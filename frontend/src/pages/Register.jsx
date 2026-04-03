@@ -1,138 +1,267 @@
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
-import { toast } from 'react-toastify';
-import { FiUserPlus, FiUser, FiMail, FiLock, FiPieChart } from 'react-icons/fi';
-import { GoogleLogin } from '@react-oauth/google';
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
+import { FcGoogle } from "react-icons/fc";
+import { FaApple } from "react-icons/fa";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
-  const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const { register, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const onChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const onChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      return toast.warning("Passwords do not match.");
+    }
+    if (formData.password.length < 6) {
+      return toast.warning("Password must be at least 6 characters long.");
+    }
+    if (!formData.username.trim()) {
+      return toast.warning("Please enter your full name.");
+    }
     try {
       await register(formData.username, formData.email, formData.password);
-      toast.success('Account created successfully!');
-      navigate('/');
+      toast.success("Account created successfully!");
+      navigate("/dashboard");
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      const errorMsg =
+        err.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMsg);
     }
   };
 
   return (
-    <div className="auth-split-wrapper animate-fade-in">
-      {/* Left Creative Hero Section */}
-      <div className="auth-hero">
-        <div className="auth-hero-content">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '40px' }}>
-            <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '12px', borderRadius: '14px' }}>
-              <FiPieChart size={32} color="#60a5fa" />
+    <div className="min-h-screen bg-[#1e293b] flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
+      {/* Background Dots Pattern */}
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(#94a3b8 1px, transparent 1px)",
+          backgroundSize: "16px 16px",
+        }}
+      ></div>
+
+      {/* Main Split Card Container */}
+      <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl h-[680px]">
+        {/* Left Side: Form */}
+        <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
+          <div className="flex items-center gap-2 mb-6">
+            <svg
+              className="w-6 h-6 text-primary-600"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2.12-1.15V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72l5 2.73 5-2.73v3.72z" />
+            </svg>
+            <div className="font-bold text-xl tracking-tight text-primary-700">
+              Scholar Ledger
             </div>
-            <h2 style={{ fontSize: '1.6rem', color: '#f8fafc', margin: 0, fontWeight: '700', letterSpacing: '-0.5px' }}>ExpenseTracker</h2>
           </div>
-          <h1>Start your journey<br />to saving more.</h1>
-          <p>Create an account to unlock powerful analytics and understand exactly where your hard-earned money goes every month.</p>
-        </div>
-      </div>
-      
-      {/* Right Form Section */}
-      <div className="auth-form-container">
-        <div className="creative-form-box">
-          <div style={{ marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '2.2rem', color: '#f8fafc', marginBottom: '10px' }}>Create Account</h2>
-            <p style={{ color: '#94a3b8', fontSize: '1.05rem' }}>Sign up securely in less than a minute.</p>
-          </div>
-          
-          <form onSubmit={onSubmit}>
-            <div className="input-group">
-              <label style={{ color: '#cbd5e1', fontWeight: '500' }}>Username</label>
-              <div className="input-icon-wrapper">
-                <FiUser className="input-icon" />
-                <input 
-                  type="text" 
-                  name="username" 
-                  value={formData.username} 
-                  onChange={onChange} 
-                  className="form-input form-input-with-icon creative-input"
-                  required 
-                  placeholder="CreativeName123"
-                />
-              </div>
+
+          <div className="flex-1 flex flex-col justify-center max-w-sm w-full mx-auto">
+            <div className="mb-4">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
+                Join Scholar Ledger
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
+                The smartest way to manage your academic financial life.
+              </p>
             </div>
-            
-            <div className="input-group" style={{ marginTop: '20px' }}>
-              <label style={{ color: '#cbd5e1', fontWeight: '500' }}>Email Address</label>
-              <div className="input-icon-wrapper">
-                <FiMail className="input-icon" />
-                <input 
-                  type="email" 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={onChange} 
-                  className="form-input form-input-with-icon creative-input"
-                  required 
-                  placeholder="hello@example.com"
-                />
-              </div>
-            </div>
-            
-            <div className="input-group" style={{ marginTop: '20px' }}>
-              <label style={{ color: '#cbd5e1', fontWeight: '500' }}>Password</label>
-              <div className="input-icon-wrapper">
-                <FiLock className="input-icon" />
-                <input 
-                  type="password" 
-                  name="password" 
-                  value={formData.password} 
+
+            <form onSubmit={onSubmit} className="space-y-3">
+              {/* Full Name */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
                   onChange={onChange}
-                  className="form-input form-input-with-icon creative-input" 
-                  required 
-                  placeholder="••••••••"
-                  minLength="6"
+                  placeholder="Enter your full name"
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
                 />
               </div>
-            </div>
-            
-            <button type="submit" className="btn btn-primary w-full creative-btn" style={{ marginTop: '35px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-                <FiUserPlus size={20} /> Join ExpenseTracker
+
+              {/* Email Field */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={onChange}
+                  placeholder="student@university.edu"
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                />
+              </div>
+
+              {/* Passwords Flex */}
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={onChange}
+                    placeholder="••••••••"
+                    required
+                    minLength="6"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={onChange}
+                    placeholder="••••••••"
+                    required
+                    minLength="6"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="w-full bg-[#4f46e5] text-white font-bold tracking-wide py-3 rounded-xl shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 transition-all active:scale-[0.98] mt-2 text-sm"
+              >
+                Create Account
+              </button>
+            </form>
+
+            <div className="flex items-center my-4">
+              <hr className="flex-1 border-slate-100" />
+              <span className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Or Continue With
               </span>
-            </button>
-            
-            <div style={{ display: 'flex', alignItems: 'center', margin: '25px 0' }}>
-              <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.05)' }} />
-              <span style={{ padding: '0 15px', color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>OR</span>
-              <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.05)' }} />
+              <hr className="flex-1 border-slate-100" />
             </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <GoogleLogin
-                onSuccess={async (credentialResponse) => {
-                  try {
-                    await googleLogin(credentialResponse.credential);
-                    toast.success('Successfully registered via Google!');
-                    navigate('/');
-                  } catch (err) {
-                    console.error(err);
-                    toast.error('Google authentication failed on server.');
-                  }
-                }}
-                onError={() => toast.error('Google popup failed to load')}
-                theme="outline"
-                size="large"
-                shape="pill"
-                width="100%"
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Standard Visible Google Login */}
+              <div className="flex items-center justify-center bg-white rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
+                <GoogleLogin
+                  onSuccess={async (res) => {
+                    try {
+                      await googleLogin(res.credential);
+                      toast.success("Successfully registered via Google!");
+                      navigate("/dashboard");
+                    } catch (err) {
+                      toast.error("Google authentication failed.");
+                    }
+                  }}
+                  onError={() => toast.error("Google popup failed to load")}
+                  width="100%"
+                  size="large"
+                  theme="outline"
+                  shape="rectangular"
+                  logo_alignment="center"
+                />
+              </div>
+
+              {/* Apple mockup */}
+              <button
+                onClick={() => toast.info("Apple Login coming soon.")}
+                type="button"
+                className="h-[44px] flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-all text-sm group"
+              >
+                <FaApple
+                  size={18}
+                  className="group-hover:-translate-y-0.5 transition-transform"
+                />{" "}
+                Apple
+              </button>
             </div>
-          </form>
-          
-          <p style={{ textAlign: 'center', marginTop: '30px', color: '#94a3b8', fontSize: '1.05rem' }}>
-            Already registered? <Link to="/login" style={{ color: '#818cf8', fontWeight: '600' }}>Sign in here</Link>
-          </p>
+          </div>
+
+          <div className="mt-auto text-center pt-6 flex flex-col gap-2 w-full text-[10px] font-bold text-slate-400 uppercase tracking-widest relative">
+            <div className="text-xs tracking-normal font-medium text-slate-500 capitalize">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="ml-1 font-bold text-primary-600 hover:text-primary-700"
+              >
+                Log In
+              </Link>
+            </div>
+            <div className="flex justify-between mt-2">
+              <div>© 2024 SCHOLAR LEDGER.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: Visual Image and Glass block */}
+        <div
+          className="hidden md:flex w-[55%] relative h-full bg-slate-900 border-l border-slate-800 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1500')",
+          }}
+        >
+          {/* Dark Gradient Overlay for text readability */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0f172a] to-transparent opacity-90"></div>
+          <div className="absolute inset-0 bg-indigo-900/30 mix-blend-multiply"></div>
+
+          {/* Center Glass Block */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] max-w-md rounded-[2rem] bg-black/20 backdrop-blur-xl border border-white/20 p-10 shadow-2xl flex flex-col items-center text-center gap-6">
+            <div className="bg-white/40 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-3">
+              <div className="flex -space-x-2">
+                <div className="w-6 h-6 rounded-full bg-primary-500 flex flex-col overflow-hidden">
+                  <div className="h-1/2 w-full bg-[#fca5a5]"></div>
+                  <div className="flex-1 bg-indigo-500"></div>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-emerald-500 flex flex-col overflow-hidden">
+                  <div className="h-1/2 w-full bg-[#fdba74]"></div>
+                  <div className="flex-1 bg-teal-500"></div>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-primary-600 border-2 border-transparent flex items-center justify-center text-[8px] font-bold text-white">
+                  +50k
+                </div>
+              </div>
+              <span className="text-[10px] font-bold tracking-widest text-white uppercase pr-2">
+                Trusted By Students
+              </span>
+            </div>
+
+            <h3 className="text-3xl font-extrabold text-white leading-tight tracking-tight">
+              Empowering 50,000+ students to build their financial future today.
+            </h3>
+
+            <p className="text-sm font-medium text-white/90 italic mt-2 leading-relaxed">
+              "Scholar Ledger changed how I think about my loans and savings.
+              It's the essential toolkit for every student."
+            </p>
+          </div>
+
+          <div className="absolute bottom-6 right-8 text-[10px] font-bold text-white/50 tracking-widest uppercase">
+            EST. 2024 / SCHOLAR LEDGER GLOBAL
+          </div>
         </div>
       </div>
     </div>

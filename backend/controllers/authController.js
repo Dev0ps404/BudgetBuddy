@@ -15,10 +15,14 @@ const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    if (!email || !password || !username) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'User already exists with this email' });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -28,14 +32,17 @@ const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      monthlyBudget: 1000 // Default budget
     });
 
     if (user) {
       res.status(201).json({
         _id: user.id,
+        name: user.username,
         username: user.username,
         email: user.email,
         profilePicture: user.profilePicture,
+        monthlyBudget: user.monthlyBudget,
         token: generateToken(user._id),
       });
     } else {
@@ -43,7 +50,7 @@ const registerUser = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error during registration' });
   }
 };
 
@@ -51,14 +58,20 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
         _id: user.id,
+        name: user.username,
         username: user.username,
         email: user.email,
         profilePicture: user.profilePicture,
+        monthlyBudget: user.monthlyBudget,
         token: generateToken(user._id),
       });
     } else {
@@ -66,7 +79,7 @@ const loginUser = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error during login' });
   }
 };
 
@@ -104,9 +117,11 @@ const googleLogin = async (req, res) => {
 
     res.json({
       _id: user.id,
+      name: user.username,
       username: user.username,
       email: user.email,
       profilePicture: user.profilePicture,
+      monthlyBudget: user.monthlyBudget,
       token: generateToken(user._id),
     });
 
@@ -120,7 +135,14 @@ const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
     if (user) {
-      res.json(user);
+      res.json({
+        _id: user.id,
+        name: user.username,
+        username: user.username,
+        email: user.email,
+        profilePicture: user.profilePicture,
+        monthlyBudget: user.monthlyBudget,
+      });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -141,6 +163,7 @@ const updateProfile = async (req, res) => {
       
       res.json({
         _id: updatedUser.id,
+        name: updatedUser.username,
         username: updatedUser.username,
         email: updatedUser.email,
         monthlyBudget: updatedUser.monthlyBudget,

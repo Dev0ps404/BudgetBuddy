@@ -23,15 +23,19 @@ app.get('/', (req, res) => res.send('API is running...'));
 // DB Connection & Server Start
 const startServer = async () => {
   try {
-    // 1. Create a simulated MongoDB server in memory
-    const mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
+    if (process.env.MONGO_URI) {
+      // Connect to real MongoDB Cluster (Production/Persistent)
+      await mongoose.connect(process.env.MONGO_URI);
+      console.log('MongoDB (Cloud Atlas) Connected Successfully!');
+    } else {
+      // Create a simulated MongoDB server in memory (Local Dev)
+      const mongoServer = await MongoMemoryServer.create();
+      const mongoUri = mongoServer.getUri();
+      await mongoose.connect(mongoUri);
+      console.log('MongoDB (In-Memory Dummy) Connected Successfully!');
+    }
 
-    // 2. Connect to the simulated database instead of a cloud one
-    await mongoose.connect(mongoUri);
-    console.log('MongoDB (In-Memory Dummy) Connected Successfully!');
-
-    // 3. Start the node server
+    // Start the node server
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);

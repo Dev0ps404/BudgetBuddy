@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-// Default the baseURL
-axios.defaults.baseURL = 'http://localhost:5000/api';
+// Default the baseURL (dynamic for production deployment)
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const AuthContext = createContext();
 

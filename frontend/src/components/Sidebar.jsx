@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { FiHome, FiList, FiPieChart, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiGrid, FiList, FiPieChart, FiUser, FiLogOut, FiBookOpen } from 'react-icons/fi';
 
 const Sidebar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -12,45 +12,46 @@ const Sidebar = () => {
     navigate('/login');
   };
 
+  const navClass = ({ isActive }) =>
+    `flex items-center gap-3 px-6 py-3.5 mx-4 my-1 font-medium transition-all duration-200 rounded-lg ${
+      isActive
+        ? 'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600 shadow-sm'
+        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent'
+    }`;
+
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <div style={{ background: 'rgba(59, 130, 246, 0.2)', padding: '10px', borderRadius: '12px' }}>
-          <FiPieChart size={24} color="#60a5fa" />
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col h-full shadow-[2px_0_10px_rgba(0,0,0,0.02)] z-20">
+      <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+        <div className="bg-primary-600 p-2 rounded-lg text-white">
+          <FiBookOpen size={24} />
         </div>
-        <h2>ExpenseTracker</h2>
-      </div>
-
-      <div className="sidebar-user">
-        {user?.profilePicture ? (
-          <img src={user.profilePicture} alt={user.username} className="avatar" style={{ objectFit: 'cover' }} referrerPolicy="no-referrer" />
-        ) : (
-          <div className="avatar">{user?.username?.charAt(0).toUpperCase()}</div>
-        )}
-        <div className="user-info">
-          <p className="name">{user?.username}</p>
-          <p className="email">{user?.email}</p>
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight leading-tight">Curator</h2>
+          <p className="text-[0.65rem] uppercase font-bold text-slate-400 tracking-wider">Financial Intelligence</p>
         </div>
       </div>
 
-      <nav className="sidebar-nav">
-        <NavLink to="/" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} end>
-          <FiHome size={20} /> <span>Dashboard</span>
+      <nav className="flex-1 py-6 flex flex-col gap-1 overflow-y-auto">
+        <NavLink to="/dashboard" className={navClass}>
+          <FiGrid size={20} /> <span className="text-sm">Dashboard</span>
         </NavLink>
-        <NavLink to="/manage-expenses" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-          <FiList size={20} /> <span>Manage Expenses</span>
+        <NavLink to="/manage-expenses" className={navClass}>
+          <FiList size={20} /> <span className="text-sm">Expenses</span>
         </NavLink>
-        <NavLink to="/reports" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-          <FiPieChart size={20} /> <span>Reports</span>
+        <NavLink to="/reports" className={navClass}>
+          <FiPieChart size={20} /> <span className="text-sm">Reports</span>
         </NavLink>
-        <NavLink to="/profile" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-          <FiUser size={20} /> <span>Profile</span>
+        <NavLink to="/profile" className={navClass}>
+          <FiUser size={20} /> <span className="text-sm">Profile</span>
         </NavLink>
       </nav>
 
-      <div className="sidebar-footer">
-        <button onClick={handleLogout} className="logout-btn">
-          <FiLogOut size={20} /> <span>Logout</span>
+      <div className="p-6 border-t border-slate-100">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all font-medium text-sm shadow-sm"
+        >
+          <FiLogOut size={18} /> <span>Logout</span>
         </button>
       </div>
     </aside>
