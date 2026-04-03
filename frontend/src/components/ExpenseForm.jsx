@@ -45,8 +45,8 @@ const ExpenseForm = ({ fetchExpenses, expenseToEdit, onClose }) => {
         
         {/* Header Title inside flow */}
         <div className="text-center mb-6 relative z-10 w-full flex-col items-center">
-            <h2 className="text-3xl font-bold text-slate-800">Log New Expense</h2>
-            <p className="text-slate-500 mt-1 text-sm font-medium tracking-wide">Categorize your spending to keep your academic budget healthy.</p>
+            <h2 className="text-3xl font-bold text-slate-800">{expenseToEdit ? 'Edit Expense' : 'Log New Expense'}</h2>
+            <p className="text-slate-500 mt-1 text-sm font-medium tracking-wide">Categorize your spending to keep your budget healthy.</p>
         </div>
 
         {/* Form Card */}
@@ -56,7 +56,7 @@ const ExpenseForm = ({ fetchExpenses, expenseToEdit, onClose }) => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold tracking-wider text-slate-500 uppercase">Amount</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-600 font-medium text-xl">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-600 font-medium text-xl">₹</span>
                 <input 
                   type="number" 
                   name="amount" 
@@ -130,7 +130,7 @@ const ExpenseForm = ({ fetchExpenses, expenseToEdit, onClose }) => {
            <div className="text-success-600 mt-0.5"><FiActivity size={18} /></div>
            <div>
              <h4 className="font-bold text-success-800 text-sm tracking-tight mb-1">Financial Intelligence Tip</h4>
-             <p className="text-xs text-success-700/80 leading-relaxed font-medium">Categorizing this expense helps Scholar Ledger predict your end-of-semester savings more accurately.</p>
+             <p className="text-xs text-success-700/80 leading-relaxed font-medium">Categorizing this expense helps Kharchify predict your end-of-semester savings more accurately.</p>
            </div>
         </div>
       </div>

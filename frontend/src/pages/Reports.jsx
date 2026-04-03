@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -21,6 +22,12 @@ import {
   FiTruck,
   FiBook,
   FiActivity,
+  FiHome,
+  FiZap,
+  FiHeart,
+  FiMoreHorizontal,
+  FiShoppingBag,
+  FiChevronDown,
 } from "react-icons/fi";
 
 ChartJS.register(
@@ -35,9 +42,78 @@ ChartJS.register(
   Filler,
 );
 
+// Category configuration map for icons and colors
+const CATEGORY_CONFIG = {
+  "Dining & Food": {
+    icon: FiCoffee,
+    bgColor: "bg-amber-50",
+    textColor: "text-amber-600",
+    subtitle: "Cafeteria, Groceries, Delivery",
+  },
+  Transport: {
+    icon: FiTruck,
+    bgColor: "bg-indigo-50",
+    textColor: "text-indigo-600",
+    subtitle: "Public Transit, Uber, Fuel",
+  },
+  "Academic Tools": {
+    icon: FiBook,
+    bgColor: "bg-blue-50",
+    textColor: "text-blue-600",
+    subtitle: "Books, Software, Stationery",
+  },
+  Housing: {
+    icon: FiHome,
+    bgColor: "bg-violet-50",
+    textColor: "text-violet-600",
+    subtitle: "Rent, Maintenance, Furnishing",
+  },
+  Utilities: {
+    icon: FiZap,
+    bgColor: "bg-orange-50",
+    textColor: "text-orange-600",
+    subtitle: "Electricity, Internet, Phone",
+  },
+  Lifestyle: {
+    icon: FiHeart,
+    bgColor: "bg-pink-50",
+    textColor: "text-pink-600",
+    subtitle: "Entertainment, Shopping, Fitness",
+  },
+  Other: {
+    icon: FiMoreHorizontal,
+    bgColor: "bg-slate-100",
+    textColor: "text-slate-600",
+    subtitle: "Miscellaneous expenses",
+  },
+};
+
+const DEFAULT_CONFIG = {
+  icon: FiShoppingBag,
+  bgColor: "bg-slate-100",
+  textColor: "text-slate-600",
+  subtitle: "General expenses",
+};
+
+// Determine health status based on category's share of total spending
+const getSpendingHealth = (percentage) => {
+  if (percentage <= 15) return { label: "Optimal", barColor: "bg-emerald-500" };
+  if (percentage <= 30) return { label: "Healthy", barColor: "bg-emerald-400" };
+  if (percentage <= 45) return { label: "Moderate", barColor: "bg-amber-500" };
+  if (percentage <= 60) return { label: "High", barColor: "bg-orange-500" };
+  return { label: "Critical", barColor: "bg-red-500" };
+};
+
 const Reports = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const monthPickerRef = useRef(null);
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -53,7 +129,41 @@ const Reports = () => {
     fetchExpenses();
   }, []);
 
-  const totalMonthly = expenses.reduce(
+  // Close month picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (monthPickerRef.current && !monthPickerRef.current.contains(e.target)) {
+        setShowMonthPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Generate last 12 months for the picker
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      options.push({
+        value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`,
+        label: d.toLocaleString("default", { month: "long", year: "numeric" }),
+      });
+    }
+    return options;
+  }, []);
+
+  // Filter expenses for the selected month
+  const currentMonthExpenses = useMemo(() => {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    return expenses.filter((e) => {
+      const d = new Date(e.date);
+      return d.getMonth() === month - 1 && d.getFullYear() === year;
+    });
+  }, [expenses, selectedMonth]);
+
+  const totalMonthly = currentMonthExpenses.reduce(
     (acc, curr) => acc + Number(curr.amount),
     0,
   );
@@ -61,7 +171,7 @@ const Reports = () => {
   // Process Data for Doughnut Chart (Expenses by Category)
   const categoryData = useMemo(() => {
     const cats = {};
-    expenses.forEach((e) => {
+    currentMonthExpenses.forEach((e) => {
       cats[e.category] = (cats[e.category] || 0) + Number(e.amount);
     });
 
@@ -80,6 +190,7 @@ const Reports = () => {
             "#3b82f6", // blue-500
             "#8b5cf6", // violet-500
             "#ec4899", // pink-500
+            "#64748b", // slate-500
           ],
           borderWidth: 0,
           hoverOffset: 4,
@@ -88,7 +199,29 @@ const Reports = () => {
       ],
       raw: cats,
     };
-  }, [expenses]);
+  }, [currentMonthExpenses]);
+
+  // Process data for Category Breakdown section
+  const breakdownData = useMemo(() => {
+    const result = {};
+    currentMonthExpenses.forEach((e) => {
+      if (!result[e.category]) {
+        result[e.category] = { total: 0, count: 0 };
+      }
+      result[e.category].total += Number(e.amount);
+      result[e.category].count += 1;
+    });
+
+    // Sort by total descending
+    return Object.entries(result)
+      .map(([category, data]) => ({
+        category,
+        total: data.total,
+        count: data.count,
+        percentage: totalMonthly > 0 ? (data.total / totalMonthly) * 100 : 0,
+      }))
+      .sort((a, b) => b.total - a.total);
+  }, [currentMonthExpenses, totalMonthly]);
 
   const chartOptions = {
     plugins: { legend: { display: false } },
@@ -118,29 +251,174 @@ const Reports = () => {
     elements: { line: { tension: 0.4 } },
   };
 
-  const lineData = {
-    labels: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"],
-    datasets: [
-      {
-        label: "Actual",
-        data: [1200, 1900, 1500, 2100, 2400, 2200],
-        borderColor: "#4f46e5",
-        backgroundColor: "rgba(79, 70, 229, 0.1)",
-        fill: true,
-        pointBackgroundColor: "#fff",
-        pointBorderColor: "#4f46e5",
-        pointBorderWidth: 2,
-        pointRadius: 4,
-      },
-      {
-        label: "Budget",
-        data: [1500, 1500, 1500, 2000, 2000, 2500],
-        borderColor: "#cbd5e1",
-        borderDash: [5, 5],
-        fill: false,
-        pointRadius: 0,
-      },
-    ],
+  // Build dynamic line chart from actual expense data (last 6 months)
+  const lineData = useMemo(() => {
+    const now = new Date();
+    const months = [];
+    const monthLabels = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ month: d.getMonth(), year: d.getFullYear() });
+      monthLabels.push(
+        d.toLocaleString("default", { month: "short" }).toUpperCase(),
+      );
+    }
+
+    const actualData = months.map(({ month, year }) =>
+      expenses
+        .filter((e) => {
+          const d = new Date(e.date);
+          return d.getMonth() === month && d.getFullYear() === year;
+        })
+        .reduce((sum, e) => sum + Number(e.amount), 0),
+    );
+
+    const maxSpend = Math.max(...actualData, 1);
+    const avgBudget = actualData.reduce((a, b) => a + b, 0) / actualData.length || maxSpend;
+    const budgetData = months.map(() => Math.round(avgBudget));
+
+    return {
+      labels: monthLabels,
+      datasets: [
+        {
+          label: "Actual",
+          data: actualData,
+          borderColor: "#4f46e5",
+          backgroundColor: "rgba(79, 70, 229, 0.1)",
+          fill: true,
+          pointBackgroundColor: "#fff",
+          pointBorderColor: "#4f46e5",
+          pointBorderWidth: 2,
+          pointRadius: 4,
+        },
+        {
+          label: "Average",
+          data: budgetData,
+          borderColor: "#cbd5e1",
+          borderDash: [5, 5],
+          fill: false,
+          pointRadius: 0,
+        },
+      ],
+    };
+  }, [expenses]);
+
+  const selectedMonthDate = useMemo(() => {
+    const [year, month] = selectedMonth.split("-").map(Number);
+    return new Date(year, month - 1, 1);
+  }, [selectedMonth]);
+
+  const currentMonthName = selectedMonthDate.toLocaleString("default", {
+    month: "long",
+  });
+
+  const currentMonthLabel = selectedMonthDate.toLocaleString("default", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const displayedCategories = showAllCategories
+    ? breakdownData
+    : breakdownData.slice(0, 5);
+
+  // Export PDF handler
+  const handleExportPDF = () => {
+    // Build a printable report
+    const printWindow = window.open("", "_blank");
+    const categoryRows = breakdownData
+      .map(
+        (item) => `
+      <tr>
+        <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;font-weight:500">${item.category}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:center">${item.count}</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:center">${item.percentage.toFixed(1)}%</td>
+        <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700">₹${item.total.toFixed(2)}</td>
+      </tr>`
+      )
+      .join("");
+
+    const expenseRows = currentMonthExpenses
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .map(
+        (exp) => `
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px">${new Date(exp.date).toLocaleDateString("en-IN")}</td>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px">${exp.category}</td>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px">${exp.description || "-"}</td>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:600;font-size:13px">₹${Number(exp.amount).toFixed(2)}</td>
+      </tr>`
+      )
+      .join("");
+
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Kharchify - Expense Report - ${currentMonthLabel}</title>
+        <style>
+          body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1e293b; }
+          h1 { font-size: 24px; margin-bottom: 4px; }
+          .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+          .summary { display: flex; gap: 20px; margin-bottom: 30px; }
+          .summary-card { background: #f8fafc; border-radius: 12px; padding: 20px; flex: 1; }
+          .summary-card h3 { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin:0 0 8px 0; }
+          .summary-card .value { font-size: 28px; font-weight: 700; color: #4f46e5; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+          th { text-align: left; padding: 10px 8px; border-bottom: 2px solid #e2e8f0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+          .section-title { font-size: 16px; font-weight: 700; margin: 30px 0 12px 0; }
+          .footer { margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px; }
+          @media print { body { padding: 20px; } }
+        </style>
+      </head>
+      <body>
+        <h1>📊 Kharchify — Expense Report</h1>
+        <p class="subtitle">${currentMonthLabel} • Generated on ${new Date().toLocaleDateString("en-IN")}</p>
+        
+        <div class="summary">
+          <div class="summary-card">
+            <h3>Total Spent</h3>
+            <div class="value">₹${totalMonthly.toFixed(2)}</div>
+          </div>
+          <div class="summary-card">
+            <h3>Transactions</h3>
+            <div class="value">${currentMonthExpenses.length}</div>
+          </div>
+          <div class="summary-card">
+            <h3>Categories</h3>
+            <div class="value">${breakdownData.length}</div>
+          </div>
+        </div>
+
+        <div class="section-title">Category Breakdown</div>
+        <table>
+          <thead><tr>
+            <th>Category</th>
+            <th style="text-align:center">Items</th>
+            <th style="text-align:center">Share</th>
+            <th style="text-align:right">Amount</th>
+          </tr></thead>
+          <tbody>${categoryRows}</tbody>
+        </table>
+
+        <div class="section-title">All Transactions</div>
+        <table>
+          <thead><tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th style="text-align:right">Amount</th>
+          </tr></thead>
+          <tbody>${expenseRows}</tbody>
+        </table>
+
+        <div class="footer">Kharchify — Your Personal Expense Tracker</div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.print();
+    }, 300);
+    toast.success("Report generated! Use the print dialog to save as PDF.");
   };
 
   return (
@@ -152,14 +430,43 @@ const Reports = () => {
             Financial Intelligence
           </h1>
           <p className="text-slate-500 mt-1">
-            Deep dive into your spending patterns for Semester 2
+            Deep dive into your spending patterns for {currentMonthName}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-primary-50 text-primary-700 font-semibold rounded-xl hover:bg-primary-100 transition-colors text-sm shadow-sm">
-            <FiCalendar /> Current Month
-          </button>
-          <button className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-colors text-sm shadow-sm">
+          {/* Month Filter Dropdown */}
+          <div className="relative" ref={monthPickerRef}>
+            <button
+              onClick={() => setShowMonthPicker(!showMonthPicker)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary-50 text-primary-700 font-semibold rounded-xl hover:bg-primary-100 transition-colors text-sm shadow-sm"
+            >
+              <FiCalendar /> {currentMonthLabel} <FiChevronDown size={14} />
+            </button>
+            {showMonthPicker && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 z-30 py-2 w-56 max-h-80 overflow-y-auto">
+                {monthOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => {
+                      setSelectedMonth(opt.value);
+                      setShowMonthPicker(false);
+                    }}
+                    className={`w-full px-4 py-2.5 text-left text-sm transition-colors font-medium ${
+                      selectedMonth === opt.value
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 px-6 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition-colors text-sm shadow-sm"
+          >
             <FiDownload /> Export PDF
           </button>
         </div>
@@ -183,7 +490,7 @@ const Reports = () => {
             {/* Center Label for Doughnut */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-3xl font-bold text-primary-700">
-                ${totalMonthly.toFixed(0)}
+                ₹{totalMonthly.toFixed(0)}
               </span>
               <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase mt-1">
                 Total Spent
@@ -237,9 +544,11 @@ const Reports = () => {
               <FiActivity size={18} />
             </div>
             <p className="text-sm text-slate-700 font-medium">
-              Your spending in <strong>June</strong> is{" "}
-              <span className="text-emerald-600 font-bold">8.2% lower</span>{" "}
-              than the average budget. Great job!
+              Your total spending in <strong>{currentMonthName}</strong> is{" "}
+              <span className="text-primary-600 font-bold">
+                ₹{totalMonthly.toFixed(0)}
+              </span>{" "}
+              across {currentMonthExpenses.length} transactions.
             </p>
           </div>
         </div>
@@ -252,88 +561,98 @@ const Reports = () => {
             <h3 className="font-bold text-slate-800 inline-block mr-2">
               Category Breakdown
             </h3>
-            <span className="text-xs text-slate-400">(Current Month)</span>
+            <span className="text-xs text-slate-400">({currentMonthName})</span>
           </div>
-          <button className="text-primary-600 text-sm font-semibold">
-            View All Categories &gt;
-          </button>
+          {breakdownData.length > 5 && (
+            <button
+              onClick={() => setShowAllCategories(!showAllCategories)}
+              className="text-primary-600 text-sm font-semibold hover:text-primary-700 transition-colors"
+            >
+              {showAllCategories ? "Show Less" : `View All (${breakdownData.length})`} &gt;
+            </button>
+          )}
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-12 gap-4 items-center border-b border-slate-50 pb-4">
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center">
-                <FiCoffee />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800 text-sm">
-                  Dining & Food
-                </p>
-                <p className="text-xs text-slate-400">
-                  Cafeteria, Groceries, Delivery
-                </p>
-              </div>
-            </div>
-            <div className="col-span-2 text-sm text-slate-500">24 Items</div>
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-emerald-500 h-1.5 rounded-full w-2/3"></div>
-              </div>
-              <span className="text-xs text-slate-400 w-16">Healthy</span>
-            </div>
-            <div className="col-span-2 text-right font-bold text-slate-800">
-              $612.50
-            </div>
+        {breakdownData.length === 0 ? (
+          <div className="text-center py-12">
+            <FiShoppingBag className="mx-auto text-slate-300 mb-3" size={40} />
+            <p className="text-slate-400 font-medium">No expenses this month</p>
+            <p className="text-xs text-slate-300 mt-1">
+              Start adding expenses to see your category breakdown
+            </p>
           </div>
+        ) : (
+          <div className="space-y-1">
+            {/* Table Header */}
+            <div className="grid grid-cols-12 gap-4 items-center pb-3 border-b border-slate-100">
+              <div className="col-span-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Category
+              </div>
+              <div className="col-span-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Items
+              </div>
+              <div className="col-span-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Health
+              </div>
+              <div className="col-span-2 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">
+                Amount
+              </div>
+            </div>
 
-          <div className="grid grid-cols-12 gap-4 items-center border-b border-slate-50 pb-4">
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <FiTruck />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800 text-sm">
-                  Transport
-                </p>
-                <p className="text-xs text-slate-400">Public Transit, Uber</p>
-              </div>
-            </div>
-            <div className="col-span-2 text-sm text-slate-500">12 Items</div>
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-orange-500 h-1.5 rounded-full w-11/12"></div>
-              </div>
-              <span className="text-xs text-slate-400 w-16">Critical</span>
-            </div>
-            <div className="col-span-2 text-right font-bold text-slate-800">
-              $367.50
-            </div>
-          </div>
+            {displayedCategories.map((item, index) => {
+              const config =
+                CATEGORY_CONFIG[item.category] || DEFAULT_CONFIG;
+              const IconComponent = config.icon;
+              const health = getSpendingHealth(item.percentage);
 
-          <div className="grid grid-cols-12 gap-4 items-center">
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-                <FiBook />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800 text-sm">
-                  Academic Tools
-                </p>
-                <p className="text-xs text-slate-400">Books, Software</p>
-              </div>
-            </div>
-            <div className="col-span-2 text-sm text-slate-500">4 Items</div>
-            <div className="col-span-4 flex items-center gap-3">
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div className="bg-emerald-600 h-1.5 rounded-full w-1/3"></div>
-              </div>
-              <span className="text-xs text-slate-400 w-16">Optimal</span>
-            </div>
-            <div className="col-span-2 text-right font-bold text-slate-800">
-              $490.00
-            </div>
+              return (
+                <div
+                  key={item.category}
+                  className={`grid grid-cols-12 gap-4 items-center py-4 transition-colors hover:bg-slate-50 rounded-lg ${
+                    index < displayedCategories.length - 1
+                      ? "border-b border-slate-50"
+                      : ""
+                  }`}
+                >
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div
+                      className={`w-10 h-10 rounded-xl ${config.bgColor} ${config.textColor} flex items-center justify-center flex-shrink-0`}
+                    >
+                      <IconComponent size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-800 text-sm truncate">
+                        {item.category}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {config.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="col-span-2 text-sm text-slate-500 font-medium">
+                    {item.count} {item.count === 1 ? "Item" : "Items"}
+                  </div>
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div
+                        className={`${health.barColor} h-1.5 rounded-full transition-all duration-500`}
+                        style={{
+                          width: `${Math.max(item.percentage, 3)}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="text-xs text-slate-400 w-16 flex-shrink-0">
+                      {health.label}
+                    </span>
+                  </div>
+                  <div className="col-span-2 text-right font-bold text-slate-800">
+                    ₹{item.total.toFixed(2)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
 
       {/* Suggestion Cards */}
@@ -345,7 +664,7 @@ const Reports = () => {
           <h3 className="font-bold text-slate-800 mb-2">Optimizing Travel</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
             By using the student railcard more frequently, you could save
-            approximately $45/month.
+            approximately ₹45/month.
           </p>
         </div>
         <div className="bg-emerald-50 p-5 rounded-2xl border-l-4 border-emerald-600 border-t border-r border-b border-white shadow-sm">
@@ -355,7 +674,7 @@ const Reports = () => {
           <h3 className="font-bold text-slate-800 mb-2">Software Grants</h3>
           <p className="text-xs text-slate-600 leading-relaxed">
             Your Adobe subscription is eligible for a university rebate. Claim
-            $120 back this week.
+            ₹120 back this week.
           </p>
         </div>
         <div className="bg-orange-50 p-5 rounded-2xl border-l-4 border-orange-600 border-t border-r border-b border-white shadow-sm">

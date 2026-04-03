@@ -95,7 +95,7 @@ const ExpenseList = ({ expenses, fetchExpenses, setExpenseToEdit }) => {
                     </div>
                     <div>
                       <div className="text-sm font-semibold text-slate-800">{expense.description || 'Untitled Transaction'}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">Academic logging</div>
+                      <div className="text-xs text-slate-400 mt-0.5">{expense.category}</div>
                     </div>
                   </div>
                 </td>
@@ -103,7 +103,7 @@ const ExpenseList = ({ expenses, fetchExpenses, setExpenseToEdit }) => {
                   <CategoryPill category={expense.category} />
                 </td>
                 <td className="px-6 py-4 font-bold text-slate-800 text-sm">
-                  ${Number(expense.amount).toFixed(2)}
+                  ₹{Number(expense.amount).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity flex justify-end gap-2">

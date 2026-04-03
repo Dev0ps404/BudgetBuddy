@@ -11,7 +11,7 @@ const Landing = () => {
       
       {/* --- NAVBAR --- */}
       <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto border-b border-transparent">
-        <div className="font-bold text-xl tracking-tight text-indigo-700">Scholar Ledger</div>
+        <div className="font-bold text-xl tracking-tight text-indigo-700">Kharchify</div>
         <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-500">
           <a href="#home" className="hover:text-indigo-600 transition-colors">Home</a>
           <a href="#features" className="hover:text-indigo-600 transition-colors">Features</a>
@@ -34,10 +34,10 @@ const Landing = () => {
             New: Smart Receipt Parsing 2.0
           </span>
           <h1 className="text-5xl lg:text-7xl font-extrabold text-slate-900 leading-[1.05] tracking-tight">
-            Your Academic <br/><span className="text-indigo-700">Financial</span><br/>Intelligence.
+            Your Smart <br/><span className="text-indigo-700">Financial</span><br/>Intelligence.
           </h1>
-          <p className="text-xl text-slate-600 max-w-lg leading-relaxed">
-            Master your budget with the sophisticated clarity of an academic journal. Track expenses, analyze spending trends, and secure your future—all in one place.
+          <p className="text-base md:text-lg text-slate-600 max-w-lg leading-relaxed font-medium">
+            Master your budget with ease. Track expenses, analyze spending trends, and secure your future—all in one place.
           </p>
           <div className="flex flex-wrap gap-4 pt-4">
             <Link to="/register" className="px-8 py-4 bg-indigo-700 text-white rounded-xl font-bold text-lg hover:bg-indigo-800 transition-all shadow-xl shadow-indigo-600/20 active:scale-95">
@@ -101,7 +101,7 @@ const Landing = () => {
            <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Engineered for Success</h2>
               <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                Scholar Ledger combines high-end financial tools with an intuitive student-first interface.
+                Kharchify combines high-end financial tools with an intuitive student-first interface.
               </p>
            </div>
 
@@ -175,7 +175,7 @@ const Landing = () => {
               <div className="flex-1 space-y-6">
                  <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight">Built by Students,<br/>For Scholars.</h2>
                  <p className="text-slate-600 text-lg">
-                   We understand the specific financial challenges of academic life. From fluctuating tuition payments to monthly textbook surges, we've built tools to handle it all.
+                   We understand your unique financial challenges. From monthly subscriptions to daily expenses, we've built tools to handle it all.
                  </p>
                  <div className="space-y-4 pt-4">
                     <div className="flex items-center gap-3 text-slate-700 font-semibold"><FiShield className="text-teal-500" size={20} /> Encrypted Bank-Level Security</div>
@@ -188,7 +188,7 @@ const Landing = () => {
               <div className="flex-1 w-full bg-[#f1f5f9] p-10 rounded-3xl relative overflow-hidden border border-slate-200 shadow-sm">
                  <div className="absolute -top-6 -right-6 text-[150px] font-serif text-indigo-100 leading-none select-none">"</div>
                  <p className="text-xl italic text-slate-800 font-medium relative z-10 leading-relaxed">
-                   "Scholar Ledger changed how I view my money. It feels like a high-end journal rather than a boring spreadsheet. I saved $800 in my first semester."
+                   "Kharchify changed how I view my money. It feels like a high-end journal rather than a boring spreadsheet. I saved ₹800 in my first semester."
                  </p>
                  <div className="flex items-center gap-4 mt-8 relative z-10">
                     <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm overflow-hidden">
@@ -207,7 +207,7 @@ const Landing = () => {
               <div className="relative z-10 flex flex-col items-center">
                  <h2 className="text-4xl font-extrabold text-white mb-6">Ready to Take Control?</h2>
                  <p className="text-indigo-100 text-lg mb-10 max-w-xl mx-auto">
-                   Join 50,000+ students managing their finances with Scholar Ledger today.
+                   Join 50,000+ students managing their finances with Kharchify today.
                  </p>
                  <div className="flex flex-wrap justify-center gap-4">
                     <Link to="/register" className="px-8 py-4 bg-white text-indigo-700 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
@@ -234,7 +234,7 @@ const Landing = () => {
               <div className="md:col-span-1 space-y-6">
                  <div className="font-bold text-2xl tracking-tight text-indigo-700">Curator</div>
                  <p className="text-slate-500 text-sm leading-relaxed">
-                   Financial Intelligence for the modern academic journey. Secure, intuitive, editorial.
+                   Financial Intelligence for the modern lifestyle. Secure, intuitive, powerful.
                  </p>
                  <div className="flex gap-4">
                     <a href="#" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiGlobe size={16} /></a>
@@ -256,7 +256,7 @@ const Landing = () => {
               <div>
                  <h4 className="font-bold text-slate-900 mb-6">Resources</h4>
                  <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Academic Blog</a></li>
+                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Blog</a></li>
                     <li><a href="#" className="hover:text-indigo-600 transition-colors">Scholarships</a></li>
                     <li><a href="#" className="hover:text-indigo-600 transition-colors">Help Center</a></li>
                     <li><a href="#" className="hover:text-indigo-600 transition-colors">API Docs</a></li>
@@ -276,7 +276,7 @@ const Landing = () => {
 
            {/* Bottom Bar */}
            <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-slate-500">
-              <div>© 2024 Scholar Ledger. All rights reserved.</div>
+              <div>© 2026 Kharchify. All rights reserved.</div>
               <div className="flex gap-8">
                  <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
                  <a href="#" className="hover:text-indigo-600 transition-colors">Cookie Settings</a>

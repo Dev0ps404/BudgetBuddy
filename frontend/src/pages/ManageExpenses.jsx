@@ -68,7 +68,7 @@ const ManageExpenses = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Manage Expenses</h1>
-          <p className="text-slate-500 mt-1">Keep your academic budget on track with precise transaction control.</p>
+          <p className="text-slate-500 mt-1">Keep your budget on track with precise transaction control.</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <div className="relative group">
@@ -107,7 +107,7 @@ const ManageExpenses = () => {
         <div className="dashboard-card md:col-span-2 flex justify-between relative overflow-hidden group">
            <div className="z-10 bg-white/60 p-1 rounded-xl">
              <h3 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-2">Total Monthly Spend</h3>
-             <div className="text-4xl font-bold text-primary-700 mb-2">${totalMonthly.toFixed(2)}</div>
+             <div className="text-4xl font-bold text-primary-700 mb-2">₹{totalMonthly.toFixed(2)}</div>
              <div className="flex items-center gap-1 text-sm text-emerald-600 font-medium">
                 <FiTrendingDown /> 12% less than last month
              </div>

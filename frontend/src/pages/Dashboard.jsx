@@ -1,9 +1,39 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import ExpenseForm from '../components/ExpenseForm';
 import { AuthContext } from '../context/AuthContext';
-import { FiDollarSign, FiCalendar, FiBox, FiTrendingUp, FiTrendingDown, FiPlus, FiDownload, FiArrowRight } from 'react-icons/fi';
+import { FiDollarSign, FiCalendar, FiBox, FiTrendingUp, FiTrendingDown, FiPlus, FiDownload, FiArrowRight, FiCoffee, FiTruck, FiBook, FiHome, FiZap, FiHeart, FiMoreHorizontal, FiClock, FiChevronRight } from 'react-icons/fi';
+
+// Category icon & color mapping
+const CATEGORY_MAP = {
+  'Dining & Food': { icon: FiCoffee, bg: 'bg-amber-50', text: 'text-amber-600', pill: 'bg-amber-100 text-amber-700' },
+  'Transport':     { icon: FiTruck,  bg: 'bg-indigo-50', text: 'text-indigo-600', pill: 'bg-indigo-100 text-indigo-700' },
+  'Academic Tools': { icon: FiBook,  bg: 'bg-blue-50', text: 'text-blue-600', pill: 'bg-blue-100 text-blue-700' },
+  'Housing':       { icon: FiHome,   bg: 'bg-violet-50', text: 'text-violet-600', pill: 'bg-violet-100 text-violet-700' },
+  'Utilities':     { icon: FiZap,    bg: 'bg-orange-50', text: 'text-orange-600', pill: 'bg-orange-100 text-orange-700' },
+  'Lifestyle':     { icon: FiHeart,  bg: 'bg-pink-50', text: 'text-pink-600', pill: 'bg-pink-100 text-pink-700' },
+  'Other':         { icon: FiMoreHorizontal, bg: 'bg-slate-100', text: 'text-slate-600', pill: 'bg-slate-200 text-slate-700' },
+};
+const DEFAULT_CAT = { icon: FiBox, bg: 'bg-primary-50', text: 'text-primary-600', pill: 'bg-primary-100 text-primary-700' };
+
+// Relative time formatter
+const getRelativeTime = (dateStr) => {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+};
 
 const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
@@ -78,19 +108,19 @@ const Dashboard = () => {
     };
 
     const csvContent = [
-      ['Scholar Ledger - Monthly Expense Report'],
+      ['Kharchify - Monthly Expense Report'],
       [],
       ['Month:', reportData.month],
-      ['Total Expenses:', `$${reportData.totalExpenses.toFixed(2)}`],
-      ['Budget:', `$${reportData.budget.toFixed(2)}`],
-      ['Remaining:', `$${reportData.remaining.toFixed(2)}`],
+      ['Total Expenses:', `₹${reportData.totalExpenses.toFixed(2)}`],
+      ['Budget:', `₹${reportData.budget.toFixed(2)}`],
+      ['Remaining:', `₹${reportData.remaining.toFixed(2)}`],
       [],
       ['Date', 'Category', 'Description', 'Amount'],
       ...reportData.expenses.map(exp => [
         new Date(exp.date).toLocaleDateString(),
         exp.category,
         exp.description,
-        `$${Number(exp.amount).toFixed(2)}`
+        `₹${Number(exp.amount).toFixed(2)}`
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -116,7 +146,7 @@ const Dashboard = () => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Financial Overview</h1>
-          <p className="text-slate-500 mt-1">Welcome back, Scholar. Here's your spending pulse for this week.</p>
+          <p className="text-slate-500 mt-1">Welcome back! Here's your spending pulse for this week.</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={handleExportReport} className="px-4 py-2 bg-primary-50 text-primary-700 font-medium rounded-lg hover:bg-primary-100 transition-colors text-sm flex items-center gap-2">
@@ -141,7 +171,7 @@ const Dashboard = () => {
             </span>
           </div>
           <div className="text-slate-500 text-sm font-medium mb-1">Total Expenses</div>
-          <div className="text-3xl font-bold text-slate-900">${totalMonthly.toFixed(2)}</div>
+          <div className="text-3xl font-bold text-slate-900">₹{totalMonthly.toFixed(2)}</div>
           <div className="text-xs text-slate-400 mt-2">Updated 2 mins ago</div>
         </div>
 
@@ -156,7 +186,7 @@ const Dashboard = () => {
             </span>
           </div>
           <div className="text-slate-500 text-sm font-medium mb-1">Monthly Budget Usage</div>
-          <div className="text-3xl font-bold text-slate-900">${totalMonthly.toFixed(2)}</div>
+          <div className="text-3xl font-bold text-slate-900">₹{totalMonthly.toFixed(2)}</div>
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1 font-medium text-slate-500">
               <span>{budgetPercent.toFixed(0)}% Used</span>
@@ -178,7 +208,7 @@ const Dashboard = () => {
             </span>
           </div>
           <div className="text-slate-500 text-sm font-medium mb-1">Remaining Budget</div>
-          <div className="text-3xl font-bold text-slate-900">${Math.max(0, remaining).toFixed(2)}</div>
+          <div className="text-3xl font-bold text-slate-900">₹{Math.max(0, remaining).toFixed(2)}</div>
           <div className="mt-4">
             <div className="flex justify-between text-xs mb-1 font-medium text-slate-500">
               <span></span>
@@ -205,27 +235,26 @@ const Dashboard = () => {
           </div>
           
           {/* Dynamic Bar Chart with Real Weekly Data */}
-          <div className="h-64 flex items-end justify-between gap-2 pb-6 mt-4 relative border-b border-slate-100">
+          <div className="h-64 flex items-end justify-around gap-4 pb-6 mt-4 relative border-b border-slate-100 px-4">
             {weeklyData.map((value, idx) => {
               const maxValue = Math.max(...weeklyData, 100);
-              const heightPercent = Math.max((value / maxValue) * 100, 8);
+              const heightPercent = Math.max((value / maxValue) * 100, 5);
               const today = new Date();
               const dayDate = new Date(today);
               dayDate.setDate(today.getDate() - (6 - idx));
               const isToday = dayDate.toDateString() === today.toDateString();
               
               return (
-                <div key={idx} className="w-full flex flex-col items-center group relative h-full justify-end">
+                <div key={idx} className="flex-1 max-w-10 flex flex-col items-center group relative h-full justify-end">
+                  {value > 0 && (
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      ₹{value.toFixed(0)}
+                    </div>
+                  )}
                   <div 
-                    className={`w-full rounded-t-sm transition-all ${isToday ? 'bg-primary-600 shadow-lg shadow-primary-600/30' : 'bg-slate-100 group-hover:bg-slate-200'}`}
+                    className={`w-full rounded-lg transition-all duration-300 ${isToday ? 'bg-primary-600 shadow-md shadow-primary-600/30' : 'bg-slate-200 group-hover:bg-slate-300'}`}
                     style={{ height: `${heightPercent}%` }}
-                  >
-                    {value > 0 && (
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap font-semibold">
-                        ${value.toFixed(0)}
-                      </div>
-                    )}
-                  </div>
+                  ></div>
                 </div>
               );
             })}
@@ -247,56 +276,198 @@ const Dashboard = () => {
 
         {/* Recent Activity */}
         <div className="dashboard-card flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-slate-900">Recent Activity</h3>
-            <button onClick={() => setShowAllActivity(true)} className="text-primary-600 text-sm font-medium hover:text-primary-700">View All</button>
+          <div className="flex justify-between items-center mb-5">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-slate-900">Recent Activity</h3>
+              {expenses.length > 0 && (
+                <span className="text-[10px] font-bold bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+                  {expenses.length}
+                </span>
+              )}
+            </div>
+            <button onClick={() => setShowAllActivity(true)} className="text-primary-600 text-sm font-medium hover:text-primary-700 flex items-center gap-1 group">
+              View All <FiChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </button>
           </div>
           
-          <div className="flex-1 space-y-4 overflow-hidden">
-            {expenses.slice(0, 4).map((exp, i) => (
-              <div key={exp._id || i} className="flex justify-between items-center">
-                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center">
-                     <FiBox size={16} />
-                   </div>
-                   <div>
-                     <p className="font-semibold text-slate-800 text-sm">{exp.description}</p>
-                     <p className="text-xs text-slate-400 mt-0.5">{new Date(exp.date).toLocaleDateString()}</p>
-                   </div>
-                 </div>
-                 <span className="font-semibold text-slate-700 text-sm">-${Number(exp.amount).toFixed(2)}</span>
+          <div className="flex-1 space-y-1 overflow-hidden">
+            {expenses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                  <FiClock size={24} className="text-slate-300" />
+                </div>
+                <p className="text-slate-400 font-medium text-sm">No activity yet</p>
+                <p className="text-xs text-slate-300 mt-1">Your transactions will appear here</p>
               </div>
-            ))}
-            
-            {expenses.length === 0 && (
-              <p className="text-slate-400 text-center py-4 text-sm">No expenses recorded yet</p>
-            )}
-            
-            {/* Hardcoded positive income mock for aesthetic */}
-            {expenses.length > 0 && (
-              <div className="flex justify-between items-center pt-2">
-                 <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-full bg-success-50 text-success-600 flex items-center justify-center">
-                     <FiTrendingUp size={16} />
-                   </div>
-                   <div>
-                     <p className="font-semibold text-slate-800 text-sm">Scholarship Credit</p>
-                     <p className="text-xs text-slate-400 mt-0.5">Oct 21 • Income</p>
-                   </div>
-                 </div>
-                 <span className="font-semibold text-success-600 text-sm">+$500.00</span>
-              </div>
+            ) : (
+              expenses.slice(0, 5).map((exp, i) => {
+                const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
+                const IconComp = cat.icon;
+                return (
+                  <div key={exp._id || i} className="flex justify-between items-center p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}>
+                        <IconComp size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-800 text-sm truncate">{exp.description || exp.category}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${cat.pill}`}>
+                            {exp.category}
+                          </span>
+                          <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
+                            <FiClock size={9} /> {getRelativeTime(exp.date)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-2">-₹{Number(exp.amount).toFixed(0)}</span>
+                  </div>
+                );
+              })
             )}
           </div>
 
-          {/* Smart Tip Card */}
-          <div className="mt-6 bg-slate-900 text-white rounded-xl p-4 flex gap-3 shadow-lg">
-             <div className="text-cyan-400"><FiTrendingDown size={24} /></div>
-             <div>
-               <h4 className="font-semibold text-sm">Smart Tip</h4>
-               <p className="text-xs text-slate-300 mt-1 leading-relaxed">You spent 15% less on dining this week. Keep it up!</p>
-             </div>
-          </div>
+          {/* Dynamic Smart Insight — Rotating Cards */}
+          {(() => {
+            // Generate insights from real data
+            const insights = [];
+
+            if (expenses.length === 0) {
+              insights.push({
+                emoji: '🚀',
+                title: 'Get Started',
+                text: 'Add your first expense and unlock personalized spending insights!',
+                gradient: 'from-indigo-600 to-violet-600',
+              });
+            } else {
+              // Filter to current month only
+              const now = new Date();
+              const curMonth = now.getMonth();
+              const curYear = now.getFullYear();
+              const monthExpenses = expenses.filter(e => {
+                const d = new Date(e.date);
+                return d.getMonth() === curMonth && d.getFullYear() === curYear;
+              });
+
+              if (monthExpenses.length === 0) {
+                insights.push({
+                  emoji: '📭',
+                  title: 'No Activity',
+                  text: 'No expenses logged this month yet. Start tracking to see your insights!',
+                  gradient: 'from-slate-600 to-slate-700',
+                });
+              } else {
+                const monthTotal = monthExpenses.reduce((s, e) => s + Number(e.amount), 0);
+
+                // Top category insight
+                const cats = {};
+                monthExpenses.forEach(e => { cats[e.category] = (cats[e.category] || 0) + Number(e.amount); });
+                const sorted = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+                const topCat = sorted[0];
+                if (topCat) {
+                  const pct = ((topCat[1] / monthTotal) * 100).toFixed(0);
+                  insights.push({
+                    emoji: '🔥',
+                    title: 'Top Spender',
+                    text: `${topCat[0]} takes ${pct}% of your budget (₹${topCat[1].toFixed(0)}). ${Number(pct) > 40 ? 'Consider cutting back!' : 'Looking balanced!'}`,
+                    gradient: 'from-orange-600 to-red-600',
+                  });
+                }
+
+                // Daily average
+                const dayOfMonth = now.getDate();
+                const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+                const dailyAvg = monthTotal / dayOfMonth;
+                const projectedTotal = dailyAvg * daysInMonth;
+                insights.push({
+                  emoji: '📊',
+                  title: 'Daily Average',
+                  text: `You're spending ~₹${dailyAvg.toFixed(0)}/day. Projected total: ₹${projectedTotal.toFixed(0)} by month end.`,
+                  gradient: 'from-blue-600 to-cyan-600',
+                });
+
+                // Biggest single expense
+                const biggest = monthExpenses.reduce((max, e) => Number(e.amount) > Number(max.amount) ? e : max, monthExpenses[0]);
+                if (biggest) {
+                  insights.push({
+                    emoji: '💸',
+                    title: 'Biggest Expense',
+                    text: `"${biggest.description || biggest.category}" at ₹${Number(biggest.amount).toFixed(0)} was your largest single spend.`,
+                    gradient: 'from-pink-600 to-rose-600',
+                  });
+                }
+
+                // Category diversity
+                const uniqueCats = Object.keys(cats).length;
+                insights.push({
+                  emoji: uniqueCats >= 4 ? '🌈' : '🎯',
+                  title: uniqueCats >= 4 ? 'Diverse Spender' : 'Focused Spender',
+                  text: uniqueCats >= 4
+                    ? `Spending across ${uniqueCats} categories — you have a well-distributed budget!`
+                    : `Only ${uniqueCats} ${uniqueCats === 1 ? 'category' : 'categories'} this month. Try tracking more for better insights.`,
+                  gradient: 'from-emerald-600 to-teal-600',
+                });
+
+                // Transaction frequency (today only)
+                const todayExpenses = monthExpenses.filter(e => new Date(e.date).toDateString() === now.toDateString());
+                if (todayExpenses.length > 0) {
+                  const todayTotal = todayExpenses.reduce((s, e) => s + Number(e.amount), 0);
+                  insights.push({
+                    emoji: '⚡',
+                    title: "Today's Pulse",
+                    text: `${todayExpenses.length} transaction${todayExpenses.length > 1 ? 's' : ''} today totaling ₹${todayTotal.toFixed(0)}. ${todayTotal > dailyAvg ? 'Above your daily average!' : 'Under your daily average — nice!'}`,
+                    gradient: 'from-violet-600 to-purple-600',
+                  });
+                }
+              }
+            }
+
+            // Use a time-based index to auto-rotate every 5 seconds
+            const [insightIdx, setInsightIdx] = React.useState(0);
+            React.useEffect(() => {
+              if (insights.length <= 1) return;
+              const timer = setInterval(() => {
+                setInsightIdx(prev => (prev + 1) % insights.length);
+              }, 5000);
+              return () => clearInterval(timer);
+            }, [insights.length]);
+
+            const current = insights[insightIdx % insights.length] || insights[0];
+
+            return (
+              <div
+                onClick={() => insights.length > 1 && setInsightIdx(prev => (prev + 1) % insights.length)}
+                className={`mt-4 bg-gradient-to-r ${current.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
+              >
+                {/* Decorative circles */}
+                <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
+                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
+                
+                <div className="flex gap-3 relative z-10">
+                  <div className="text-2xl flex-shrink-0 mt-0.5">{current.emoji}</div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm tracking-tight">{current.title}</h4>
+                    <p className="text-xs text-white/80 mt-1 leading-relaxed">{current.text}</p>
+                  </div>
+                </div>
+
+                {/* Dot indicators */}
+                {insights.length > 1 && (
+                  <div className="flex justify-center gap-1.5 mt-3 relative z-10">
+                    {insights.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          i === insightIdx % insights.length ? 'w-4 bg-white' : 'w-1.5 bg-white/30'
+                        }`}
+                      ></div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -324,34 +495,64 @@ const Dashboard = () => {
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onClick={() => setShowAllActivity(false)}
           ></div>
-          <div className="relative w-full max-w-2xl mx-auto bg-white rounded-[24px] shadow-2xl p-8 border border-slate-100 z-10 max-h-96 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">All Activity</h2>
-            <div className="space-y-4">
+          <div className="relative w-full max-w-2xl mx-auto bg-white rounded-[24px] shadow-2xl border border-slate-100 z-10 max-h-[75vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="p-6 pb-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
+              <div>
+                <h2 className="text-xl font-bold text-slate-800">All Activity</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{expenses.length} transactions total</p>
+              </div>
+              <button 
+                onClick={() => setShowAllActivity(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors text-lg"
+              >
+                ×
+              </button>
+            </div>
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 pt-3 space-y-2">
               {expenses.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No expenses recorded yet</p>
+                <div className="text-center py-12">
+                  <FiClock size={36} className="mx-auto text-slate-300 mb-3" />
+                  <p className="text-slate-400 font-medium">No expenses recorded yet</p>
+                </div>
               ) : (
-                expenses.map((exp) => (
-                  <div key={exp._id} className="flex justify-between items-center p-4 border border-slate-100 rounded-lg hover:bg-slate-50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center">
-                        <FiBox size={16} />
+                expenses.map((exp) => {
+                  const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
+                  const IconComp = cat.icon;
+                  return (
+                    <div key={exp._id} className="flex justify-between items-center p-3.5 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-10 h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}>
+                          <IconComp size={16} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-800 text-sm truncate">{exp.description || exp.category}</p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${cat.pill}`}>
+                              {exp.category}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(exp.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-slate-800 text-sm">{exp.description}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{exp.category} • {new Date(exp.date).toLocaleDateString()}</p>
-                      </div>
+                      <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-3">-₹{Number(exp.amount).toFixed(2)}</span>
                     </div>
-                    <span className="font-semibold text-slate-700 text-sm">-${Number(exp.amount).toFixed(2)}</span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
-            <button 
-              onClick={() => setShowAllActivity(false)}
-              className="mt-6 w-full px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              Close
-            </button>
+            {/* Modal Footer */}
+            <div className="p-6 pt-4 border-t border-slate-100 flex-shrink-0">
+              <button 
+                onClick={() => setShowAllActivity(false)}
+                className="w-full px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors shadow-sm"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}

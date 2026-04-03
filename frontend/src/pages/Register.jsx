@@ -65,17 +65,17 @@ const Register = () => {
               <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2.12-1.15V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72l5 2.73 5-2.73v3.72z" />
             </svg>
             <div className="font-bold text-xl tracking-tight text-primary-700">
-              Scholar Ledger
+              Kharchify
             </div>
           </div>
 
           <div className="flex-1 flex flex-col justify-center max-w-sm w-full mx-auto">
             <div className="mb-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
-                Join Scholar Ledger
+                Join Kharchify
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
-                The smartest way to manage your academic financial life.
+                The smartest way to manage your financial life.
               </p>
             </div>
 
@@ -211,7 +211,7 @@ const Register = () => {
               </Link>
             </div>
             <div className="flex justify-between mt-2">
-              <div>© 2024 SCHOLAR LEDGER.</div>
+              <div>© 2026 KHARCHIFY.</div>
             </div>
           </div>
         </div>
@@ -254,13 +254,13 @@ const Register = () => {
             </h3>
 
             <p className="text-sm font-medium text-white/90 italic mt-2 leading-relaxed">
-              "Scholar Ledger changed how I think about my loans and savings.
+              "Kharchify changed how I think about my loans and savings.
               It's the essential toolkit for every student."
             </p>
           </div>
 
           <div className="absolute bottom-6 right-8 text-[10px] font-bold text-white/50 tracking-widest uppercase">
-            EST. 2024 / SCHOLAR LEDGER GLOBAL
+            EST. 2026 / KHARCHIFY GLOBAL
           </div>
         </div>
       </div>

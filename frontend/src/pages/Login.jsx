@@ -59,7 +59,7 @@ const Login = () => {
         <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
           <div className="flex justify-between items-center mb-6">
             <div className="font-bold text-xl tracking-tight text-primary-700">
-              Scholar Ledger
+              Kharchify
             </div>
             <div className="text-xs font-semibold text-slate-400 tracking-wider">
               NEED HELP?
@@ -72,7 +72,7 @@ const Login = () => {
                 Welcome Back!
               </h2>
               <p className="text-sm text-slate-500 font-medium tracking-wide">
-                Continue your journey toward academic financial mastery.
+                Continue your journey toward financial mastery.
               </p>
             </div>
 
@@ -254,7 +254,7 @@ const Login = () => {
               </Link>
             </div>
             <div className="flex justify-between mt-2">
-              <div>© 2024 SCHOLAR LEDGER.</div>
+              <div>© 2026 KHARCHIFY.</div>
               <div className="flex gap-4">
                 <span>PRIVACY POLICY</span>
                 <span>TERMS</span>
@@ -279,7 +279,7 @@ const Login = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] max-w-sm rounded-[2rem] bg-white/10 backdrop-blur-md border border-white/20 p-8 shadow-2xl flex flex-col gap-6 transform transition-all hover:scale-105 duration-500">
             <div className="w-8 h-1 bg-emerald-500 rounded-full"></div>
             <h3 className="text-3xl font-bold text-white leading-tight italic tracking-tight">
-              "Empowering your academic financial journey."
+              "Empowering your financial journey."
             </h3>
 
             <div className="flex items-center gap-3">
