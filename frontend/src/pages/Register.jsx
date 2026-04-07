@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +15,25 @@ const Register = () => {
   });
   const { register, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        await googleLogin(tokenResponse.access_token);
+        toast.success("Successfully registered via Google!");
+        navigate("/dashboard");
+      } catch (err) {
+        console.error("Google register error:", err.response?.data || err);
+        const errorMsg =
+          err.response?.data?.message || "Google authentication failed.";
+        toast.error(errorMsg);
+      }
+    },
+    onError: (err) => {
+      console.error("Google popup error:", err);
+      toast.error("Google sign-in failed. Check your browser popup settings.");
+    },
+  });
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -65,14 +84,14 @@ const Register = () => {
               <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2.12-1.15V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72l5 2.73 5-2.73v3.72z" />
             </svg>
             <div className="font-bold text-xl tracking-tight text-primary-700">
-              Kharchify
+              BudgetBuddy
             </div>
           </div>
 
           <div className="flex-1 flex flex-col justify-center max-w-sm w-full mx-auto">
             <div className="mb-4">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
-                Join Kharchify
+                Join BudgetBuddy
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-medium tracking-wide">
                 The smartest way to manage your financial life.
@@ -166,23 +185,17 @@ const Register = () => {
             <div className="grid grid-cols-2 gap-4">
               {/* Standard Visible Google Login */}
               <div className="flex items-center justify-center bg-white rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
-                <GoogleLogin
-                  onSuccess={async (res) => {
-                    try {
-                      await googleLogin(res.credential);
-                      toast.success("Successfully registered via Google!");
-                      navigate("/dashboard");
-                    } catch (err) {
-                      toast.error("Google authentication failed.");
-                    }
-                  }}
-                  onError={() => toast.error("Google popup failed to load")}
-                  width="100%"
-                  size="large"
-                  theme="outline"
-                  shape="rectangular"
-                  logo_alignment="center"
-                />
+                <button
+                  type="button"
+                  onClick={() => handleGoogleLogin()}
+                  className="w-full h-[44px] flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-all text-sm group"
+                >
+                  <FcGoogle
+                    size={20}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                  Google
+                </button>
               </div>
 
               {/* Apple mockup */}
@@ -211,7 +224,7 @@ const Register = () => {
               </Link>
             </div>
             <div className="flex justify-between mt-2">
-              <div>© 2026 KHARCHIFY.</div>
+              <div>© 2026 BUDGETBUDDY.</div>
             </div>
           </div>
         </div>
@@ -254,13 +267,13 @@ const Register = () => {
             </h3>
 
             <p className="text-sm font-medium text-white/90 italic mt-2 leading-relaxed">
-              "Kharchify changed how I think about my loans and savings.
-              It's the essential toolkit for every student."
+              "BudgetBuddy changed how I think about my loans and savings. It's
+              the essential toolkit for every student."
             </p>
           </div>
 
           <div className="absolute bottom-6 right-8 text-[10px] font-bold text-white/50 tracking-widest uppercase">
-            EST. 2026 / KHARCHIFY GLOBAL
+            EST. 2026 / BUDGETBUDDY GLOBAL
           </div>
         </div>
       </div>

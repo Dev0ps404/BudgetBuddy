@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { FiEye, FiEyeOff, FiTrendingUp } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
-import { GoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -14,6 +14,25 @@ const Login = () => {
 
   const { login, googleLogin } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        await googleLogin(tokenResponse.access_token);
+        toast.success("Successfully logged in with Google!");
+        navigate("/dashboard");
+      } catch (err) {
+        console.error("Google login error:", err.response?.data || err);
+        const errorMsg =
+          err.response?.data?.message || "Google authentication failed.";
+        toast.error(errorMsg);
+      }
+    },
+    onError: (err) => {
+      console.error("Google popup error:", err);
+      toast.error("Google sign-in failed. Check your browser popup settings.");
+    },
+  });
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -59,7 +78,7 @@ const Login = () => {
         <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
           <div className="flex justify-between items-center mb-6">
             <div className="font-bold text-xl tracking-tight text-primary-700">
-              Kharchify
+              BudgetBuddy
             </div>
             <div className="text-xs font-semibold text-slate-400 tracking-wider">
               NEED HELP?
@@ -209,23 +228,17 @@ const Login = () => {
             <div className="grid grid-cols-2 gap-4">
               {/* Standard Visible Google Login */}
               <div className="flex items-center justify-center bg-white rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <GoogleLogin
-                  onSuccess={async (res) => {
-                    try {
-                      await googleLogin(res.credential);
-                      toast.success("Successfully logged in with Google!");
-                      navigate("/dashboard");
-                    } catch (err) {
-                      toast.error("Google authentication failed.");
-                    }
-                  }}
-                  onError={() => toast.error("Google popup failed to load")}
-                  width="100%"
-                  size="large"
-                  theme="outline"
-                  shape="rectangular"
-                  logo_alignment="center"
-                />
+                <button
+                  type="button"
+                  onClick={() => handleGoogleLogin()}
+                  className="w-full h-[44px] flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-all text-sm group"
+                >
+                  <FcGoogle
+                    size={20}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                  Sign in with Google
+                </button>
               </div>
 
               {/* Apple mockup */}
@@ -254,7 +267,7 @@ const Login = () => {
               </Link>
             </div>
             <div className="flex justify-between mt-2">
-              <div>© 2026 KHARCHIFY.</div>
+              <div>© 2026 BUDGETBUDDY.</div>
               <div className="flex gap-4">
                 <span>PRIVACY POLICY</span>
                 <span>TERMS</span>

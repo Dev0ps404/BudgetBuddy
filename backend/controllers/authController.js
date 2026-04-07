@@ -1,13 +1,13 @@
-const User = require('../models/User');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: "30d",
   });
 };
 
@@ -16,13 +16,15 @@ const registerUser = async (req, res) => {
 
   try {
     if (!email || !password || !username) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const userExists = await User.findOne({ email });
 
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists with this email' });
+      return res
+        .status(400)
+        .json({ message: "User already exists with this email" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -32,7 +34,7 @@ const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      monthlyBudget: 1000 // Default budget
+      monthlyBudget: 1000, // Default budget
     });
 
     if (user) {
@@ -46,11 +48,11 @@ const registerUser = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(400).json({ message: 'Invalid user data' });
+      res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ message: "Server error during registration" });
   }
 };
 
@@ -59,7 +61,9 @@ const loginUser = async (req, res) => {
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
     }
 
     const user = await User.findOne({ email });
@@ -75,23 +79,68 @@ const loginUser = async (req, res) => {
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error during login' });
+    res.status(500).json({ message: "Server error during login" });
   }
 };
 
 const googleLogin = async (req, res) => {
   const { token } = req.body;
 
+  if (!token) {
+    return res.status(400).json({ message: "No Google token provided" });
+  }
+
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
+    let payload;
+
+    try {
+      // Primary method: verify as ID Token
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+      console.log("Google token verified via ID Token");
+    } catch (verifyError) {
+      console.error("ID Token verification failed:", verifyError.message);
+
+      // Fallback: Try fetching user info with axios (Access Token flow)
+      try {
+        console.log("Attempting access token verification with axios...");
+        const axios = require("axios");
+        const response = await axios.get(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        payload = response.data;
+        console.log("Google token verified via Access Token (axios userinfo)");
+      } catch (accessTokenError) {
+        console.error(
+          "Access token verification failed. Axios error details:",
+          accessTokenError.response?.data || accessTokenError.message,
+        );
+        return res.status(401).json({
+          message: "Invalid Google token. Please try again.",
+          error: accessTokenError.message || verifyError.message,
+        });
+      }
+    }
+
+    const { sub, email, name, picture } = payload;
+    console.log("Google auth payload:", {
+      sub,
+      email,
+      name,
+      picture: picture ? "present" : "none",
     });
-    const { sub, email, name, picture } = ticket.getPayload();
 
     let user = await User.findOne({ email });
 
@@ -100,19 +149,25 @@ const googleLogin = async (req, res) => {
         username: name,
         email: email,
         googleId: sub,
-        profilePicture: picture
+        profilePicture: picture,
+        monthlyBudget: 1000,
       });
+      console.log("Created new user via Google:", email);
     } else {
       let updated = false;
       if (!user.googleId) {
         user.googleId = sub;
         updated = true;
       }
-      if (!user.profilePicture && picture) {
+      if (
+        picture &&
+        (!user.profilePicture || user.profilePicture !== picture)
+      ) {
         user.profilePicture = picture;
         updated = true;
       }
       if (updated) await user.save();
+      console.log("Existing user logged in via Google:", email);
     }
 
     res.json({
@@ -124,16 +179,32 @@ const googleLogin = async (req, res) => {
       monthlyBudget: user.monthlyBudget,
       token: generateToken(user._id),
     });
-
   } catch (error) {
-    console.error('Google Auth Error:', error);
-    res.status(401).json({ message: 'Invalid Google token' });
+    console.error("Google Auth Controller Exception:", error);
+
+    // Explicitly check for Database errors
+    if (
+      error.name === "MongoNetworkError" ||
+      error.name === "MongooseServerSelectionError" ||
+      error.message.includes("buffering timed out")
+    ) {
+      return res.status(503).json({
+        message:
+          "Database connection failed. Please check your internet or MongoDB Atlas whitelist.",
+      });
+    }
+
+    res.status(500).json({
+      message:
+        "Google authentication failed: " + (error.message || "Server error"),
+      error: error.message,
+    });
   }
 };
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user.id).select("-password");
     if (user) {
       res.json({
         _id: user.id,
@@ -144,11 +215,11 @@ const getProfile = async (req, res) => {
         monthlyBudget: user.monthlyBudget,
       });
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -156,11 +227,14 @@ const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (user) {
-      user.monthlyBudget = req.body.monthlyBudget !== undefined ? req.body.monthlyBudget : user.monthlyBudget;
+      user.monthlyBudget =
+        req.body.monthlyBudget !== undefined
+          ? req.body.monthlyBudget
+          : user.monthlyBudget;
       user.username = req.body.username || user.username;
-      
+
       const updatedUser = await user.save();
-      
+
       res.json({
         _id: updatedUser.id,
         name: updatedUser.username,
@@ -171,12 +245,18 @@ const updateProfile = async (req, res) => {
         token: generateToken(updatedUser._id),
       });
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = { registerUser, loginUser, googleLogin, getProfile, updateProfile };
+module.exports = {
+  registerUser,
+  loginUser,
+  googleLogin,
+  getProfile,
+  updateProfile,
+};

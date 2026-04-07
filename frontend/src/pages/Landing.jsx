@@ -11,7 +11,7 @@ const Landing = () => {
       
       {/* --- NAVBAR --- */}
       <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto border-b border-transparent">
-        <div className="font-bold text-xl tracking-tight text-indigo-700">Kharchify</div>
+        <div className="font-bold text-xl tracking-tight text-indigo-700">BudgetBuddy</div>
         <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-500">
           <a href="#home" className="hover:text-indigo-600 transition-colors">Home</a>
           <a href="#features" className="hover:text-indigo-600 transition-colors">Features</a>
@@ -101,7 +101,7 @@ const Landing = () => {
            <div className="text-center mb-16">
               <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Engineered for Success</h2>
               <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-                Kharchify combines high-end financial tools with an intuitive student-first interface.
+                BudgetBuddy combines high-end financial tools with an intuitive student-first interface.
               </p>
            </div>
 
@@ -188,7 +188,7 @@ const Landing = () => {
               <div className="flex-1 w-full bg-[#f1f5f9] p-10 rounded-3xl relative overflow-hidden border border-slate-200 shadow-sm">
                  <div className="absolute -top-6 -right-6 text-[150px] font-serif text-indigo-100 leading-none select-none">"</div>
                  <p className="text-xl italic text-slate-800 font-medium relative z-10 leading-relaxed">
-                   "Kharchify changed how I view my money. It feels like a high-end journal rather than a boring spreadsheet. I saved ₹800 in my first semester."
+                   "BudgetBuddy changed how I view my money. It feels like a high-end journal rather than a boring spreadsheet. I saved ₹800 in my first semester."
                  </p>
                  <div className="flex items-center gap-4 mt-8 relative z-10">
                     <div className="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-sm overflow-hidden">
@@ -207,7 +207,7 @@ const Landing = () => {
               <div className="relative z-10 flex flex-col items-center">
                  <h2 className="text-4xl font-extrabold text-white mb-6">Ready to Take Control?</h2>
                  <p className="text-indigo-100 text-lg mb-10 max-w-xl mx-auto">
-                   Join 50,000+ students managing their finances with Kharchify today.
+                   Join 50,000+ students managing their finances with BudgetBuddy today.
                  </p>
                  <div className="flex flex-wrap justify-center gap-4">
                     <Link to="/register" className="px-8 py-4 bg-white text-indigo-700 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
@@ -232,7 +232,7 @@ const Landing = () => {
               
               {/* Brand Col */}
               <div className="md:col-span-1 space-y-6">
-                 <div className="font-bold text-2xl tracking-tight text-indigo-700">Curator</div>
+                 <div className="font-bold text-2xl tracking-tight text-indigo-700">BudgetBuddy</div>
                  <p className="text-slate-500 text-sm leading-relaxed">
                    Financial Intelligence for the modern lifestyle. Secure, intuitive, powerful.
                  </p>
@@ -276,7 +276,7 @@ const Landing = () => {
 
            {/* Bottom Bar */}
            <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-slate-500">
-              <div>© 2026 Kharchify. All rights reserved.</div>
+              <div>© 2026 BudgetBuddy. All rights reserved.</div>
               <div className="flex gap-8">
                  <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
                  <a href="#" className="hover:text-indigo-600 transition-colors">Cookie Settings</a>

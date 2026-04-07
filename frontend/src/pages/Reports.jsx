@@ -132,7 +132,10 @@ const Reports = () => {
   // Close month picker on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (monthPickerRef.current && !monthPickerRef.current.contains(e.target)) {
+      if (
+        monthPickerRef.current &&
+        !monthPickerRef.current.contains(e.target)
+      ) {
         setShowMonthPicker(false);
       }
     };
@@ -274,7 +277,8 @@ const Reports = () => {
     );
 
     const maxSpend = Math.max(...actualData, 1);
-    const avgBudget = actualData.reduce((a, b) => a + b, 0) / actualData.length || maxSpend;
+    const avgBudget =
+      actualData.reduce((a, b) => a + b, 0) / actualData.length || maxSpend;
     const budgetData = months.map(() => Math.round(avgBudget));
 
     return {
@@ -333,7 +337,7 @@ const Reports = () => {
         <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:center">${item.count}</td>
         <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:center">${item.percentage.toFixed(1)}%</td>
         <td style="padding:10px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:700">₹${item.total.toFixed(2)}</td>
-      </tr>`
+      </tr>`,
       )
       .join("");
 
@@ -346,14 +350,14 @@ const Reports = () => {
         <td style="padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px">${exp.category}</td>
         <td style="padding:8px;border-bottom:1px solid #f1f5f9;font-size:13px">${exp.description || "-"}</td>
         <td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;font-weight:600;font-size:13px">₹${Number(exp.amount).toFixed(2)}</td>
-      </tr>`
+      </tr>`,
       )
       .join("");
 
     printWindow.document.write(`
       <html>
       <head>
-        <title>Kharchify - Expense Report - ${currentMonthLabel}</title>
+        <title>BudgetBuddy - Expense Report - ${currentMonthLabel}</title>
         <style>
           body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1e293b; }
           h1 { font-size: 24px; margin-bottom: 4px; }
@@ -370,7 +374,7 @@ const Reports = () => {
         </style>
       </head>
       <body>
-        <h1>📊 Kharchify — Expense Report</h1>
+        <h1>📊 BudgetBuddy — Expense Report</h1>
         <p class="subtitle">${currentMonthLabel} • Generated on ${new Date().toLocaleDateString("en-IN")}</p>
         
         <div class="summary">
@@ -410,7 +414,7 @@ const Reports = () => {
           <tbody>${expenseRows}</tbody>
         </table>
 
-        <div class="footer">Kharchify — Your Personal Expense Tracker</div>
+        <div class="footer">BudgetBuddy — Your Personal Expense Tracker</div>
       </body>
       </html>
     `);
@@ -568,7 +572,10 @@ const Reports = () => {
               onClick={() => setShowAllCategories(!showAllCategories)}
               className="text-primary-600 text-sm font-semibold hover:text-primary-700 transition-colors"
             >
-              {showAllCategories ? "Show Less" : `View All (${breakdownData.length})`} &gt;
+              {showAllCategories
+                ? "Show Less"
+                : `View All (${breakdownData.length})`}{" "}
+              &gt;
             </button>
           )}
         </div>
@@ -600,8 +607,7 @@ const Reports = () => {
             </div>
 
             {displayedCategories.map((item, index) => {
-              const config =
-                CATEGORY_CONFIG[item.category] || DEFAULT_CONFIG;
+              const config = CATEGORY_CONFIG[item.category] || DEFAULT_CONFIG;
               const IconComponent = config.icon;
               const health = getSpendingHealth(item.percentage);
 
@@ -657,35 +663,86 @@ const Reports = () => {
 
       {/* Suggestion Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-primary-50 p-5 rounded-2xl border-l-4 border-primary-600 border-t border-r border-b border-white shadow-sm">
-          <h4 className="text-[10px] font-bold text-primary-600 uppercase tracking-wider mb-1">
-            Savings Potential
-          </h4>
-          <h3 className="font-bold text-slate-800 mb-2">Optimizing Travel</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            By using the student railcard more frequently, you could save
-            approximately ₹45/month.
-          </p>
+        {/* Savings Potential Card */}
+        <div className="group relative bg-gradient-to-br from-primary-50 to-indigo-50 p-6 rounded-2xl border-2 border-primary-200 hover:border-primary-500 hover:shadow-2xl hover:shadow-primary-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-600/0 via-primary-600/0 to-primary-600/0 group-hover:from-primary-600/5 group-hover:via-primary-600/10 group-hover:to-primary-600/5 transition-all duration-500"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary-400 via-primary-600 to-primary-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+          <div className="relative">
+            <h4 className="text-[10px] font-bold text-primary-600 uppercase tracking-widest mb-2 group-hover:text-primary-700 transition-colors">
+              💰 Savings Potential
+            </h4>
+            <h3 className="font-bold text-slate-800 mb-3 text-lg group-hover:text-slate-900 transition-colors">
+              Optimizing Travel
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+              By using the student railcard more frequently, you could save
+              approximately{" "}
+              <span className="font-bold text-primary-600 group-hover:text-primary-700">
+                ₹45/month
+              </span>
+              .
+            </p>
+            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
+              <span className="text-xs font-semibold text-primary-600">
+                Potential yearly savings
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="bg-emerald-50 p-5 rounded-2xl border-l-4 border-emerald-600 border-t border-r border-b border-white shadow-sm">
-          <h4 className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
-            Academic ROI
-          </h4>
-          <h3 className="font-bold text-slate-800 mb-2">Software Grants</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Your Adobe subscription is eligible for a university rebate. Claim
-            ₹120 back this week.
-          </p>
+
+        {/* Academic ROI Card */}
+        <div className="group relative bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border-2 border-emerald-200 hover:border-emerald-500 hover:shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/0 via-emerald-600/0 to-emerald-600/0 group-hover:from-emerald-600/5 group-hover:via-emerald-600/10 group-hover:to-emerald-600/5 transition-all duration-500"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-emerald-600 to-emerald-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+          <div className="relative">
+            <h4 className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2 group-hover:text-emerald-700 transition-colors">
+              🎓 Academic ROI
+            </h4>
+            <h3 className="font-bold text-slate-800 mb-3 text-lg group-hover:text-slate-900 transition-colors">
+              Software Grants
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+              Your Adobe subscription is eligible for a university rebate. Claim{" "}
+              <span className="font-bold text-emerald-600 group-hover:text-emerald-700">
+                ₹120 back
+              </span>{" "}
+              this week.
+            </p>
+            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+              <span className="text-xs font-semibold text-emerald-600">
+                Claim now →
+              </span>
+            </div>
+          </div>
         </div>
-        <div className="bg-orange-50 p-5 rounded-2xl border-l-4 border-orange-600 border-t border-r border-b border-white shadow-sm">
-          <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-wider mb-1">
-            Budget Alert
-          </h4>
-          <h3 className="font-bold text-slate-800 mb-2">Utility Spike</h3>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Electricity costs are 22% higher than last semester. Consider review
-            of peak usage times.
-          </p>
+
+        {/* Budget Alert Card */}
+        <div className="group relative bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-2xl border-2 border-orange-200 hover:border-orange-500 hover:shadow-2xl hover:shadow-orange-500/20 hover:-translate-y-2 transition-all duration-500 cursor-pointer overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-600/0 via-orange-600/0 to-orange-600/0 group-hover:from-orange-600/5 group-hover:via-orange-600/10 group-hover:to-orange-600/5 transition-all duration-500"></div>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 via-orange-600 to-orange-400 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700"></div>
+          <div className="relative">
+            <h4 className="text-[10px] font-bold text-orange-600 uppercase tracking-widest mb-2 group-hover:text-orange-700 transition-colors">
+              ⚠️ Budget Alert
+            </h4>
+            <h3 className="font-bold text-slate-800 mb-3 text-lg group-hover:text-slate-900 transition-colors">
+              Utility Spike
+            </h3>
+            <p className="text-sm text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors">
+              Electricity costs are{" "}
+              <span className="font-bold text-orange-600 group-hover:text-orange-700">
+                22% higher
+              </span>{" "}
+              than last semester. Consider review of peak usage times.
+            </p>
+            <div className="mt-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+              <div className="w-1.5 h-1.5 bg-orange-600 rounded-full"></div>
+              <span className="text-xs font-semibold text-orange-600">
+                View details →
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

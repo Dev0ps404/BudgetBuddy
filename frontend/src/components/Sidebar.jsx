@@ -79,7 +79,7 @@ const Sidebar = () => {
             <FiZap size={20} />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight leading-tight">Kharchify</h2>
+            <h2 className="text-lg font-bold text-white tracking-tight leading-tight">BudgetBuddy</h2>
             <p className="text-[0.6rem] uppercase font-semibold text-primary-400 tracking-widest">Smart Finance</p>
           </div>
         </div>
@@ -91,7 +91,7 @@ const Sidebar = () => {
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-400 to-violet-500 flex items-center justify-center text-white font-bold text-sm shadow-md overflow-hidden flex-shrink-0">
               {user?.profilePicture
-                ? <img src={user.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                ? <img src={user.profilePicture} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 : user?.name?.charAt(0)?.toUpperCase() || 'U'
               }
             </div>
@@ -104,8 +104,8 @@ const Sidebar = () => {
           {/* Mini Budget Bar */}
           <div className="mt-3 pt-3 border-t border-white/10">
             <div className="flex justify-between items-center mb-1.5">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Monthly Spend</span>
-              <span className="text-[10px] font-bold text-primary-400">₹{monthlyTotal.toFixed(0)}</span>
+              <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Monthly Spend</span>
+              <span className="text-[10px] font-bold text-white tracking-widest">₹{monthlyTotal.toFixed(0)}</span>
             </div>
             <div className="w-full bg-white/10 rounded-full h-1.5">
               <div

@@ -130,7 +130,7 @@ const ExpenseForm = ({ fetchExpenses, expenseToEdit, onClose }) => {
            <div className="text-success-600 mt-0.5"><FiActivity size={18} /></div>
            <div>
              <h4 className="font-bold text-success-800 text-sm tracking-tight mb-1">Financial Intelligence Tip</h4>
-             <p className="text-xs text-success-700/80 leading-relaxed font-medium">Categorizing this expense helps Kharchify predict your end-of-semester savings more accurately.</p>
+             <p className="text-xs text-success-700/80 leading-relaxed font-medium">Categorizing this expense helps BudgetBuddy predict your end-of-semester savings more accurately.</p>
            </div>
         </div>
       </div>
