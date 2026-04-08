@@ -312,77 +312,77 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-3 md:space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900">
             Financial Overview
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-xs md:text-sm text-slate-500 mt-1">
             Welcome back! Here's your spending pulse for this week.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
           <button
             onClick={handleExportReport}
-            className="px-4 py-2 bg-primary-50 text-primary-700 font-medium rounded-lg hover:bg-primary-100 transition-colors text-sm flex items-center gap-2"
+            className="px-3 md:px-4 py-1.5 md:py-2 bg-primary-50 text-primary-700 font-medium rounded-lg hover:bg-primary-100 transition-colors text-xs md:text-sm flex items-center gap-2 flex-shrink-0"
           >
-            <FiDownload size={16} /> Export Report
+            <FiDownload size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">Export Report</span>
           </button>
           <button
             onClick={handleViewAllActivity}
-            className="px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-sm flex items-center gap-2"
+            className="px-3 md:px-4 py-1.5 md:py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-xs md:text-sm flex items-center gap-2 flex-shrink-0"
           >
-            View All Activity <FiArrowRight size={16} />
+            View All <FiArrowRight size={14} className="md:w-4 md:h-4" />
           </button>
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Total Expenses */}
         <div className="dashboard-card group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiBox className="w-6 h-6" />
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="p-2 md:p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
+              <FiBox className="w-4 md:w-6 h-4 md:h-6" />
             </div>
-            <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-red-50 text-red-600 rounded-full">
-              <FiTrendingUp /> 12%
+            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-red-50 text-red-600 rounded-full">
+              <FiTrendingUp size={12} /> 12%
             </span>
           </div>
-          <div className="text-slate-500 text-sm font-medium mb-1">
+          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
             Total Expenses
           </div>
-          <div className="text-3xl font-bold text-slate-900">
+          <div className="text-2xl md:text-3xl font-bold text-slate-900">
             ₹{totalMonthly.toFixed(2)}
           </div>
-          <div className="text-xs text-slate-400 mt-2">Updated 2 mins ago</div>
+          <div className="text-[10px] md:text-xs text-slate-400 mt-2">Updated 2 mins ago</div>
         </div>
 
         {/* Monthly Summary */}
         <div className="dashboard-card group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiCalendar className="w-6 h-6" />
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
+              <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
             </div>
-            <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-success-50 text-success-600 rounded-full">
+            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-success-50 text-success-600 rounded-full">
               On Track
             </span>
           </div>
-          <div className="text-slate-500 text-sm font-medium mb-1">
+          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
             Monthly Budget Usage
           </div>
-          <div className="text-3xl font-bold text-slate-900">
+          <div className="text-2xl md:text-3xl font-bold text-slate-900">
             ₹{totalMonthly.toFixed(2)}
           </div>
-          <div className="mt-4">
-            <div className="flex justify-between text-xs mb-1 font-medium text-slate-500">
+          <div className="mt-3 md:mt-4">
+            <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
               <span>{budgetPercent.toFixed(0)}% Used</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
               <div
-                className="bg-success-500 h-1.5 rounded-full"
+                className="bg-success-500 h-1.5 md:h-2 rounded-full"
                 style={{ width: `${budgetPercent}%` }}
               ></div>
             </div>
@@ -390,29 +390,29 @@ const Dashboard = () => {
         </div>
 
         {/* Remaining Budget */}
-        <div className="dashboard-card group">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiDollarSign className="w-6 h-6" />
+        <div className="dashboard-card group sm:col-span-2 lg:col-span-1">
+          <div className="flex justify-between items-start mb-3 md:mb-4">
+            <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
+              <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
             </div>
-            <span className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-600 rounded-full">
+            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-amber-50 text-amber-600 rounded-full">
               {remainingPercent < 20 ? "Low" : "Healthy"}
             </span>
           </div>
-          <div className="text-slate-500 text-sm font-medium mb-1">
+          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
             Remaining Budget
           </div>
-          <div className="text-3xl font-bold text-slate-900">
+          <div className="text-2xl md:text-3xl font-bold text-slate-900">
             ₹{Math.max(0, remaining).toFixed(2)}
           </div>
-          <div className="mt-4">
-            <div className="flex justify-between text-xs mb-1 font-medium text-slate-500">
+          <div className="mt-3 md:mt-4">
+            <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
               <span></span>
               <span>{remainingPercent.toFixed(0)}%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
               <div
-                className={`h-1.5 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
+                className={`h-1.5 md:h-2 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
                 style={{ width: `${remainingPercent}%` }}
               ></div>
             </div>
@@ -421,25 +421,25 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Weekly Spending Analysis */}
         <div className="dashboard-card lg:col-span-2">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-slate-900">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+            <h3 className="font-bold text-slate-900 text-sm md:text-base">
               Weekly Spending Analysis
             </h3>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 bg-primary-50 text-primary-700 text-xs font-medium rounded-full">
+            <div className="flex gap-2 overflow-x-auto">
+              <button className="px-2 md:px-3 py-1 bg-primary-50 text-primary-700 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
                 Last 7 Days
               </button>
-              <button className="px-3 py-1 text-slate-500 hover:bg-slate-50 text-xs font-medium rounded-full">
+              <button className="px-2 md:px-3 py-1 text-slate-500 hover:bg-slate-50 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
                 Last 30 Days
               </button>
             </div>
           </div>
 
           {/* Dynamic Bar Chart with Real Weekly Data */}
-          <div className="h-64 flex items-end justify-around gap-4 pb-6 mt-4 relative border-b border-slate-100 px-4">
+          <div className="h-40 md:h-64 flex items-end justify-around gap-2 md:gap-4 pb-4 md:pb-6 mt-2 md:mt-4 relative border-b border-slate-100 px-2 md:px-4">
             {weeklyData.map((value, idx) => {
               const maxValue = Math.max(...weeklyData, 100);
               const heightPercent = Math.max((value / maxValue) * 100, 5);
@@ -467,6 +467,7 @@ const Dashboard = () => {
             })}
           </div>
           <div className="flex justify-between text-xs text-slate-400 mt-3 font-medium uppercase px-2">
+          <div className="flex justify-between text-[10px] md:text-xs text-slate-400 mt-2 md:mt-3 font-medium uppercase px-1 md:px-2">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
               (day, idx) => {
                 const today = new Date();
@@ -488,18 +489,18 @@ const Dashboard = () => {
 
         {/* Recent Activity */}
         <div className="dashboard-card flex flex-col">
-          <div className="flex justify-between items-center mb-5">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-slate-900">Recent Activity</h3>
+              <h3 className="font-bold text-slate-900 text-sm md:text-base">Recent Activity</h3>
               {expenses.length > 0 && (
-                <span className="text-[10px] font-bold bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
                   {expenses.length}
                 </span>
               )}
             </div>
             <button
               onClick={() => setShowAllActivity(true)}
-              className="text-primary-600 text-sm font-medium hover:text-primary-700 flex items-center gap-1 group"
+              className="text-primary-600 text-xs md:text-sm font-medium hover:text-primary-700 flex items-center gap-1 group justify-start sm:justify-end"
             >
               View All{" "}
               <FiChevronRight
@@ -511,14 +512,14 @@ const Dashboard = () => {
 
           <div className="flex-1 space-y-1 overflow-hidden">
             {filteredExpenses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-                  <FiClock size={24} className="text-slate-300" />
+              <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
+                <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
+                  <FiClock size={20} className="md:w-6 md:h-6 text-slate-300" />
                 </div>
-                <p className="text-slate-400 font-medium text-sm">
+                <p className="text-slate-400 font-medium text-xs md:text-sm">
                   No transactions found
                 </p>
-                <p className="text-xs text-slate-300 mt-1">
+                <p className="text-[10px] md:text-xs text-slate-300 mt-1">
                   Try a different search term
                 </p>
               </div>
@@ -529,25 +530,25 @@ const Dashboard = () => {
                 return (
                   <div
                     key={exp._id || i}
-                    className="flex justify-between items-center p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default"
+                    className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
                   >
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-2 md:gap-3 min-w-0">
                       <div
-                        className={`w-10 h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
+                        className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
                       >
-                        <IconComp size={16} />
+                        <IconComp size={14} className="md:w-4 md:h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 text-sm truncate">
+                        <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
                           {exp.description || exp.category}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span
-                            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md ${cat.pill}`}
+                            className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded-md ${cat.pill}`}
                           >
                             {exp.category}
                           </span>
-                          <span className="text-[10px] text-slate-400 flex items-center gap-0.5">
+                          <span className="text-[8px] md:text-[10px] text-slate-400 flex items-center gap-0.5">
                             <FiClock size={9} /> {getRelativeTime(exp.date)}
                           </span>
                         </div>
@@ -608,7 +609,7 @@ const Dashboard = () => {
       </div>
 
       {/* AI Insights Section */}
-      <div className="mt-8">
+      <div className="mt-4 md:mt-8">
         <AIInsights />
       </div>
 
@@ -616,9 +617,9 @@ const Dashboard = () => {
       <div className="fixed bottom-6 right-6 z-30">
         <button
           onClick={() => setShowAddModal(true)}
-          className="btn-primary shadow-xl shadow-primary-600/40 flex items-center gap-2 px-6 py-3 hover:shadow-2xl hover:shadow-primary-600/50 transition-shadow"
+          className="btn-primary shadow-xl shadow-primary-600/40 flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 text-sm md:text-base hover:shadow-2xl hover:shadow-primary-600/50 transition-shadow"
         >
-          <FiPlus size={20} /> Add Expense
+          <FiPlus size={16} className="md:w-5 md:h-5" /> <span className="hidden sm:inline">Add</span> Expense
         </button>
       </div>
 
@@ -631,35 +632,35 @@ const Dashboard = () => {
 
       {/* View All Activity Modal */}
       {showAllActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 pb-20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4 sm:p-6 pb-16 md:pb-20">
           <div
             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
             onClick={() => setShowAllActivity(false)}
           ></div>
-          <div className="relative w-full max-w-2xl mx-auto bg-white rounded-[24px] shadow-2xl border border-slate-100 z-10 max-h-[75vh] flex flex-col">
+          <div className="relative w-full max-w-2xl mx-auto bg-white rounded-2xl md:rounded-[24px] shadow-2xl border border-slate-100 z-10 max-h-[75vh] flex flex-col">
             {/* Modal Header */}
-            <div className="p-6 pb-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
+            <div className="p-4 md:p-6 pb-3 md:pb-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0">
               <div>
-                <h2 className="text-xl font-bold text-slate-800">
+                <h2 className="text-lg md:text-xl font-bold text-slate-800">
                   All Activity
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">
                   {expenses.length} transactions total
                 </p>
               </div>
               <button
                 onClick={() => setShowAllActivity(false)}
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors text-lg"
+                className="w-7 md:w-8 h-7 md:h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors text-lg md:text-xl flex-shrink-0"
               >
                 ×
               </button>
             </div>
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 pt-3 space-y-2">
+            <div className="flex-1 overflow-y-auto p-3 md:p-6 md:pt-3 space-y-2">
               {filteredExpenses.length === 0 ? (
-                <div className="text-center py-12">
-                  <FiClock size={36} className="mx-auto text-slate-300 mb-3" />
-                  <p className="text-slate-400 font-medium">No matches found</p>
+                <div className="text-center py-8 md:py-12">
+                  <FiClock size={28} className="md:w-9 md:h-9 mx-auto text-slate-300 mb-2 md:mb-3" />
+                  <p className="text-slate-400 font-medium text-sm md:text-base">No matches found</p>
                 </div>
               ) : (
                 filteredExpenses.map((exp) => {
@@ -668,13 +669,13 @@ const Dashboard = () => {
                   return (
                     <div
                       key={exp._id}
-                      className="flex justify-between items-center p-3.5 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors"
+                      className="flex justify-between items-center p-2.5 md:p-3.5 border border-slate-100 rounded-lg md:rounded-xl hover:bg-slate-50 transition-colors gap-2"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-2 md:gap-3 min-w-0">
                         <div
-                          className={`w-10 h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
+                          className={`w-8 md:w-10 h-8 md:h-10 rounded-lg md:rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
                         >
-                          <IconComp size={16} />
+                          <IconComp size={14} className="md:w-4 md:h-4" />
                         </div>
                         <div className="min-w-0">
                           <p className="font-semibold text-slate-800 text-sm truncate">
