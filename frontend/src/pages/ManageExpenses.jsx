@@ -189,7 +189,7 @@ const ManageExpenses = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Monthly Spend */}
         <div
-          className="dashboard-card md:col-span-2 flex justify-between relative overflow-hidden group animate-fade-in"
+          className="dashboard-card md:col-span-2 flex justify-between relative overflow-hidden group animate-fade-in hover:shadow-lg transition-all duration-300"
           style={{ animationDuration: "0.6s" }}
         >
           <div className="z-10 bg-white/60 p-1 rounded-xl">
@@ -222,36 +222,43 @@ const ManageExpenses = () => {
 
           {/* Abstract chart illusion matching the gray backdrop on the design */}
           <div className="absolute right-0 bottom-0 h-[120%] w-[50%] bg-slate-50 -skew-x-12 translate-x-4 border-l border-slate-100 flex items-end animate-slide-right group-hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-1/2 opacity-20 flex items-end justify-around px-4">
+            <div
+              key={`${totalMonthly}-${previousMonthTotal}`}
+              className="w-full h-1/2 opacity-20 flex items-end justify-around px-4"
+            >
               <div
-                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                className="w-2 bg-primary-500 rounded-t"
                 style={{
-                  height: "100%",
-                  animation: `chart-bar-rise 0.8s ease-out 0.2s forwards`,
+                  "--bar-height": "100%",
+                  animation:
+                    "chart-bar-rise 0.8s ease-out 0.2s forwards, pulse-glow 2.2s ease-in-out 1.1s infinite",
                   filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
                 }}
               ></div>
               <div
-                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                className="w-2 bg-primary-500 rounded-t"
                 style={{
-                  height: "66%",
-                  animation: `chart-bar-rise 0.8s ease-out 0.3s forwards`,
+                  "--bar-height": "66%",
+                  animation:
+                    "chart-bar-rise 0.8s ease-out 0.3s forwards, pulse-glow 2.2s ease-in-out 1.2s infinite",
                   filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
                 }}
               ></div>
               <div
-                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                className="w-2 bg-primary-500 rounded-t"
                 style={{
-                  height: "25%",
-                  animation: `chart-bar-rise 0.8s ease-out 0.4s forwards`,
+                  "--bar-height": "25%",
+                  animation:
+                    "chart-bar-rise 0.8s ease-out 0.4s forwards, pulse-glow 2.2s ease-in-out 1.3s infinite",
                   filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
                 }}
               ></div>
               <div
-                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                className="w-2 bg-primary-500 rounded-t"
                 style={{
-                  height: "80%",
-                  animation: `chart-bar-rise 0.8s ease-out 0.5s forwards`,
+                  "--bar-height": "80%",
+                  animation:
+                    "chart-bar-rise 0.8s ease-out 0.5s forwards, pulse-glow 2.2s ease-in-out 1.4s infinite",
                   filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
                 }}
               ></div>
