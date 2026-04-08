@@ -328,7 +328,8 @@ const Dashboard = () => {
             onClick={handleExportReport}
             className="px-3 md:px-4 py-1.5 md:py-2 bg-primary-50 text-primary-700 font-medium rounded-lg hover:bg-primary-100 transition-colors text-xs md:text-sm flex items-center gap-2 flex-shrink-0"
           >
-            <FiDownload size={14} className="md:w-4 md:h-4" /> <span className="hidden sm:inline">Export Report</span>
+            <FiDownload size={14} className="md:w-4 md:h-4" />{" "}
+            <span className="hidden sm:inline">Export Report</span>
           </button>
           <button
             onClick={handleViewAllActivity}
@@ -357,7 +358,9 @@ const Dashboard = () => {
           <div className="text-2xl md:text-3xl font-bold text-slate-900">
             ₹{totalMonthly.toFixed(2)}
           </div>
-          <div className="text-[10px] md:text-xs text-slate-400 mt-2">Updated 2 mins ago</div>
+          <div className="text-[10px] md:text-xs text-slate-400 mt-2">
+            Updated 2 mins ago
+          </div>
         </div>
 
         {/* Monthly Summary */}
@@ -466,7 +469,6 @@ const Dashboard = () => {
               );
             })}
           </div>
-          <div className="flex justify-between text-xs text-slate-400 mt-3 font-medium uppercase px-2">
           <div className="flex justify-between text-[10px] md:text-xs text-slate-400 mt-2 md:mt-3 font-medium uppercase px-1 md:px-2">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
               (day, idx) => {
@@ -491,7 +493,9 @@ const Dashboard = () => {
         <div className="dashboard-card flex flex-col">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-slate-900 text-sm md:text-base">Recent Activity</h3>
+              <h3 className="font-bold text-slate-900 text-sm md:text-base">
+                Recent Activity
+              </h3>
               {expenses.length > 0 && (
                 <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
                   {expenses.length}
@@ -619,7 +623,8 @@ const Dashboard = () => {
           onClick={() => setShowAddModal(true)}
           className="btn-primary shadow-xl shadow-primary-600/40 flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 text-sm md:text-base hover:shadow-2xl hover:shadow-primary-600/50 transition-shadow"
         >
-          <FiPlus size={16} className="md:w-5 md:h-5" /> <span className="hidden sm:inline">Add</span> Expense
+          <FiPlus size={16} className="md:w-5 md:h-5" />{" "}
+          <span className="hidden sm:inline">Add</span> Expense
         </button>
       </div>
 
@@ -659,8 +664,13 @@ const Dashboard = () => {
             <div className="flex-1 overflow-y-auto p-3 md:p-6 md:pt-3 space-y-2">
               {filteredExpenses.length === 0 ? (
                 <div className="text-center py-8 md:py-12">
-                  <FiClock size={28} className="md:w-9 md:h-9 mx-auto text-slate-300 mb-2 md:mb-3" />
-                  <p className="text-slate-400 font-medium text-sm md:text-base">No matches found</p>
+                  <FiClock
+                    size={28}
+                    className="md:w-9 md:h-9 mx-auto text-slate-300 mb-2 md:mb-3"
+                  />
+                  <p className="text-slate-400 font-medium text-sm md:text-base">
+                    No matches found
+                  </p>
                 </div>
               ) : (
                 filteredExpenses.map((exp) => {

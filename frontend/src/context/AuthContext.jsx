@@ -2,8 +2,11 @@ import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 
 // Create axios instance with proper base URL for production
-const API_BASE_URL =
+const RAW_API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, "").endsWith("/api")
+  ? RAW_API_BASE_URL.replace(/\/+$/, "")
+  : `${RAW_API_BASE_URL.replace(/\/+$/, "")}/api`;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
