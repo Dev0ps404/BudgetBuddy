@@ -38,6 +38,16 @@ const PrivateLayout = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
+  const storedUser = (() => {
+    try {
+      const raw = localStorage.getItem("user");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const sessionUser = user || storedUser;
+
   // Safety check: if still loading, show spinner
   if (loading) {
     return (
@@ -48,7 +58,7 @@ const PrivateLayout = ({ children }) => {
   }
 
   // If no user, redirect to login
-  if (!user) {
+  if (!sessionUser) {
     console.warn("⚠️ No user found, redirecting to login");
     return <Navigate to="/login" />;
   }
@@ -66,7 +76,7 @@ const PrivateLayout = ({ children }) => {
             {/* Left — Greeting & Date */}
             <div className="hidden md:block">
               <h2 className="text-sm font-bold text-slate-800">
-                Welcome back, {user.name?.split(" ")[0]} 👋
+                Welcome back, {sessionUser.name?.split(" ")[0]} 👋
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 {new Date().toLocaleDateString("en-IN", {
@@ -143,7 +153,7 @@ const PrivateLayout = ({ children }) => {
               <div className="flex items-center gap-3 border-l border-slate-200 pl-3">
                 <div className="text-right hidden md:block">
                   <p className="text-sm font-semibold text-slate-800 leading-tight">
-                    {user.name}
+                    {sessionUser.name}
                   </p>
                   <p className="text-[10px] text-primary-600 font-bold uppercase tracking-wider">
                     Pro Member
@@ -153,15 +163,15 @@ const PrivateLayout = ({ children }) => {
                   className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-violet-500 flex items-center justify-center text-white font-bold overflow-hidden shadow-md shadow-primary-600/20 active:scale-95 transition-transform cursor-pointer hover:scale-105"
                   onClick={() => navigate("/profile")}
                 >
-                  {user.profilePicture ? (
+                  {sessionUser.profilePicture ? (
                     <img
-                      src={user.profilePicture}
+                      src={sessionUser.profilePicture}
                       alt="Profile"
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    user.name?.charAt(0)
+                    sessionUser.name?.charAt(0)
                   )}
                 </div>
               </div>
