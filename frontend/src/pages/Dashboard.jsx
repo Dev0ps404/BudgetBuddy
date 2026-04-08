@@ -483,66 +483,71 @@ const Dashboard = () => {
           </div>
 
           {/* Dynamic Bar Chart with 7d/30d Data */}
-          <div className="mt-2 md:mt-4 overflow-x-auto border-b border-slate-100">
-            <div
-              className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
-                chartRange === "30d"
-                  ? "min-w-[900px] gap-2"
-                  : "justify-around gap-2 md:gap-4"
-              }`}
-            >
-            {trendData.map((value, idx) => {
-              const maxValue = Math.max(...trendData, 100);
-              const heightPercent = Math.max((value / maxValue) * 100, 5);
-              const isToday = idx === trendData.length - 1;
-
-              return (
+          <div className="mt-2 md:mt-4 overflow-x-auto">
+            <div className={chartRange === "30d" ? "min-w-[900px]" : "w-full"}>
+              <div className="border-b border-slate-100">
                 <div
-                  key={idx}
-                  className={`${
+                  className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
                     chartRange === "30d"
-                      ? "w-5"
-                      : "flex-1 max-w-10"
-                  } flex flex-col items-center group relative h-full justify-end shrink-0`}
+                      ? "gap-2"
+                      : "justify-around gap-2 md:gap-4"
+                  }`}
                 >
-                  {value > 0 && (
-                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                      ₹{value.toFixed(0)}
-                    </div>
-                  )}
-                  <div
-                    className={`w-full rounded-lg transition-all duration-300 ${isToday ? "bg-primary-600 shadow-md shadow-primary-600/30" : "bg-slate-200 group-hover:bg-slate-300"}`}
-                    style={{ height: `${heightPercent}%` }}
-                  ></div>
-                </div>
-              );
-            })}
-            </div>
-          </div>
-          <div className="mt-2 md:mt-3 overflow-x-auto">
-            <div
-              className={`text-[10px] md:text-xs text-slate-400 font-medium uppercase ${
-                chartRange === "30d"
-                  ? "min-w-[900px] flex gap-2 px-2 md:px-4"
-                  : "flex justify-between px-1 md:px-2"
-              }`}
-            >
-              {trendLabels.map((label, idx) => {
-                const isToday = idx === trendLabels.length - 1;
-                const showThirtyDayLabel =
-                  chartRange === "7d" || idx % 5 === 0 || idx === trendLabels.length - 1;
+                  {trendData.map((value, idx) => {
+                    const maxValue = Math.max(...trendData, 100);
+                    const heightPercent = Math.max((value / maxValue) * 100, 5);
+                    const isToday = idx === trendData.length - 1;
 
-                return (
-                  <span
-                    key={`${label}-${idx}`}
-                    className={`${isToday ? "text-primary-600 font-bold" : ""} ${
-                      chartRange === "30d" ? "w-5 text-center shrink-0" : ""
-                    }`}
-                  >
-                    {showThirtyDayLabel ? label : ""}
-                  </span>
-                );
-              })}
+                    return (
+                      <div
+                        key={idx}
+                        className={`${
+                          chartRange === "30d" ? "w-5" : "flex-1 max-w-10"
+                        } flex flex-col items-center group relative h-full justify-end shrink-0`}
+                      >
+                        {value > 0 && (
+                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            ₹{value.toFixed(0)}
+                          </div>
+                        )}
+                        <div
+                          className={`w-full rounded-lg transition-all duration-300 ${isToday ? "bg-primary-600 shadow-md shadow-primary-600/30" : "bg-slate-200 group-hover:bg-slate-300"}`}
+                          style={{ height: `${heightPercent}%` }}
+                        ></div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-2 md:mt-3">
+                <div
+                  className={`text-[10px] md:text-xs text-slate-400 font-medium uppercase ${
+                    chartRange === "30d"
+                      ? "flex gap-2 px-2 md:px-4"
+                      : "flex justify-between px-1 md:px-2"
+                  }`}
+                >
+                  {trendLabels.map((label, idx) => {
+                    const isToday = idx === trendLabels.length - 1;
+                    const showThirtyDayLabel =
+                      chartRange === "7d" ||
+                      idx % 5 === 0 ||
+                      idx === trendLabels.length - 1;
+
+                    return (
+                      <span
+                        key={`${label}-${idx}`}
+                        className={`${isToday ? "text-primary-600 font-bold" : ""} ${
+                          chartRange === "30d" ? "w-5 text-center shrink-0" : ""
+                        }`}
+                      >
+                        {showThirtyDayLabel ? label : ""}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         </div>
