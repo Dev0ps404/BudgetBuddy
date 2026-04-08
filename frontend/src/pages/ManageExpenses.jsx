@@ -104,19 +104,46 @@ const ManageExpenses = () => {
   const budgetRemainingPercent = 100 - budgetUsedPercent;
 
   // Calculate month-over-month change
-  const monthlyChange =
+  const monthlyChangeValue =
     previousMonthTotal > 0
-      ? (
-          ((totalMonthly - previousMonthTotal) / previousMonthTotal) *
-          100
-        ).toFixed(1)
-      : 0;
-  const isSpendingLess = monthlyChange < 0;
+      ? Number(
+          (
+            ((totalMonthly - previousMonthTotal) / previousMonthTotal) *
+            100
+          ).toFixed(1),
+        )
+      : null;
+  const isSpendingLess = monthlyChangeValue !== null && monthlyChangeValue < 0;
+  const isSpendingSame =
+    monthlyChangeValue !== null && monthlyChangeValue === 0;
+
+  const stableTrendQuotes = [
+    "Perfect consistency. Discipline looks great.",
+    "Same pace, strong habits. Keep this streak alive.",
+    "Steady spending this month. Smart and predictable.",
+    "Expenses are stable. You're in control.",
+  ];
+  const quoteSeed =
+    new Date().getDate() + Math.round(totalMonthly) + expenses.length;
+  const dynamicStableQuote =
+    stableTrendQuotes[quoteSeed % stableTrendQuotes.length];
+
   const spendingTrendText = isSpendingLess
-    ? `${Math.abs(monthlyChange)}% less than last month`
-    : monthlyChange === 0
-      ? "Same as last month"
-      : `${monthlyChange}% more than last month`;
+    ? `${Math.abs(monthlyChangeValue)}% less than last month`
+    : monthlyChangeValue === null
+      ? totalMonthly === 0
+        ? "No spending yet this month. Start strong."
+        : "First tracked month - this sets your baseline."
+      : isSpendingSame
+        ? dynamicStableQuote
+        : `${monthlyChangeValue}% more than last month`;
+
+  const trendTextColorClass =
+    monthlyChangeValue === null || isSpendingSame
+      ? "text-primary-600"
+      : isSpendingLess
+        ? "text-emerald-600"
+        : "text-orange-600";
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -179,7 +206,7 @@ const ManageExpenses = () => {
               ₹{totalMonthly.toFixed(2)}
             </div>
             <div
-              className={`flex items-center gap-1 text-sm font-medium transition-colors duration-500 ${isSpendingLess ? "text-emerald-600" : "text-orange-600"}`}
+              className={`flex items-center gap-1 text-sm font-medium transition-colors duration-500 ${trendTextColorClass}`}
               style={{
                 animation: `fade-in 0.6s ease-out forwards`,
                 animationDelay: "0.3s",
