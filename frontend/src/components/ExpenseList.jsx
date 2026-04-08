@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { FiTrash2, FiEdit2, FiClock, FiDownload, FiMoreVertical, FiBook, FiCoffee, FiTruck, FiBox, FiHome, FiZap } from 'react-icons/fi';
 
 const CategoryIcon = ({ category }) => {
@@ -32,7 +34,23 @@ const CategoryPill = ({ category }) => {
 
 const ExpenseList = ({ expenses, fetchExpenses, setExpenseToEdit }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [showActionsMenu, setShowActionsMenu] = useState(false);
+  const actionsMenuRef = useRef(null);
   const itemsPerPage = 5;
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (
+        actionsMenuRef.current &&
+        !actionsMenuRef.current.contains(event.target)
+      ) {
+        setShowActionsMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
   
   const handleDelete = async (id) => {
     if(window.confirm('Are you sure you want to delete this expense?')) {
@@ -60,13 +78,112 @@ const ExpenseList = ({ expenses, fetchExpenses, setExpenseToEdit }) => {
   const totalPages = Math.ceil(expenses.length / itemsPerPage);
   const currentExpenses = expenses.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const handleDownloadPdf = (data, fileTag = 'all') => {
+    if (!data || data.length === 0) {
+      toast.info('No transactions available to export.');
+      return;
+    }
+
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const generatedOn = format(new Date(), 'dd MMM yyyy, hh:mm a');
+    const totalAmount = data.reduce((sum, exp) => sum + Number(exp.amount || 0), 0);
+
+    doc.setFontSize(16);
+    doc.text('BudgetBuddy - Recent Transactions', 40, 40);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${generatedOn}`, 40, 58);
+    doc.text(`Records: ${data.length}`, 40, 72);
+
+    autoTable(doc, {
+      startY: 86,
+      head: [['#', 'Date', 'Description', 'Category', 'Amount (INR)']],
+      body: data.map((expense, index) => [
+        index + 1,
+        format(new Date(expense.date), 'dd MMM yyyy'),
+        expense.description || 'Untitled Transaction',
+        expense.category || 'Other',
+        Number(expense.amount).toFixed(2),
+      ]),
+      styles: { fontSize: 9, cellPadding: 6 },
+      headStyles: { fillColor: [79, 70, 229] },
+      columnStyles: {
+        0: { cellWidth: 24 },
+        1: { cellWidth: 80 },
+        2: { cellWidth: 200 },
+        3: { cellWidth: 90 },
+        4: { halign: 'right' },
+      },
+    });
+
+    const finalY = doc.lastAutoTable?.finalY || 100;
+    doc.setFontSize(11);
+    doc.setTextColor(35);
+    doc.text(`Total Amount: INR ${totalAmount.toFixed(2)}`, 40, finalY + 24);
+
+    doc.save(`expense-report-${fileTag}-${new Date().toISOString().split('T')[0]}.pdf`);
+    toast.success('PDF downloaded successfully');
+  };
+
+  const handleDownloadAllPdf = () => {
+    handleDownloadPdf(expenses, 'all');
+    setShowActionsMenu(false);
+  };
+
+  const handleDownloadCurrentPagePdf = () => {
+    handleDownloadPdf(currentExpenses, `page-${currentPage}`);
+    setShowActionsMenu(false);
+  };
+
   return (
     <div className="dashboard-card mt-6 p-0 overflow-hidden">
       <div className="p-6 border-b border-slate-100 flex justify-between items-center">
         <h3 className="font-bold text-slate-800">Recent Transactions</h3>
-        <div className="flex gap-2 text-slate-400">
-           <button className="p-1.5 hover:bg-slate-50 rounded"><FiDownload size={18} /></button>
-           <button className="p-1.5 hover:bg-slate-50 rounded"><FiMoreVertical size={18} /></button>
+        <div className="flex gap-2 text-slate-400 items-center">
+           <button
+             onClick={handleDownloadAllPdf}
+             className="p-1.5 hover:bg-slate-50 rounded transition-colors"
+             title="Download all as PDF"
+             aria-label="Download all as PDF"
+           >
+             <FiDownload size={18} />
+           </button>
+           <div className="relative" ref={actionsMenuRef}>
+             <button
+               onClick={() => setShowActionsMenu(prev => !prev)}
+               className="p-1.5 hover:bg-slate-50 rounded transition-colors"
+               title="More actions"
+               aria-label="More actions"
+             >
+               <FiMoreVertical size={18} />
+             </button>
+
+             {showActionsMenu && (
+               <div className="absolute right-0 top-full mt-2 w-52 bg-white border border-slate-200 rounded-xl shadow-lg z-30 overflow-hidden">
+                 <button
+                   onClick={handleDownloadAllPdf}
+                   className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                 >
+                   Download all as PDF
+                 </button>
+                 <button
+                   onClick={handleDownloadCurrentPagePdf}
+                   className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                 >
+                   Download this page as PDF
+                 </button>
+                 <button
+                   onClick={() => {
+                     fetchExpenses();
+                     setShowActionsMenu(false);
+                   }}
+                   className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors border-t border-slate-100"
+                 >
+                   Refresh transactions
+                 </button>
+               </div>
+             )}
+           </div>
         </div>
       </div>
       
