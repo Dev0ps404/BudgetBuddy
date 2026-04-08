@@ -31,14 +31,16 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Failed to fetch profile", error);
-      if (
-        error.response &&
-        (error.response.status === 404 || error.response.status === 401)
-      ) {
+      // Only clear user for specific auth errors (401 Unauthorized)
+      // Don't clear for 404 or network errors - user session is still valid
+      if (error.response && error.response.status === 401) {
+        console.warn("Authentication token invalid, logging out");
         setUser(null);
         localStorage.removeItem("user");
         delete axios.defaults.headers.common["Authorization"];
       }
+      // For other errors (404, network), keep user session intact
+      // The stored user is still valid even if profile fetch fails
     }
   };
 
@@ -49,7 +51,11 @@ export const AuthProvider = ({ children }) => {
       setUser(parsedUser);
       axios.defaults.headers.common["Authorization"] =
         `Bearer ${parsedUser.token}`;
-      fetchProfile();
+      // Attempt to refresh profile in background, but don't wait for it
+      // This way even if backend is slow/unreachable, user stays logged in
+      fetchProfile().catch(() => {
+        // Silently ignore profile fetch errors, user session remains valid
+      });
     }
     setLoading(false);
   }, []);
