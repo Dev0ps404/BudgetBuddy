@@ -18,7 +18,18 @@ axios.defaults.baseURL = API_BASE_URL;
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize user synchronously from localStorage to prevent race condition
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        return JSON.parse(storedUser);
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
@@ -47,15 +58,20 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      axios.defaults.headers.common["Authorization"] =
-        `Bearer ${parsedUser.token}`;
-      // Attempt to refresh profile in background, but don't wait for it
-      // This way even if backend is slow/unreachable, user stays logged in
-      fetchProfile().catch(() => {
-        // Silently ignore profile fetch errors, user session remains valid
-      });
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        // Set auth header immediately
+        axios.defaults.headers.common["Authorization"] =
+          `Bearer ${parsedUser.token}`;
+        // Fetch fresh profile in background (non-blocking)
+        fetchProfile().catch(() => {
+          // Silently ignore errors
+        });
+      } catch (_) {
+        // Invalid stored user, clear it
+        localStorage.removeItem("user");
+        setUser(null);
+      }
     }
     setLoading(false);
   }, []);
