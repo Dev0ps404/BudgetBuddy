@@ -5,6 +5,7 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -33,6 +34,7 @@ const PrivateLayout = ({ children }) => {
   const { searchQuery, setSearchQuery } = useContext(SearchContext);
   const { unreadCount } = useContext(NotificationContext);
   const { user, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -141,8 +143,8 @@ const PrivateLayout = ({ children }) => {
                   </p>
                 </div>
                 <div
-                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-violet-500 flex items-center justify-center text-white font-bold overflow-hidden shadow-md shadow-primary-600/20 active:scale-95 transition-transform cursor-pointer"
-                  onClick={() => (window.location.href = "/profile")}
+                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-violet-500 flex items-center justify-center text-white font-bold overflow-hidden shadow-md shadow-primary-600/20 active:scale-95 transition-transform cursor-pointer hover:scale-105"
+                  onClick={() => navigate("/profile")}
                 >
                   {user.profilePicture ? (
                     <img
