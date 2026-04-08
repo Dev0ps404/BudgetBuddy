@@ -11,6 +11,7 @@ const ManageExpenses = () => {
   const [expenseToEdit, setExpenseToEdit] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [totalMonthly, setTotalMonthly] = useState(0);
+  const [previousMonthTotal, setPreviousMonthTotal] = useState(0);
   const { user } = useContext(AuthContext);
   const { searchQuery, expenses, fetchExpenses } = useContext(SearchContext);
 
@@ -30,6 +31,10 @@ const ManageExpenses = () => {
     if (expenses.length > 0) {
       const currentMonth = new Date().getMonth();
       const currentYear = new Date().getFullYear();
+      const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+      // Calculate current month total
       const monthlyTotal = expenses.reduce((acc, curr) => {
         const itemDate = new Date(curr.date);
         if (
@@ -40,7 +45,21 @@ const ManageExpenses = () => {
         }
         return acc;
       }, 0);
+
+      // Calculate previous month total
+      const previousMonthTotalAmount = expenses.reduce((acc, curr) => {
+        const itemDate = new Date(curr.date);
+        if (
+          itemDate.getMonth() === previousMonth &&
+          itemDate.getFullYear() === previousYear
+        ) {
+          return acc + Number(curr.amount);
+        }
+        return acc;
+      }, 0);
+
       setTotalMonthly(monthlyTotal);
+      setPreviousMonthTotal(previousMonthTotalAmount);
     }
   }, [expenses]);
 
@@ -79,8 +98,25 @@ const ManageExpenses = () => {
     year: "numeric",
   });
   const budget = user?.monthlyBudget || 1000;
-  const budgetHealth =
+  const budgetUsedPercent =
     budget > 0 ? Math.min((totalMonthly / budget) * 100, 100) : 0;
+  const budgetRemaining = Math.max(0, budget - totalMonthly);
+  const budgetRemainingPercent = 100 - budgetUsedPercent;
+
+  // Calculate month-over-month change
+  const monthlyChange =
+    previousMonthTotal > 0
+      ? (
+          ((totalMonthly - previousMonthTotal) / previousMonthTotal) *
+          100
+        ).toFixed(1)
+      : 0;
+  const isSpendingLess = monthlyChange < 0;
+  const spendingTrendText = isSpendingLess
+    ? `${Math.abs(monthlyChange)}% less than last month`
+    : monthlyChange === 0
+      ? "Same as last month"
+      : `${monthlyChange}% more than last month`;
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -125,47 +161,122 @@ const ManageExpenses = () => {
       {/* Top Cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Monthly Spend */}
-        <div className="dashboard-card md:col-span-2 flex justify-between relative overflow-hidden group">
+        <div
+          className="dashboard-card md:col-span-2 flex justify-between relative overflow-hidden group animate-fade-in"
+          style={{ animationDuration: "0.6s" }}
+        >
           <div className="z-10 bg-white/60 p-1 rounded-xl">
-            <h3 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-2">
+            <h3
+              className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-2 animate-fade-in"
+              style={{ animationDuration: "0.8s", animationDelay: "0.1s" }}
+            >
               Total Monthly Spend
             </h3>
-            <div className="text-4xl font-bold text-primary-700 mb-2">
+            <div
+              className="text-4xl font-bold text-primary-700 mb-2 animate-scale-in-bounce"
+              style={{ animationDuration: "0.7s", animationDelay: "0.2s" }}
+            >
               ₹{totalMonthly.toFixed(2)}
             </div>
-            <div className="flex items-center gap-1 text-sm text-emerald-600 font-medium">
-              <FiTrendingDown /> 12% less than last month
+            <div
+              className={`flex items-center gap-1 text-sm font-medium transition-colors duration-500 ${isSpendingLess ? "text-emerald-600" : "text-orange-600"}`}
+              style={{
+                animation: `fade-in 0.6s ease-out forwards`,
+                animationDelay: "0.3s",
+              }}
+            >
+              <FiTrendingDown
+                className="animate-bounce"
+                style={{ animationDuration: "2s", animationDelay: "0.4s" }}
+              />{" "}
+              {spendingTrendText}
             </div>
           </div>
 
           {/* Abstract chart illusion matching the gray backdrop on the design */}
-          <div className="absolute right-0 bottom-0 h-[120%] w-[50%] bg-slate-50 -skew-x-12 translate-x-4 border-l border-slate-100 flex items-end">
+          <div className="absolute right-0 bottom-0 h-[120%] w-[50%] bg-slate-50 -skew-x-12 translate-x-4 border-l border-slate-100 flex items-end animate-slide-right group-hover:scale-105 transition-transform duration-300">
             <div className="w-full h-1/2 opacity-20 flex items-end justify-around px-4">
-              <div className="w-2 h-full bg-primary-500 rounded-t"></div>
-              <div className="w-2 h-2/3 bg-primary-500 rounded-t"></div>
-              <div className="w-2 h-1/4 bg-primary-500 rounded-t"></div>
-              <div className="w-2 h-4/5 bg-primary-500 rounded-t"></div>
+              <div
+                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                style={{
+                  height: "100%",
+                  animation: `chart-bar-rise 0.8s ease-out 0.2s forwards`,
+                  filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
+                }}
+              ></div>
+              <div
+                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                style={{
+                  height: "66%",
+                  animation: `chart-bar-rise 0.8s ease-out 0.3s forwards`,
+                  filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
+                }}
+              ></div>
+              <div
+                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                style={{
+                  height: "25%",
+                  animation: `chart-bar-rise 0.8s ease-out 0.4s forwards`,
+                  filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
+                }}
+              ></div>
+              <div
+                className="w-2 bg-primary-500 rounded-t animate-pulse"
+                style={{
+                  height: "80%",
+                  animation: `chart-bar-rise 0.8s ease-out 0.5s forwards`,
+                  filter: "drop-shadow(0 0 8px rgba(99, 102, 241, 0.3))",
+                }}
+              ></div>
             </div>
           </div>
         </div>
 
         {/* Budget Health */}
-        <div className="dashboard-card bg-emerald-50 border-emerald-100 relative overflow-hidden">
-          <h3 className="text-xs font-bold tracking-wider text-emerald-700 uppercase mb-2">
+        <div
+          className="dashboard-card bg-emerald-50 border-emerald-100 relative overflow-hidden animate-fade-in group hover:shadow-lg hover:border-emerald-200 transition-all duration-300"
+          style={{ animationDuration: "0.6s", animationDelay: "0.1s" }}
+        >
+          <h3
+            className="text-xs font-bold tracking-wider text-emerald-700 uppercase mb-2 animate-fade-in"
+            style={{ animationDuration: "0.8s", animationDelay: "0.2s" }}
+          >
             Budget Health
           </h3>
-          <div className="text-4xl font-bold text-emerald-600 mb-4">
-            {Math.round(budgetHealth)}%
+          <div
+            className="text-4xl font-bold text-emerald-600 mb-4 animate-scale-in-bounce group-hover:scale-110 transition-transform duration-300"
+            style={{ animationDuration: "0.7s", animationDelay: "0.3s" }}
+          >
+            {Math.round(budgetRemainingPercent)}%
           </div>
           <div className="flex justify-between items-center text-xs font-medium text-emerald-700 mb-2">
-            <span>Usage</span>
-            <span>Remaining</span>
+            <span
+              className="animate-fade-in"
+              style={{ animationDuration: "0.8s", animationDelay: "0.3s" }}
+            >
+              Usage
+            </span>
+            <span
+              className="animate-fade-in"
+              style={{ animationDuration: "0.8s", animationDelay: "0.35s" }}
+            >
+              Remaining
+            </span>
           </div>
-          <div className="w-full bg-emerald-200 rounded-full h-2">
+          <div
+            className="w-full bg-emerald-200 rounded-full h-2 overflow-hidden animate-fade-in"
+            style={{ animationDuration: "0.8s", animationDelay: "0.4s" }}
+          >
             <div
-              className="bg-emerald-600 h-2 rounded-full"
-              style={{ width: `${100 - budgetHealth}%` }}
+              className="bg-emerald-600 h-2 rounded-full transition-all duration-1000 ease-out group-hover:bg-emerald-500 shadow-lg shadow-emerald-500/50"
+              style={{ width: `${budgetUsedPercent}%` }}
             ></div>
+          </div>
+          <div
+            className="text-xs text-emerald-600 font-semibold mt-3 animate-fade-in"
+            style={{ animationDuration: "0.8s", animationDelay: "0.5s" }}
+          >
+            ₹{budgetRemaining.toFixed(2)} remaining of ₹{budget}
           </div>
         </div>
       </div>
