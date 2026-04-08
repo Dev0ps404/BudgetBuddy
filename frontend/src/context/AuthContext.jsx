@@ -34,44 +34,49 @@ export const AuthProvider = ({ children }) => {
 
   const fetchProfile = async () => {
     try {
-      const res = await apiClient.get("/auth/profile");
+      const res = await apiClient.get("/auth/profile", { timeout: 5000 });
       // Update local storage and state with fresh data
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const updatedUser = { ...storedUser, ...res.data };
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
+      console.log("✅ Profile fetched successfully");
     } catch (error) {
-      console.error("Failed to fetch profile", error);
-      // Only clear user for specific auth errors (401 Unauthorized)
-      // Don't clear for 404 or network errors - user session is still valid
-      if (error.response && error.response.status === 401) {
-        console.warn("Authentication token invalid, logging out");
+      console.error("⚠️ Failed to fetch profile:", error.message);
+      // Only clear user for 401 (unauthorized token)
+      if (error.response?.status === 401) {
+        console.warn("❌ Auth token invalid, logging out");
         setUser(null);
         localStorage.removeItem("user");
         delete axios.defaults.headers.common["Authorization"];
       }
-      // For other errors (404, network), keep user session intact
-      // The stored user is still valid even if profile fetch fails
+      // For network errors, timeouts, 404, 500 etc - DON'T clear user
+      // User session from localStorage is still valid
     }
   };
 
   useEffect(() => {
+    // Just set up the auth headers from localStorage
+    // Don't call fetchProfile during initialization - it can fail and cause issues
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        // Set auth header immediately
+        // Ensure user is properly set from localStorage
+        setUser(parsedUser);
+        // Set auth header for all future requests
         axios.defaults.headers.common["Authorization"] =
           `Bearer ${parsedUser.token}`;
-        // Fetch fresh profile in background (non-blocking)
-        fetchProfile().catch(() => {
-          // Silently ignore errors
-        });
-      } catch (_) {
-        // Invalid stored user, clear it
+        apiClient.defaults.headers.common["Authorization"] =
+          `Bearer ${parsedUser.token}`;
+        console.log("✅ User loaded from localStorage");
+      } catch (err) {
+        console.warn("⚠️ Invalid stored user, clearing");
         localStorage.removeItem("user");
         setUser(null);
       }
+    } else {
+      console.log("ℹ️ No stored user found");
     }
     setLoading(false);
   }, []);
