@@ -72,7 +72,7 @@ const Register = () => {
       ></div>
 
       {/* Main Split Card Container */}
-      <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl h-[680px]">
+      <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl md:h-[680px]">
         {/* Left Side: Form */}
         <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
           <div className="flex items-center gap-2 mb-6">
