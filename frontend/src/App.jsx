@@ -33,7 +33,7 @@ import NotFound from "./pages/NotFound";
 const PrivateLayout = ({ children }) => {
   const { searchQuery, setSearchQuery } = useContext(SearchContext);
   const { unreadCount } = useContext(NotificationContext);
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -46,7 +46,18 @@ const PrivateLayout = ({ children }) => {
       return null;
     }
   })();
-  const sessionUser = user || storedUser;
+  const storedToken = localStorage.getItem("authToken") || storedUser?.token;
+  const sessionUser =
+    user ||
+    storedUser ||
+    (storedToken
+      ? {
+          name: "User",
+          username: "User",
+          profilePicture: null,
+        }
+      : null);
+  const sessionAuthenticated = isAuthenticated || Boolean(storedToken);
 
   // Safety check: if still loading, show spinner
   if (loading) {
@@ -58,7 +69,7 @@ const PrivateLayout = ({ children }) => {
   }
 
   // If no user, redirect to login
-  if (!sessionUser) {
+  if (!sessionAuthenticated) {
     console.warn("⚠️ No user found, redirecting to login");
     return <Navigate to="/login" />;
   }
