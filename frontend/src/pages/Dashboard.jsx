@@ -97,7 +97,9 @@ const getRelativeTime = (dateStr) => {
 
 const Dashboard = () => {
   const [totalMonthly, setTotalMonthly] = useState(0);
-  const [weeklyData, setWeeklyData] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [chartRange, setChartRange] = useState("7d");
+  const [trendData, setTrendData] = useState([]);
+  const [trendLabels, setTrendLabels] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllActivity, setShowAllActivity] = useState(false);
   const { user } = useContext(AuthContext);
@@ -199,41 +201,66 @@ const Dashboard = () => {
   const currentInsight = insights[insightIdx % insights.length] || insights[0];
 
   useEffect(() => {
-    if (expenses.length > 0) {
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
 
-      const monthlyTotal = expenses.reduce((acc, curr) => {
-        const itemDate = new Date(curr.date);
-        if (
-          itemDate.getMonth() === currentMonth &&
-          itemDate.getFullYear() === currentYear
-        ) {
-          return acc + Number(curr.amount);
-        }
-        return acc;
-      }, 0);
+    const monthlyTotal = expenses.reduce((acc, curr) => {
+      const itemDate = new Date(curr.date);
+      if (
+        itemDate.getMonth() === currentMonth &&
+        itemDate.getFullYear() === currentYear
+      ) {
+        return acc + Number(curr.amount);
+      }
+      return acc;
+    }, 0);
+    setTotalMonthly(monthlyTotal);
 
-      setTotalMonthly(monthlyTotal);
+    const daysCount = chartRange === "7d" ? 7 : 30;
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+    const start = new Date(end);
+    start.setDate(end.getDate() - (daysCount - 1));
+    start.setHours(0, 0, 0, 0);
 
-      const today = new Date();
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(today.getDate() - 6);
+    const labels = [];
+    const data = Array(daysCount).fill(0);
+    const dayIndexMap = new Map();
 
-      const weekData = [0, 0, 0, 0, 0, 0, 0];
-      expenses.forEach((expense) => {
-        const expDate = new Date(expense.date);
-        if (expDate >= sevenDaysAgo && expDate <= today) {
-          const dayDiff = Math.floor((today - expDate) / (1000 * 60 * 60 * 24));
-          if (dayDiff >= 0 && dayDiff < 7) {
-            weekData[6 - dayDiff] += Number(expense.amount);
-          }
-        }
-      });
+    for (let i = 0; i < daysCount; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
 
-      setWeeklyData(weekData);
+      const dayKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      dayIndexMap.set(dayKey, i);
+
+      labels.push(
+        chartRange === "7d"
+          ? d.toLocaleDateString("en-IN", { weekday: "short" })
+          : d.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+      );
     }
-  }, [expenses]);
+
+    expenses.forEach((expense) => {
+      const expDate = new Date(expense.date);
+      const normalizedDate = new Date(
+        expDate.getFullYear(),
+        expDate.getMonth(),
+        expDate.getDate(),
+      );
+
+      if (normalizedDate >= start && normalizedDate <= end) {
+        const key = `${normalizedDate.getFullYear()}-${String(normalizedDate.getMonth() + 1).padStart(2, "0")}-${String(normalizedDate.getDate()).padStart(2, "0")}`;
+        const idx = dayIndexMap.get(key);
+        if (idx !== undefined) {
+          data[idx] += Number(expense.amount);
+        }
+      }
+    });
+
+    setTrendLabels(labels);
+    setTrendData(data);
+  }, [expenses, chartRange]);
 
   useEffect(() => {
     fetchExpenses();
@@ -425,36 +452,58 @@ const Dashboard = () => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
-        {/* Weekly Spending Analysis */}
+        {/* Spending Analysis */}
         <div className="dashboard-card lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
             <h3 className="font-bold text-slate-900 text-sm md:text-base">
-              Weekly Spending Analysis
+              Spending Analysis
             </h3>
             <div className="flex gap-2 overflow-x-auto">
-              <button className="px-2 md:px-3 py-1 bg-primary-50 text-primary-700 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+              <button
+                onClick={() => setChartRange("7d")}
+                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
+                  chartRange === "7d"
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-slate-500 hover:bg-slate-50"
+                }`}
+              >
                 Last 7 Days
               </button>
-              <button className="px-2 md:px-3 py-1 text-slate-500 hover:bg-slate-50 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+              <button
+                onClick={() => setChartRange("30d")}
+                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
+                  chartRange === "30d"
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-slate-500 hover:bg-slate-50"
+                }`}
+              >
                 Last 30 Days
               </button>
             </div>
           </div>
 
-          {/* Dynamic Bar Chart with Real Weekly Data */}
-          <div className="h-40 md:h-64 flex items-end justify-around gap-2 md:gap-4 pb-4 md:pb-6 mt-2 md:mt-4 relative border-b border-slate-100 px-2 md:px-4">
-            {weeklyData.map((value, idx) => {
-              const maxValue = Math.max(...weeklyData, 100);
+          {/* Dynamic Bar Chart with 7d/30d Data */}
+          <div className="mt-2 md:mt-4 overflow-x-auto border-b border-slate-100">
+            <div
+              className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
+                chartRange === "30d"
+                  ? "min-w-[900px] gap-2"
+                  : "justify-around gap-2 md:gap-4"
+              }`}
+            >
+            {trendData.map((value, idx) => {
+              const maxValue = Math.max(...trendData, 100);
               const heightPercent = Math.max((value / maxValue) * 100, 5);
-              const today = new Date();
-              const dayDate = new Date(today);
-              dayDate.setDate(today.getDate() - (6 - idx));
-              const isToday = dayDate.toDateString() === today.toDateString();
+              const isToday = idx === trendData.length - 1;
 
               return (
                 <div
                   key={idx}
-                  className="flex-1 max-w-10 flex flex-col items-center group relative h-full justify-end"
+                  className={`${
+                    chartRange === "30d"
+                      ? "w-5"
+                      : "flex-1 max-w-10"
+                  } flex flex-col items-center group relative h-full justify-end shrink-0`}
                 >
                   {value > 0 && (
                     <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
@@ -468,24 +517,33 @@ const Dashboard = () => {
                 </div>
               );
             })}
+            </div>
           </div>
-          <div className="flex justify-between text-[10px] md:text-xs text-slate-400 mt-2 md:mt-3 font-medium uppercase px-1 md:px-2">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
-              (day, idx) => {
-                const today = new Date();
-                const dayDate = new Date(today);
-                dayDate.setDate(today.getDate() - (6 - idx));
-                const isToday = dayDate.toDateString() === today.toDateString();
+          <div className="mt-2 md:mt-3 overflow-x-auto">
+            <div
+              className={`text-[10px] md:text-xs text-slate-400 font-medium uppercase ${
+                chartRange === "30d"
+                  ? "min-w-[900px] flex gap-2 px-2 md:px-4"
+                  : "flex justify-between px-1 md:px-2"
+              }`}
+            >
+              {trendLabels.map((label, idx) => {
+                const isToday = idx === trendLabels.length - 1;
+                const showThirtyDayLabel =
+                  chartRange === "7d" || idx % 5 === 0 || idx === trendLabels.length - 1;
+
                 return (
                   <span
-                    key={day}
-                    className={isToday ? "text-primary-600 font-bold" : ""}
+                    key={`${label}-${idx}`}
+                    className={`${isToday ? "text-primary-600 font-bold" : ""} ${
+                      chartRange === "30d" ? "w-5 text-center shrink-0" : ""
+                    }`}
                   >
-                    {day}
+                    {showThirtyDayLabel ? label : ""}
                   </span>
                 );
-              },
-            )}
+              })}
+            </div>
           </div>
         </div>
 
