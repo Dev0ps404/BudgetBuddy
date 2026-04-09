@@ -449,13 +449,13 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 md:gap-6">
-        {/* Expense Calendar */}
-        <div className="lg:col-span-1">
-          <ExpenseCalendar expenses={expenses} />
-        </div>
+      {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
+      <div className="xl:hidden">
+        <ExpenseCalendar expenses={expenses} />
+      </div>
 
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Spending Analysis */}
         <div className="dashboard-card lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
@@ -557,7 +557,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="dashboard-card flex flex-col lg:col-span-1">
+        <div className="dashboard-card flex flex-col">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-slate-900 text-sm md:text-base">

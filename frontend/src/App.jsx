@@ -17,6 +17,7 @@ import {
   NotificationContext,
 } from "./context/NotificationContext";
 import Sidebar from "./components/Sidebar";
+import CalendarSidebar from "./components/CalendarSidebar";
 import MobileMenu from "./components/MobileMenu";
 import NotificationDropdown from "./components/NotificationDropdown";
 import SearchDropdown from "./components/SearchDropdown";
@@ -31,12 +32,14 @@ import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const PrivateLayout = ({ children }) => {
-  const { searchQuery, setSearchQuery } = useContext(SearchContext);
+  const { searchQuery, setSearchQuery, expenses } = useContext(SearchContext);
   const { unreadCount } = useContext(NotificationContext);
   const { user, loading, isAuthenticated } = useContext(AuthContext);
+  const location = useLocation();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const showCalendarSidebar = location.pathname === "/dashboard";
 
   const storedUser = (() => {
     try {
@@ -190,6 +193,11 @@ const PrivateLayout = ({ children }) => {
           </div>
           <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
         </div>
+        {showCalendarSidebar && (
+          <div className="hidden xl:block">
+            <CalendarSidebar expenses={expenses} />
+          </div>
+        )}
       </div>
     </>
   );
