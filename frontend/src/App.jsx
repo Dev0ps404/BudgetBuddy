@@ -28,6 +28,7 @@ import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
+import InfoPage from "./pages/InfoPage";
 
 const PrivateLayout = ({ children }) => {
   const { searchQuery, setSearchQuery } = useContext(SearchContext);
@@ -205,6 +206,7 @@ function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/info/:slug" element={<InfoPage />} />
 
             <Route
               path="/dashboard"

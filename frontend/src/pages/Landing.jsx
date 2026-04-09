@@ -43,9 +43,9 @@ const Landing = () => {
             <Link to="/register" className="px-8 py-4 bg-indigo-700 text-white rounded-xl font-bold text-lg hover:bg-indigo-800 transition-all shadow-xl shadow-indigo-600/20 active:scale-95">
               Start Tracking Free
             </Link>
-            <button className="px-8 py-4 bg-blue-100 text-blue-700 rounded-xl font-bold text-lg hover:bg-blue-200 transition-all flex items-center gap-3">
+                  <a href="#features" className="px-8 py-4 bg-blue-100 text-blue-700 rounded-xl font-bold text-lg hover:bg-blue-200 transition-all flex items-center gap-3">
               <FiPlayCircle size={22} /> See How It Works
-            </button>
+                  </a>
           </div>
         </div>
 
@@ -166,7 +166,7 @@ const Landing = () => {
       </section>
 
       {/* --- TESTIMONIAL & CTA SECTION --- */}
-      <section className="py-24 bg-[#f8fafc]">
+      <section id="pricing" className="py-24 bg-[#f8fafc]">
         <div className="max-w-6xl mx-auto px-8 flex flex-col gap-24">
            
            {/* Top Split */}
@@ -213,9 +213,9 @@ const Landing = () => {
                     <Link to="/register" className="px-8 py-4 bg-white text-indigo-700 font-bold rounded-xl hover:bg-slate-50 transition-all shadow-lg active:scale-95">
                        Create Free Account
                     </Link>
-                    <button className="px-8 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
+                    <Link to="/info/student-plan" className="px-8 py-4 bg-transparent border-2 border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-all">
                        View Student Plan
-                    </button>
+                    </Link>
                  </div>
               </div>
               {/* Decorative backgrounds */}
@@ -237,9 +237,9 @@ const Landing = () => {
                    Financial Intelligence for the modern lifestyle. Secure, intuitive, powerful.
                  </p>
                  <div className="flex gap-4">
-                    <a href="#" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiGlobe size={16} /></a>
-                    <a href="#" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiShare2 size={16} /></a>
-                    <a href="#" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiAtSign size={16} /></a>
+                    <Link to="/info/about-us" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiGlobe size={16} /></Link>
+                    <Link to="/info/blog" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiShare2 size={16} /></Link>
+                    <Link to="/info/contact" className="w-8 h-8 rounded-full bg-blue-50 text-indigo-600 flex items-center justify-center hover:bg-blue-100 transition-colors"><FiAtSign size={16} /></Link>
                  </div>
               </div>
 
@@ -247,28 +247,28 @@ const Landing = () => {
               <div>
                  <h4 className="font-bold text-slate-900 mb-6">Product</h4>
                  <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Features</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Pricing</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Integrations</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Student Plan</a></li>
+                    <li><a href="#features" className="hover:text-indigo-600 transition-colors">Features</a></li>
+                    <li><a href="#pricing" className="hover:text-indigo-600 transition-colors">Pricing</a></li>
+                    <li><Link to="/info/integrations" className="hover:text-indigo-600 transition-colors">Integrations</Link></li>
+                    <li><Link to="/info/student-plan" className="hover:text-indigo-600 transition-colors">Student Plan</Link></li>
                  </ul>
               </div>
               <div>
                  <h4 className="font-bold text-slate-900 mb-6">Resources</h4>
                  <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Blog</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Scholarships</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Help Center</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">API Docs</a></li>
+                    <li><Link to="/info/blog" className="hover:text-indigo-600 transition-colors">Blog</Link></li>
+                    <li><Link to="/info/scholarships" className="hover:text-indigo-600 transition-colors">Scholarships</Link></li>
+                    <li><Link to="/info/help-center" className="hover:text-indigo-600 transition-colors">Help Center</Link></li>
+                    <li><Link to="/info/api-docs" className="hover:text-indigo-600 transition-colors">API Docs</Link></li>
                  </ul>
               </div>
               <div>
                  <h4 className="font-bold text-slate-900 mb-6">Company</h4>
                  <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">About Us</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Careers</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a></li>
-                    <li><a href="#" className="hover:text-indigo-600 transition-colors">Contact</a></li>
+                    <li><Link to="/info/about-us" className="hover:text-indigo-600 transition-colors">About Us</Link></li>
+                    <li><Link to="/info/careers" className="hover:text-indigo-600 transition-colors">Careers</Link></li>
+                    <li><Link to="/info/privacy-policy" className="hover:text-indigo-600 transition-colors">Privacy Policy</Link></li>
+                    <li><Link to="/info/contact" className="hover:text-indigo-600 transition-colors">Contact</Link></li>
                  </ul>
               </div>
 
@@ -278,8 +278,8 @@ const Landing = () => {
            <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium text-slate-500">
               <div>© 2026 BudgetBuddy. All rights reserved.</div>
               <div className="flex gap-8">
-                 <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
-                 <a href="#" className="hover:text-indigo-600 transition-colors">Cookie Settings</a>
+                 <Link to="/info/terms-of-service" className="hover:text-indigo-600 transition-colors">Terms of Service</Link>
+                 <Link to="/info/cookie-settings" className="hover:text-indigo-600 transition-colors">Cookie Settings</Link>
               </div>
            </div>
         </div>
