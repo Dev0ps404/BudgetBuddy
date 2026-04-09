@@ -417,19 +417,35 @@ User question: ${question}`;
       (sum, e) => sum + Number(e.amount),
       0,
     );
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysElapsed = now.getDate();
+    const dailyAverage = totalMonthly / Math.max(daysElapsed, 1);
 
     // Calculate category percentages
     const categoryTotals = {};
+    const categoryCounts = {};
     monthExpenses.forEach((e) => {
       categoryTotals[e.category] =
         (categoryTotals[e.category] || 0) + Number(e.amount);
+      categoryCounts[e.category] = (categoryCounts[e.category] || 0) + 1;
     });
 
+    const sortedCategories = Object.entries(categoryTotals).sort(
+      (a, b) => b[1] - a[1],
+    );
+
+    const existingTitles = new Set();
+    const addRecommendation = (item) => {
+      if (!item?.title || existingTitles.has(item.title)) return;
+      existingTitles.add(item.title);
+      recommendations.push(item);
+    };
+
     // Find high-spend categories
-    Object.entries(categoryTotals).forEach(([category, amount]) => {
+    sortedCategories.forEach(([category, amount]) => {
       const percentage = (amount / totalMonthly) * 100;
       if (percentage > 40) {
-        recommendations.push({
+        addRecommendation({
           type: "high_spend",
           title: `📍 ${category} Alert`,
           description: `${percentage.toFixed(0)}% of spending goes to ${category}. Consider optimizing.`,
@@ -439,10 +455,33 @@ User question: ${question}`;
       }
     });
 
+    // Category concentration advice
+    if (sortedCategories.length > 0) {
+      const [topCategory, topAmount] = sortedCategories[0];
+      const topShare = (topAmount / totalMonthly) * 100;
+      const topTxnCount = categoryCounts[topCategory] || 0;
+
+      if (topShare >= 60) {
+        addRecommendation({
+          type: "projection",
+          title: "🎯 Category Mix Tip",
+          description: `${topCategory} is ${topShare.toFixed(0)}% of your monthly spend. Set a soft cap near ₹${(topAmount * 0.85).toFixed(0)} next month.`,
+        });
+      }
+
+      if (topTxnCount >= 5) {
+        addRecommendation({
+          type: "on_track",
+          title: "🔁 Repeat Spend Notice",
+          description: `${topCategory} had ${topTxnCount} transactions this month. Planning these purchases weekly can reduce impulse spends.`,
+        });
+      }
+    }
+
     // Budget warning
     if (budget && totalMonthly > budget * 0.8) {
       const remaining = budget - totalMonthly;
-      recommendations.push({
+      addRecommendation({
         type: "budget_warning",
         title: "⚠️ Budget Alert",
         description: `Only ₹${remaining.toFixed(0)} left in your ₹${budget} budget`,
@@ -450,20 +489,92 @@ User question: ${question}`;
     }
 
     // Savings opportunity
-    const dailyAverage = totalMonthly / now.getDate();
-    const projectedMonthly =
-      dailyAverage * new Date(currentYear, currentMonth + 1, 0).getDate();
-    if (projectedMonthly > budget) {
-      recommendations.push({
+    const projectedMonthly = dailyAverage * daysInMonth;
+    if (budget && projectedMonthly > budget) {
+      addRecommendation({
         type: "projection",
         title: "📊 Trend Alert",
         description: `At current pace, you'll spend ₹${projectedMonthly.toFixed(0)} by month end`,
       });
     }
 
+    // Weekly trend comparison
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const last7Start = new Date(startOfToday);
+    last7Start.setDate(startOfToday.getDate() - 6);
+    const prev7Start = new Date(last7Start);
+    prev7Start.setDate(last7Start.getDate() - 7);
+    const prev7End = new Date(last7Start);
+    prev7End.setDate(last7Start.getDate() - 1);
+
+    let last7Total = 0;
+    let prev7Total = 0;
+
+    monthExpenses.forEach((e) => {
+      const d = new Date(e.date);
+      const amount = Number(e.amount) || 0;
+      if (d >= last7Start && d <= now) {
+        last7Total += amount;
+      } else if (d >= prev7Start && d <= prev7End) {
+        prev7Total += amount;
+      }
+    });
+
+    if (prev7Total > 0) {
+      const weeklyChange = ((last7Total - prev7Total) / prev7Total) * 100;
+      if (weeklyChange >= 20) {
+        addRecommendation({
+          type: "projection",
+          title: "📈 Weekly Spike",
+          description: `This week spending is ${weeklyChange.toFixed(0)}% higher than last week. Watch high-frequency purchases.`,
+        });
+      } else if (weeklyChange <= -20) {
+        addRecommendation({
+          type: "on_track",
+          title: "✅ Weekly Improvement",
+          description: `Great job! This week spending is ${Math.abs(weeklyChange).toFixed(0)}% lower than last week.`,
+        });
+      }
+    }
+
+    // Frequent small transactions can silently add up
+    const smallTxn = monthExpenses.filter((e) => Number(e.amount) <= 200);
+    const smallTxnTotal = smallTxn.reduce((sum, e) => sum + Number(e.amount), 0);
+    if (
+      smallTxn.length >= 6 &&
+      totalMonthly > 0 &&
+      (smallTxnTotal / totalMonthly) * 100 >= 20
+    ) {
+      addRecommendation({
+        type: "high_spend",
+        title: "🧾 Small Spend Pattern",
+        description: `${smallTxn.length} small transactions add up to ₹${smallTxnTotal.toFixed(0)} this month. Group similar purchases to save more.`,
+        percentage: (smallTxnTotal / totalMonthly) * 100,
+      });
+    }
+
+    // Positive reinforcement when budget usage is healthy
+    if (budget && totalMonthly <= budget * 0.5) {
+      addRecommendation({
+        type: "on_track",
+        title: "🌿 Budget Cushion",
+        description: `You've used ${((totalMonthly / budget) * 100).toFixed(0)}% of your budget so far. Keep this pace to end the month strong.`,
+      });
+    }
+
+    // Ensure at least 2 meaningful recommendations when data exists
+    if (recommendations.length < 2 && sortedCategories.length > 0) {
+      const [topCategory, topAmount] = sortedCategories[0];
+      addRecommendation({
+        type: "on_track",
+        title: "📌 Focus Category",
+        description: `${topCategory} contributes ₹${topAmount.toFixed(0)} this month. A small cut here will create the fastest savings impact.`,
+      });
+    }
+
     // No recommendations yet
     if (recommendations.length === 0) {
-      recommendations.push({
+      addRecommendation({
         type: "on_track",
         title: "✅ You're On Track",
         description: "Your spending looks good so far!",
