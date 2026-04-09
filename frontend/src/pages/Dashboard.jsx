@@ -691,6 +691,11 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* AI Insights Section */}
+          <div>
+            <AIInsights showRecommendations={false} />
+          </div>
         </div>
 
         <div className="hidden xl:block space-y-4">
@@ -702,11 +707,6 @@ const Dashboard = () => {
             showRefreshButton={false}
           />
         </div>
-      </div>
-
-      {/* AI Insights Section */}
-      <div>
-        <AIInsights showRecommendations={false} />
       </div>
 
       {/* Floating Add Button - Responsive */}
