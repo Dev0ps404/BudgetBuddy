@@ -37,7 +37,7 @@ const CalendarSidebar = ({ expenses = [] }) => {
   }, [expenses]);
 
   return (
-    <aside className="h-full w-[330px] overflow-hidden border-l border-slate-200/70 bg-gradient-to-b from-white via-slate-50/60 to-white xl:w-[340px]">
+    <aside className="h-full w-[330px] border-l border-slate-200/70 bg-gradient-to-b from-white via-slate-50/60 to-white xl:w-[340px]">
       <div className="flex h-full flex-col">
         <div className="border-b border-slate-200/70 bg-white/75 px-5 py-5 backdrop-blur-md">
           <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary-600">
@@ -51,7 +51,7 @@ const CalendarSidebar = ({ expenses = [] }) => {
           </p>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        <div className="flex-1 space-y-3 px-4 py-4">
           <div className="grid grid-cols-3 gap-2.5">
             <div className="rounded-xl border border-slate-200/70 bg-white/80 p-2.5">
               <div className="mb-1 flex items-center gap-1 text-slate-400">

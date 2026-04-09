@@ -195,12 +195,10 @@ const PrivateLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-1 min-h-0">
-            <main className="flex-1 overflow-y-auto p-4 md:p-8">
-              {children}
-            </main>
+          <div className="flex flex-1 min-h-0 overflow-y-auto">
+            <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
             {showCalendarSidebar && (
-              <div className="hidden xl:block">
+              <div className="hidden xl:block xl:shrink-0">
                 <CalendarSidebar expenses={expenses} />
               </div>
             )}
