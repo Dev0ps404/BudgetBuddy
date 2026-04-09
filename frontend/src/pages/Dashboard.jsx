@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import ExpenseForm from "../components/ExpenseForm";
 import AIInsights from "../components/AIInsights";
+import ExpenseCalendar from "../components/ExpenseCalendar";
 import { AuthContext } from "../context/AuthContext";
 import { SearchContext } from "../context/SearchContext";
 import {
@@ -96,10 +96,7 @@ const getRelativeTime = (dateStr) => {
 };
 
 const Dashboard = () => {
-  const [totalMonthly, setTotalMonthly] = useState(0);
   const [chartRange, setChartRange] = useState("7d");
-  const [trendData, setTrendData] = useState([]);
-  const [trendLabels, setTrendLabels] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllActivity, setShowAllActivity] = useState(false);
   const { user } = useContext(AuthContext);
@@ -200,7 +197,7 @@ const Dashboard = () => {
 
   const currentInsight = insights[insightIdx % insights.length] || insights[0];
 
-  useEffect(() => {
+  const { totalMonthly, trendData, trendLabels } = useMemo(() => {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
@@ -214,7 +211,6 @@ const Dashboard = () => {
       }
       return acc;
     }, 0);
-    setTotalMonthly(monthlyTotal);
 
     const daysCount = chartRange === "7d" ? 7 : 30;
     const end = new Date();
@@ -258,12 +254,16 @@ const Dashboard = () => {
       }
     });
 
-    setTrendLabels(labels);
-    setTrendData(data);
+    return {
+      totalMonthly: monthlyTotal,
+      trendData: data,
+      trendLabels: labels,
+    };
   }, [expenses, chartRange]);
 
   useEffect(() => {
     fetchExpenses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Filtered expenses for "Recent Activity" and other lists based on global search
@@ -277,7 +277,6 @@ const Dashboard = () => {
         exp.amount?.toString().includes(query),
     );
   }, [expenses, searchQuery]);
-
   const budget = user?.monthlyBudget || 1000; // default for UI display if missing
   const remaining = budget - totalMonthly;
   const budgetPercent = Math.min((totalMonthly / budget) * 100, 100);
@@ -451,7 +450,12 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 md:gap-6">
+        {/* Expense Calendar */}
+        <div className="lg:col-span-1">
+          <ExpenseCalendar expenses={expenses} />
+        </div>
+
         {/* Spending Analysis */}
         <div className="dashboard-card lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
@@ -553,7 +557,7 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div className="dashboard-card flex flex-col">
+        <div className="dashboard-card flex flex-col lg:col-span-1">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-slate-900 text-sm md:text-base">
