@@ -23,8 +23,6 @@ import {
   FiMoreHorizontal,
   FiClock,
   FiChevronRight,
-  FiMinimize2,
-  FiMaximize2,
 } from "react-icons/fi";
 
 // Category icon & color mapping
@@ -101,13 +99,6 @@ const Dashboard = () => {
   const [chartRange, setChartRange] = useState("7d");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllActivity, setShowAllActivity] = useState(false);
-  const [isCompact, setIsCompact] = useState(() => {
-    try {
-      return localStorage.getItem("dashboardDensity") === "compact";
-    } catch {
-      return false;
-    }
-  });
   const { user } = useContext(AuthContext);
   const { searchQuery, expenses, fetchExpenses } = useContext(SearchContext);
   const [insightIdx, setInsightIdx] = useState(0);
@@ -275,17 +266,6 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "dashboardDensity",
-        isCompact ? "compact" : "comfortable",
-      );
-    } catch {
-      // Ignore localStorage write failures in restricted environments.
-    }
-  }, [isCompact]);
-
   // Filtered expenses for "Recent Activity" and other lists based on global search
   const filteredExpenses = useMemo(() => {
     if (!searchQuery.trim()) return expenses;
@@ -297,31 +277,10 @@ const Dashboard = () => {
         exp.amount?.toString().includes(query),
     );
   }, [expenses, searchQuery]);
-
-  const monthTransactionCount = useMemo(() => {
-    const now = new Date();
-    const month = now.getMonth();
-    const year = now.getFullYear();
-
-    return expenses.filter((expense) => {
-      const expenseDate = new Date(expense.date);
-      return (
-        expenseDate.getMonth() === month && expenseDate.getFullYear() === year
-      );
-    }).length;
-  }, [expenses]);
-
   const budget = user?.monthlyBudget || 1000; // default for UI display if missing
   const remaining = budget - totalMonthly;
   const budgetPercent = Math.min((totalMonthly / budget) * 100, 100);
   const remainingPercent = 100 - budgetPercent;
-  const activityPreviewCount = isCompact ? 4 : 5;
-  const rootSpacing = isCompact
-    ? "space-y-3 md:space-y-4"
-    : "space-y-4 md:space-y-6";
-  const gridGapClass = isCompact ? "gap-2.5 md:gap-4" : "gap-3 md:gap-5";
-  const cardPaddingClass = isCompact ? "!p-4 md:!p-5" : "";
-  const chartHeightClass = isCompact ? "h-36 md:h-52" : "h-40 md:h-64";
 
   const handleExportReport = () => {
     const reportData = {
@@ -379,130 +338,38 @@ const Dashboard = () => {
   };
 
   return (
-    <div className={`mx-auto w-full max-w-[1400px] ${rootSpacing}`}>
+    <div className="max-w-7xl mx-auto space-y-3 md:space-y-6">
       {/* Header */}
-      <div
-        className={`relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-white to-sky-50/60 shadow-[0_20px_55px_-35px_rgba(15,23,42,0.6)] ${
-          isCompact ? "p-3.5 md:p-5" : "p-4 md:p-6"
-        }`}
-      >
-        <div className="pointer-events-none absolute -top-16 right-8 h-40 w-40 rounded-full bg-primary-200/40 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 left-5 h-44 w-44 rounded-full bg-emerald-200/30 blur-3xl" />
-
-        <div
-          className={`relative flex flex-col md:flex-row md:items-end md:justify-between ${
-            isCompact ? "gap-3" : "gap-4"
-          }`}
-        >
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary-600">
-              Dashboard Snapshot
-            </p>
-            <h1 className="mt-1 text-xl font-bold text-slate-900 md:text-3xl">
-              Financial Overview
-            </h1>
-            <p className="mt-1 text-xs text-slate-500 md:text-sm">
-              Better control, cleaner trends, and quicker actions from one view.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 md:gap-3">
-            <button
-              onClick={() => setIsCompact((prev) => !prev)}
-              aria-pressed={isCompact}
-              className="flex flex-shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-white md:px-4 md:py-2 md:text-sm"
-            >
-              {isCompact ? (
-                <FiMaximize2 size={14} className="md:h-4 md:w-4" />
-              ) : (
-                <FiMinimize2 size={14} className="md:h-4 md:w-4" />
-              )}
-              <span>{isCompact ? "Comfort" : "Compact"}</span>
-            </button>
-
-            <button
-              onClick={handleExportReport}
-              className="flex flex-shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-white md:px-4 md:py-2 md:text-sm"
-            >
-              <FiDownload size={14} className="md:h-4 md:w-4" />
-              <span className="hidden sm:inline">Export Report</span>
-            </button>
-            <button
-              onClick={handleViewAllActivity}
-              className="flex flex-shrink-0 items-center gap-2 rounded-xl bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white shadow-md shadow-primary-600/25 transition-all hover:-translate-y-0.5 hover:bg-primary-700 md:px-4 md:py-2 md:text-sm"
-            >
-              View All <FiArrowRight size={14} className="md:h-4 md:w-4" />
-            </button>
-          </div>
+      <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
+        <div>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-slate-900">
+            Financial Overview
+          </h1>
+          <p className="text-xs md:text-sm text-slate-500 mt-1">
+            Welcome back! Here's your spending pulse for this week.
+          </p>
         </div>
-
-        <div
-          className={`relative mt-4 grid grid-cols-2 md:grid-cols-4 ${
-            isCompact ? "gap-2" : "gap-2.5"
-          }`}
-        >
-          <div
-            className={`rounded-xl border border-slate-200/80 bg-white/80 ${
-              isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
-            }`}
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap md:flex-nowrap">
+          <button
+            onClick={handleExportReport}
+            className="px-3 md:px-4 py-1.5 md:py-2 bg-primary-50 text-primary-700 font-medium rounded-lg hover:bg-primary-100 transition-colors text-xs md:text-sm flex items-center gap-2 flex-shrink-0"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              This Month
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-900 md:text-base">
-              ₹{totalMonthly.toFixed(0)}
-            </p>
-          </div>
-
-          <div
-            className={`rounded-xl border border-slate-200/80 bg-white/80 ${
-              isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
-            }`}
+            <FiDownload size={14} className="md:w-4 md:h-4" />{" "}
+            <span className="hidden sm:inline">Export Report</span>
+          </button>
+          <button
+            onClick={handleViewAllActivity}
+            className="px-3 md:px-4 py-1.5 md:py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors shadow-sm text-xs md:text-sm flex items-center gap-2 flex-shrink-0"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              Remaining
-            </p>
-            <p className="mt-1 text-sm font-bold text-emerald-700 md:text-base">
-              ₹{Math.max(0, remaining).toFixed(0)}
-            </p>
-          </div>
-
-          <div
-            className={`rounded-xl border border-slate-200/80 bg-white/80 ${
-              isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
-            }`}
-          >
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              Transactions
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-900 md:text-base">
-              {monthTransactionCount}
-            </p>
-          </div>
-
-          <div
-            className={`rounded-xl border border-slate-200/80 bg-white/80 ${
-              isCompact ? "px-2.5 py-2" : "px-3 py-2.5"
-            }`}
-          >
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-              Daily Avg
-            </p>
-            <p className="mt-1 text-sm font-bold text-slate-900 md:text-base">
-              ₹{(totalMonthly / Math.max(new Date().getDate(), 1)).toFixed(0)}
-            </p>
-          </div>
+            View All <FiArrowRight size={14} className="md:w-4 md:h-4" />
+          </button>
         </div>
       </div>
 
       {/* Stat Cards */}
-      <div
-        className={`grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 ${gridGapClass}`}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Total Expenses */}
-        <div
-          className={`dashboard-card group border border-slate-200/70 bg-gradient-to-br from-white to-primary-50/35 shadow-[0_12px_36px_-24px_rgba(79,70,229,0.55)] ${cardPaddingClass}`}
-        >
+        <div className="dashboard-card group">
           <div className="flex justify-between items-start mb-3 md:mb-4">
             <div className="p-2 md:p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
               <FiBox className="w-4 md:w-6 h-4 md:h-6" />
@@ -523,9 +390,7 @@ const Dashboard = () => {
         </div>
 
         {/* Monthly Summary */}
-        <div
-          className={`dashboard-card group border border-slate-200/70 bg-gradient-to-br from-white to-emerald-50/45 shadow-[0_12px_36px_-24px_rgba(5,150,105,0.35)] ${cardPaddingClass}`}
-        >
+        <div className="dashboard-card group">
           <div className="flex justify-between items-start mb-3 md:mb-4">
             <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
               <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
@@ -554,9 +419,7 @@ const Dashboard = () => {
         </div>
 
         {/* Remaining Budget */}
-        <div
-          className={`dashboard-card group border border-slate-200/70 bg-gradient-to-br from-white to-amber-50/45 shadow-[0_12px_36px_-24px_rgba(217,119,6,0.35)] sm:col-span-2 2xl:col-span-1 ${cardPaddingClass}`}
-        >
+        <div className="dashboard-card group sm:col-span-2 lg:col-span-1">
           <div className="flex justify-between items-start mb-3 md:mb-4">
             <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
               <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
@@ -592,11 +455,9 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className={`grid grid-cols-1 2xl:grid-cols-3 ${gridGapClass}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Spending Analysis */}
-        <div
-          className={`dashboard-card border border-slate-200/70 bg-white/90 shadow-[0_15px_40px_-28px_rgba(15,23,42,0.45)] 2xl:col-span-2 ${cardPaddingClass}`}
-        >
+        <div className="dashboard-card lg:col-span-2">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
             <h3 className="font-bold text-slate-900 text-sm md:text-base">
               Spending Analysis
@@ -626,37 +487,16 @@ const Dashboard = () => {
           </div>
 
           {/* Dynamic Bar Chart with 7d/30d Data */}
-          <div
-            className={`mt-3 overflow-x-auto rounded-2xl border border-slate-200/70 bg-gradient-to-b from-slate-50/70 to-white ${
-              isCompact ? "p-2" : "p-2 md:p-3"
-            }`}
-          >
-            <div
-              className={
-                chartRange === "30d"
-                  ? "min-w-[760px] 2xl:min-w-[900px]"
-                  : "w-full"
-              }
-            >
+          <div className="mt-2 md:mt-4 overflow-x-auto">
+            <div className={chartRange === "30d" ? "min-w-[900px]" : "w-full"}>
               <div className="border-b border-slate-100">
                 <div
-                  className={`${chartHeightClass} flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
+                  className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
                     chartRange === "30d"
                       ? "gap-2"
                       : "justify-around gap-2 md:gap-4"
                   }`}
                 >
-                  <div className="pointer-events-none absolute inset-x-2 bottom-4 top-4 md:inset-x-4 md:bottom-6 md:top-6">
-                    <div className="flex h-full flex-col justify-between">
-                      {[0, 1, 2, 3].map((line) => (
-                        <span
-                          key={line}
-                          className="border-t border-dashed border-slate-200/80"
-                        />
-                      ))}
-                    </div>
-                  </div>
-
                   {trendData.map((value, idx) => {
                     const maxValue = Math.max(...trendData, 100);
                     const heightPercent = Math.max((value / maxValue) * 100, 5);
@@ -717,14 +557,8 @@ const Dashboard = () => {
         </div>
 
         {/* Recent Activity */}
-        <div
-          className={`dashboard-card flex flex-col border border-slate-200/70 bg-white/90 shadow-[0_15px_40px_-28px_rgba(15,23,42,0.45)] ${cardPaddingClass}`}
-        >
-          <div
-            className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 ${
-              isCompact ? "mb-2.5 md:mb-4" : "mb-3 md:mb-5"
-            }`}
-          >
+        <div className="dashboard-card flex flex-col">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-slate-900 text-sm md:text-base">
                 Recent Activity
@@ -747,11 +581,7 @@ const Dashboard = () => {
             </button>
           </div>
 
-          <div
-            className={`flex-1 overflow-hidden ${
-              isCompact ? "space-y-0.5" : "space-y-1"
-            }`}
-          >
+          <div className="flex-1 space-y-1 overflow-hidden">
             {filteredExpenses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
                 <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
@@ -765,35 +595,22 @@ const Dashboard = () => {
                 </p>
               </div>
             ) : (
-              filteredExpenses.slice(0, activityPreviewCount).map((exp, i) => {
+              filteredExpenses.slice(0, 5).map((exp, i) => {
                 const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
                 const IconComp = cat.icon;
                 return (
                   <div
                     key={exp._id || i}
-                    className={`group flex cursor-default items-center justify-between gap-2 rounded-xl border border-transparent bg-white/70 transition-all hover:border-slate-200/80 hover:bg-slate-50/80 ${
-                      isCompact ? "p-2" : "p-2.5"
-                    }`}
+                    className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
                   >
                     <div className="flex items-center gap-2 md:gap-3 min-w-0">
                       <div
-                        className={`h-8 w-8 rounded-xl ${cat.bg} ${cat.text} flex flex-shrink-0 items-center justify-center ${
-                          isCompact ? "md:h-8 md:w-8" : "md:h-10 md:w-10"
-                        }`}
+                        className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
                       >
-                        <IconComp
-                          size={isCompact ? 13 : 14}
-                          className="md:h-4 md:w-4"
-                        />
+                        <IconComp size={14} className="md:w-4 md:h-4" />
                       </div>
                       <div className="min-w-0">
-                        <p
-                          className={`truncate font-semibold text-slate-800 ${
-                            isCompact
-                              ? "text-[11px] md:text-xs"
-                              : "text-xs md:text-sm"
-                          }`}
-                        >
+                        <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
                           {exp.description || exp.category}
                         </p>
                         <div className="flex items-center gap-2 mt-0.5">
@@ -824,7 +641,7 @@ const Dashboard = () => {
                 insights.length > 1 &&
                 setInsightIdx((prev) => (prev + 1) % insights.length)
               }
-              className={`relative mt-4 cursor-pointer overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-r ${currentInsight.gradient} p-4 text-white shadow-[0_24px_45px_-30px_rgba(15,23,42,0.8)] transition-all duration-500 hover:shadow-[0_28px_55px_-28px_rgba(15,23,42,0.85)] active:scale-[0.99]`}
+              className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
             >
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
               <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
@@ -868,14 +685,10 @@ const Dashboard = () => {
       </div>
 
       {/* Floating Add Button - Responsive */}
-      <div className="fixed bottom-6 right-6 z-30 xl:right-[23rem]">
+      <div className="fixed bottom-6 right-6 z-30">
         <button
           onClick={() => setShowAddModal(true)}
-          className={`btn-primary shadow-xl shadow-primary-600/40 flex items-center gap-2 hover:shadow-2xl hover:shadow-primary-600/50 transition-shadow ${
-            isCompact
-              ? "px-3 py-2 text-xs md:px-4 md:py-2.5 md:text-sm"
-              : "px-4 py-2.5 text-sm md:px-6 md:py-3 md:text-base"
-          }`}
+          className="btn-primary shadow-xl shadow-primary-600/40 flex items-center gap-2 px-4 md:px-6 py-2.5 md:py-3 text-sm md:text-base hover:shadow-2xl hover:shadow-primary-600/50 transition-shadow"
         >
           <FiPlus size={16} className="md:w-5 md:h-5" />{" "}
           <span className="hidden sm:inline">Add</span> Expense
