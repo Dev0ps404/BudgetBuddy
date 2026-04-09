@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FiLoader, FiAlertCircle } from "react-icons/fi";
 
-const AIInsights = () => {
+const AIInsights = ({
+  showInsights = true,
+  showPrediction = true,
+  showRecommendations = true,
+  showRefreshButton = true,
+}) => {
   const [insights, setInsights] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [prediction, setPrediction] = useState(null);
@@ -59,7 +64,7 @@ const AIInsights = () => {
   return (
     <div className="space-y-6">
       {/* Key Insights */}
-      {insights?.insights && insights.insights.length > 0 && (
+      {showInsights && insights?.insights && insights.insights.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -103,7 +108,7 @@ const AIInsights = () => {
       )}
 
       {/* Predictions */}
-      {prediction && prediction.predicted > 0 && (
+      {showPrediction && prediction && prediction.predicted > 0 && (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-indigo-200 shadow-lg p-7 hover:shadow-xl transition-shadow duration-300 group">
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             <div className="flex-shrink-0 text-6xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
@@ -181,7 +186,7 @@ const AIInsights = () => {
       )}
 
       {/* Recommendations */}
-      {recommendations.length > 0 && (
+      {showRecommendations && recommendations.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -293,12 +298,14 @@ const AIInsights = () => {
       )}
 
       {/* Refresh Button */}
-      <button
-        onClick={fetchAIData}
-        className="w-full py-3 px-4 bg-gradient-to-r from-primary-50 to-indigo-50 hover:from-primary-100 hover:to-indigo-100 text-primary-700 font-semibold rounded-lg transition-all duration-300 text-sm border border-primary-200 hover:shadow-md"
-      >
-        🔄 Refresh AI Insights
-      </button>
+      {showRefreshButton && (
+        <button
+          onClick={fetchAIData}
+          className="w-full py-3 px-4 bg-gradient-to-r from-primary-50 to-indigo-50 hover:from-primary-100 hover:to-indigo-100 text-primary-700 font-semibold rounded-lg transition-all duration-300 text-sm border border-primary-200 hover:shadow-md"
+        >
+          🔄 Refresh AI Insights
+        </button>
+      )}
     </div>
   );
 };

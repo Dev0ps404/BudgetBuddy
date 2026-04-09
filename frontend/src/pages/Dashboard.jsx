@@ -696,12 +696,17 @@ const Dashboard = () => {
         <div className="hidden xl:block space-y-4">
           <CalendarSidebar expenses={expenses} />
           {renderRecentActivityCard()}
+          <AIInsights
+            showInsights={false}
+            showPrediction={false}
+            showRefreshButton={false}
+          />
         </div>
       </div>
 
       {/* AI Insights Section */}
       <div>
-        <AIInsights />
+        <AIInsights showRecommendations={false} />
       </div>
 
       {/* Floating Add Button - Responsive */}
