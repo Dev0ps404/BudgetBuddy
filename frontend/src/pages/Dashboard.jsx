@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
 import ExpenseForm from "../components/ExpenseForm";
 import AIInsights from "../components/AIInsights";
-import ExpenseCalendar from "../components/ExpenseCalendar";
+import CompactExpenseCalendar from "../components/CompactExpenseCalendar";
 import { AuthContext } from "../context/AuthContext";
 import { SearchContext } from "../context/SearchContext";
 import {
@@ -451,7 +451,7 @@ const Dashboard = () => {
 
       {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
       <div className="xl:hidden">
-        <ExpenseCalendar expenses={expenses} />
+        <CompactExpenseCalendar expenses={expenses} />
       </div>
 
       {/* Main Content Grid */}
