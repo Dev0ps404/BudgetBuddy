@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
   useNavigate,
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -17,7 +16,6 @@ import {
   NotificationContext,
 } from "./context/NotificationContext";
 import Sidebar from "./components/Sidebar";
-import CalendarSidebar from "./components/CalendarSidebar";
 import MobileMenu from "./components/MobileMenu";
 import NotificationDropdown from "./components/NotificationDropdown";
 import SearchDropdown from "./components/SearchDropdown";
@@ -32,14 +30,12 @@ import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const PrivateLayout = ({ children }) => {
-  const { searchQuery, setSearchQuery, expenses } = useContext(SearchContext);
+  const { searchQuery, setSearchQuery } = useContext(SearchContext);
   const { unreadCount } = useContext(NotificationContext);
   const { user, loading, isAuthenticated } = useContext(AuthContext);
-  const location = useLocation();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const showCalendarSidebar = location.pathname === "/dashboard";
 
   const storedUser = (() => {
     try {
@@ -86,11 +82,7 @@ const PrivateLayout = ({ children }) => {
         </div>
         <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden pt-14 md:pt-0">
           {/* We can put a universal Topbar here if needed, or handle headers per-page */}
-          <div
-            className={`sticky top-14 z-10 flex w-full items-center justify-between border-b border-slate-100 bg-white/70 py-3.5 backdrop-blur-md md:top-0 ${
-              showCalendarSidebar ? "pl-4 pr-2 md:pl-8 md:pr-4" : "px-4 md:px-8"
-            }`}
-          >
+          <div className="sticky top-14 z-10 flex w-full items-center justify-between border-b border-slate-100 bg-white/70 px-4 py-3.5 backdrop-blur-md md:top-0 md:px-8">
             {/* Left — Greeting & Date */}
             <div className="hidden md:block">
               <h2 className="text-sm font-bold text-slate-800">
@@ -195,14 +187,7 @@ const PrivateLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-1 min-h-0 overflow-y-auto">
-            <main className="min-w-0 flex-1 p-4 md:p-8">{children}</main>
-            {showCalendarSidebar && (
-              <div className="hidden xl:block xl:shrink-0">
-                <CalendarSidebar expenses={expenses} />
-              </div>
-            )}
-          </div>
+          <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
         </div>
       </div>
     </>

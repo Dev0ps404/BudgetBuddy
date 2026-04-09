@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import ExpenseForm from "../components/ExpenseForm";
 import AIInsights from "../components/AIInsights";
 import CompactExpenseCalendar from "../components/CompactExpenseCalendar";
+import CalendarSidebar from "../components/CalendarSidebar";
 import { AuthContext } from "../context/AuthContext";
 import { SearchContext } from "../context/SearchContext";
 import {
@@ -366,322 +367,340 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-        {/* Total Expenses */}
-        <div className="dashboard-card group">
-          <div className="flex justify-between items-start mb-3 md:mb-4">
-            <div className="p-2 md:p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiBox className="w-4 md:w-6 h-4 md:h-6" />
-            </div>
-            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-red-50 text-red-600 rounded-full">
-              <FiTrendingUp size={12} /> 12%
-            </span>
-          </div>
-          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
-            Total Expenses
-          </div>
-          <div className="text-2xl md:text-3xl font-bold text-slate-900">
-            ₹{totalMonthly.toFixed(2)}
-          </div>
-          <div className="text-[10px] md:text-xs text-slate-400 mt-2">
-            Updated 2 mins ago
-          </div>
-        </div>
-
-        {/* Monthly Summary */}
-        <div className="dashboard-card group">
-          <div className="flex justify-between items-start mb-3 md:mb-4">
-            <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
-            </div>
-            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-success-50 text-success-600 rounded-full">
-              On Track
-            </span>
-          </div>
-          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
-            Monthly Budget Usage
-          </div>
-          <div className="text-2xl md:text-3xl font-bold text-slate-900">
-            ₹{totalMonthly.toFixed(2)}
-          </div>
-          <div className="mt-3 md:mt-4">
-            <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
-              <span>{budgetPercent.toFixed(0)}% Used</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
-              <div
-                className="bg-success-500 h-1.5 md:h-2 rounded-full"
-                style={{ width: `${budgetPercent}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Remaining Budget */}
-        <div className="dashboard-card group sm:col-span-2 lg:col-span-1">
-          <div className="flex justify-between items-start mb-3 md:mb-4">
-            <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
-              <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
-            </div>
-            <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-amber-50 text-amber-600 rounded-full">
-              {remainingPercent < 20 ? "Low" : "Healthy"}
-            </span>
-          </div>
-          <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
-            Remaining Budget
-          </div>
-          <div className="text-2xl md:text-3xl font-bold text-slate-900">
-            ₹{Math.max(0, remaining).toFixed(2)}
-          </div>
-          <div className="mt-3 md:mt-4">
-            <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
-              <span></span>
-              <span>{remainingPercent.toFixed(0)}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
-              <div
-                className={`h-1.5 md:h-2 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
-                style={{ width: `${remainingPercent}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
-      <div className="xl:hidden">
-        <CompactExpenseCalendar expenses={expenses} />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
-        {/* Spending Analysis */}
-        <div className="dashboard-card lg:col-span-2">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
-            <h3 className="font-bold text-slate-900 text-sm md:text-base">
-              Spending Analysis
-            </h3>
-            <div className="flex gap-2 overflow-x-auto">
-              <button
-                onClick={() => setChartRange("7d")}
-                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
-                  chartRange === "7d"
-                    ? "bg-primary-50 text-primary-700"
-                    : "text-slate-500 hover:bg-slate-50"
-                }`}
-              >
-                Last 7 Days
-              </button>
-              <button
-                onClick={() => setChartRange("30d")}
-                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
-                  chartRange === "30d"
-                    ? "bg-primary-50 text-primary-700"
-                    : "text-slate-500 hover:bg-slate-50"
-                }`}
-              >
-                Last 30 Days
-              </button>
-            </div>
-          </div>
-
-          {/* Dynamic Bar Chart with 7d/30d Data */}
-          <div className="mt-2 md:mt-4 overflow-x-auto">
-            <div className={chartRange === "30d" ? "min-w-[900px]" : "w-full"}>
-              <div className="border-b border-slate-100">
-                <div
-                  className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
-                    chartRange === "30d"
-                      ? "gap-2"
-                      : "justify-around gap-2 md:gap-4"
-                  }`}
-                >
-                  {trendData.map((value, idx) => {
-                    const maxValue = Math.max(...trendData, 100);
-                    const heightPercent = Math.max((value / maxValue) * 100, 5);
-                    const isToday = idx === trendData.length - 1;
-
-                    return (
-                      <div
-                        key={idx}
-                        className={`${
-                          chartRange === "30d" ? "w-5" : "flex-1 max-w-10"
-                        } flex flex-col items-center group relative h-full justify-end shrink-0`}
-                      >
-                        {value > 0 && (
-                          <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            ₹{value.toFixed(0)}
-                          </div>
-                        )}
-                        <div
-                          className={`w-full rounded-lg transition-all duration-300 ${isToday ? "bg-primary-600 shadow-md shadow-primary-600/30" : "bg-slate-200 group-hover:bg-slate-300"}`}
-                          style={{ height: `${heightPercent}%` }}
-                        ></div>
-                      </div>
-                    );
-                  })}
+      <div className="grid grid-cols-1 gap-3 md:gap-6 xl:grid-cols-[minmax(0,1fr)_330px] xl:items-start">
+        <div className="min-w-0 space-y-3 md:space-y-6">
+          {/* Stat Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+            {/* Total Expenses */}
+            <div className="dashboard-card group">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <div className="p-2 md:p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
+                  <FiBox className="w-4 md:w-6 h-4 md:h-6" />
                 </div>
-              </div>
-
-              <div className="mt-2 md:mt-3">
-                <div
-                  className={`text-[10px] md:text-xs text-slate-400 font-medium uppercase ${
-                    chartRange === "30d"
-                      ? "flex gap-2 px-2 md:px-4"
-                      : "flex justify-between px-1 md:px-2"
-                  }`}
-                >
-                  {trendLabels.map((label, idx) => {
-                    const isToday = idx === trendLabels.length - 1;
-                    const showThirtyDayLabel =
-                      chartRange === "7d" ||
-                      idx % 5 === 0 ||
-                      idx === trendLabels.length - 1;
-
-                    return (
-                      <span
-                        key={`${label}-${idx}`}
-                        className={`${isToday ? "text-primary-600 font-bold" : ""} ${
-                          chartRange === "30d" ? "w-5 text-center shrink-0" : ""
-                        }`}
-                      >
-                        {showThirtyDayLabel ? label : ""}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="dashboard-card flex flex-col">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-slate-900 text-sm md:text-base">
-                Recent Activity
-              </h3>
-              {expenses.length > 0 && (
-                <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
-                  {expenses.length}
+                <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-red-50 text-red-600 rounded-full">
+                  <FiTrendingUp size={12} /> 12%
                 </span>
-              )}
-            </div>
-            <button
-              onClick={() => setShowAllActivity(true)}
-              className="text-primary-600 text-xs md:text-sm font-medium hover:text-primary-700 flex items-center gap-1 group justify-start sm:justify-end"
-            >
-              View All{" "}
-              <FiChevronRight
-                size={14}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
-            </button>
-          </div>
-
-          <div className="flex-1 space-y-1 overflow-hidden">
-            {filteredExpenses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
-                <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
-                  <FiClock size={20} className="md:w-6 md:h-6 text-slate-300" />
-                </div>
-                <p className="text-slate-400 font-medium text-xs md:text-sm">
-                  No transactions found
-                </p>
-                <p className="text-[10px] md:text-xs text-slate-300 mt-1">
-                  Try a different search term
-                </p>
               </div>
-            ) : (
-              filteredExpenses.slice(0, 5).map((exp, i) => {
-                const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
-                const IconComp = cat.icon;
-                return (
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+                Total Expenses
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-slate-900">
+                ₹{totalMonthly.toFixed(2)}
+              </div>
+              <div className="text-[10px] md:text-xs text-slate-400 mt-2">
+                Updated 2 mins ago
+              </div>
+            </div>
+
+            {/* Monthly Summary */}
+            <div className="dashboard-card group">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
+                  <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
+                </div>
+                <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-success-50 text-success-600 rounded-full">
+                  On Track
+                </span>
+              </div>
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+                Monthly Budget Usage
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-slate-900">
+                ₹{totalMonthly.toFixed(2)}
+              </div>
+              <div className="mt-3 md:mt-4">
+                <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
+                  <span>{budgetPercent.toFixed(0)}% Used</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
                   <div
-                    key={exp._id || i}
-                    className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
-                  >
-                    <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                      <div
-                        className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
-                      >
-                        <IconComp size={14} className="md:w-4 md:h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
-                          {exp.description || exp.category}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span
-                            className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded-md ${cat.pill}`}
-                          >
-                            {exp.category}
-                          </span>
-                          <span className="text-[8px] md:text-[10px] text-slate-400 flex items-center gap-0.5">
-                            <FiClock size={9} /> {getRelativeTime(exp.date)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-2">
-                      -₹{Number(exp.amount).toFixed(0)}
-                    </span>
-                  </div>
-                );
-              })
-            )}
+                    className="bg-success-500 h-1.5 md:h-2 rounded-full"
+                    style={{ width: `${budgetPercent}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Remaining Budget */}
+            <div className="dashboard-card group sm:col-span-2 lg:col-span-1">
+              <div className="flex justify-between items-start mb-3 md:mb-4">
+                <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
+                  <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
+                </div>
+                <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-amber-50 text-amber-600 rounded-full">
+                  {remainingPercent < 20 ? "Low" : "Healthy"}
+                </span>
+              </div>
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+                Remaining Budget
+              </div>
+              <div className="text-2xl md:text-3xl font-bold text-slate-900">
+                ₹{Math.max(0, remaining).toFixed(2)}
+              </div>
+              <div className="mt-3 md:mt-4">
+                <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
+                  <span></span>
+                  <span>{remainingPercent.toFixed(0)}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
+                  <div
+                    className={`h-1.5 md:h-2 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
+                    style={{ width: `${remainingPercent}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Dynamic Smart Insight — Rotating Cards */}
-          {currentInsight && (
-            <div
-              onClick={() =>
-                insights.length > 1 &&
-                setInsightIdx((prev) => (prev + 1) % insights.length)
-              }
-              className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
-            >
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
-              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
+          {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
+          <div className="xl:hidden">
+            <CompactExpenseCalendar expenses={expenses} />
+          </div>
 
-              <div className="flex gap-3 relative z-10">
-                <div className="text-2xl flex-shrink-0 mt-0.5">
-                  {currentInsight.emoji}
-                </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-sm tracking-tight">
-                    {currentInsight.title}
-                  </h4>
-                  <p className="text-xs text-white/80 mt-1 leading-relaxed">
-                    {currentInsight.text}
-                  </p>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+            {/* Spending Analysis */}
+            <div className="dashboard-card lg:col-span-2">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
+                <h3 className="font-bold text-slate-900 text-sm md:text-base">
+                  Spending Analysis
+                </h3>
+                <div className="flex gap-2 overflow-x-auto">
+                  <button
+                    onClick={() => setChartRange("7d")}
+                    className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
+                      chartRange === "7d"
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-slate-500 hover:bg-slate-50"
+                    }`}
+                  >
+                    Last 7 Days
+                  </button>
+                  <button
+                    onClick={() => setChartRange("30d")}
+                    className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
+                      chartRange === "30d"
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-slate-500 hover:bg-slate-50"
+                    }`}
+                  >
+                    Last 30 Days
+                  </button>
                 </div>
               </div>
 
-              {insights.length > 1 && (
-                <div className="flex justify-center gap-1.5 mt-3 relative z-10">
-                  {insights.map((_, i) => (
+              {/* Dynamic Bar Chart with 7d/30d Data */}
+              <div className="mt-2 md:mt-4 overflow-x-auto">
+                <div
+                  className={chartRange === "30d" ? "min-w-[900px]" : "w-full"}
+                >
+                  <div className="border-b border-slate-100">
                     <div
-                      key={i}
-                      className={`h-1 rounded-full transition-all duration-300 ${
-                        i === insightIdx % insights.length
-                          ? "w-4 bg-white"
-                          : "w-1.5 bg-white/30"
+                      className={`h-40 md:h-64 flex items-end pb-4 md:pb-6 relative px-2 md:px-4 ${
+                        chartRange === "30d"
+                          ? "gap-2"
+                          : "justify-around gap-2 md:gap-4"
                       }`}
-                    ></div>
-                  ))}
+                    >
+                      {trendData.map((value, idx) => {
+                        const maxValue = Math.max(...trendData, 100);
+                        const heightPercent = Math.max(
+                          (value / maxValue) * 100,
+                          5,
+                        );
+                        const isToday = idx === trendData.length - 1;
+
+                        return (
+                          <div
+                            key={idx}
+                            className={`${
+                              chartRange === "30d" ? "w-5" : "flex-1 max-w-10"
+                            } flex flex-col items-center group relative h-full justify-end shrink-0`}
+                          >
+                            {value > 0 && (
+                              <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap font-semibold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                ₹{value.toFixed(0)}
+                              </div>
+                            )}
+                            <div
+                              className={`w-full rounded-lg transition-all duration-300 ${isToday ? "bg-primary-600 shadow-md shadow-primary-600/30" : "bg-slate-200 group-hover:bg-slate-300"}`}
+                              style={{ height: `${heightPercent}%` }}
+                            ></div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mt-2 md:mt-3">
+                    <div
+                      className={`text-[10px] md:text-xs text-slate-400 font-medium uppercase ${
+                        chartRange === "30d"
+                          ? "flex gap-2 px-2 md:px-4"
+                          : "flex justify-between px-1 md:px-2"
+                      }`}
+                    >
+                      {trendLabels.map((label, idx) => {
+                        const isToday = idx === trendLabels.length - 1;
+                        const showThirtyDayLabel =
+                          chartRange === "7d" ||
+                          idx % 5 === 0 ||
+                          idx === trendLabels.length - 1;
+
+                        return (
+                          <span
+                            key={`${label}-${idx}`}
+                            className={`${isToday ? "text-primary-600 font-bold" : ""} ${
+                              chartRange === "30d"
+                                ? "w-5 text-center shrink-0"
+                                : ""
+                            }`}
+                          >
+                            {showThirtyDayLabel ? label : ""}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activity */}
+            <div className="dashboard-card flex flex-col">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-slate-900 text-sm md:text-base">
+                    Recent Activity
+                  </h3>
+                  {expenses.length > 0 && (
+                    <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
+                      {expenses.length}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowAllActivity(true)}
+                  className="text-primary-600 text-xs md:text-sm font-medium hover:text-primary-700 flex items-center gap-1 group justify-start sm:justify-end"
+                >
+                  View All{" "}
+                  <FiChevronRight
+                    size={14}
+                    className="group-hover:translate-x-0.5 transition-transform"
+                  />
+                </button>
+              </div>
+
+              <div className="flex-1 space-y-1 overflow-hidden">
+                {filteredExpenses.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
+                    <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
+                      <FiClock
+                        size={20}
+                        className="md:w-6 md:h-6 text-slate-300"
+                      />
+                    </div>
+                    <p className="text-slate-400 font-medium text-xs md:text-sm">
+                      No transactions found
+                    </p>
+                    <p className="text-[10px] md:text-xs text-slate-300 mt-1">
+                      Try a different search term
+                    </p>
+                  </div>
+                ) : (
+                  filteredExpenses.slice(0, 5).map((exp, i) => {
+                    const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
+                    const IconComp = cat.icon;
+                    return (
+                      <div
+                        key={exp._id || i}
+                        className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
+                      >
+                        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                          <div
+                            className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
+                          >
+                            <IconComp size={14} className="md:w-4 md:h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
+                              {exp.description || exp.category}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span
+                                className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded-md ${cat.pill}`}
+                              >
+                                {exp.category}
+                              </span>
+                              <span className="text-[8px] md:text-[10px] text-slate-400 flex items-center gap-0.5">
+                                <FiClock size={9} /> {getRelativeTime(exp.date)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-2">
+                          -₹{Number(exp.amount).toFixed(0)}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Dynamic Smart Insight — Rotating Cards */}
+              {currentInsight && (
+                <div
+                  onClick={() =>
+                    insights.length > 1 &&
+                    setInsightIdx((prev) => (prev + 1) % insights.length)
+                  }
+                  className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
+                >
+                  <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
+                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
+
+                  <div className="flex gap-3 relative z-10">
+                    <div className="text-2xl flex-shrink-0 mt-0.5">
+                      {currentInsight.emoji}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-sm tracking-tight">
+                        {currentInsight.title}
+                      </h4>
+                      <p className="text-xs text-white/80 mt-1 leading-relaxed">
+                        {currentInsight.text}
+                      </p>
+                    </div>
+                  </div>
+
+                  {insights.length > 1 && (
+                    <div className="flex justify-center gap-1.5 mt-3 relative z-10">
+                      {insights.map((_, i) => (
+                        <div
+                          key={i}
+                          className={`h-1 rounded-full transition-all duration-300 ${
+                            i === insightIdx % insights.length
+                              ? "w-4 bg-white"
+                              : "w-1.5 bg-white/30"
+                          }`}
+                        ></div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* AI Insights Section */}
-      <div className="mt-4 md:mt-8">
-        <AIInsights />
+          {/* AI Insights Section */}
+          <div className="mt-4 md:mt-8">
+            <AIInsights />
+          </div>
+        </div>
+
+        <div className="hidden xl:block">
+          <CalendarSidebar expenses={expenses} />
+        </div>
       </div>
 
       {/* Floating Add Button - Responsive */}
