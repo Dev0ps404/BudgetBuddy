@@ -338,6 +338,37 @@ const Dashboard = () => {
     setShowAllActivity(true);
   };
 
+  const renderRemainingBudgetCard = () => (
+    <div className="dashboard-card group">
+      <div className="flex justify-between items-start mb-3 md:mb-4">
+        <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
+          <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
+        </div>
+        <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-amber-50 text-amber-600 rounded-full">
+          {remainingPercent < 20 ? "Low" : "Healthy"}
+        </span>
+      </div>
+      <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
+        Remaining Budget
+      </div>
+      <div className="text-2xl md:text-3xl font-bold text-slate-900">
+        ₹{Math.max(0, remaining).toFixed(2)}
+      </div>
+      <div className="mt-3 md:mt-4">
+        <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
+          <span></span>
+          <span>{remainingPercent.toFixed(0)}%</span>
+        </div>
+        <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
+          <div
+            className={`h-1.5 md:h-2 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
+            style={{ width: `${remainingPercent}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderRecentActivityCard = () => (
     <div className="dashboard-card flex flex-col">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
@@ -545,34 +576,7 @@ const Dashboard = () => {
             </div>
 
             {/* Remaining Budget */}
-            <div className="dashboard-card group sm:col-span-2 2xl:col-span-1">
-              <div className="flex justify-between items-start mb-3 md:mb-4">
-                <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
-                  <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
-                </div>
-                <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-amber-50 text-amber-600 rounded-full">
-                  {remainingPercent < 20 ? "Low" : "Healthy"}
-                </span>
-              </div>
-              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
-                Remaining Budget
-              </div>
-              <div className="text-2xl md:text-3xl font-bold text-slate-900">
-                ₹{Math.max(0, remaining).toFixed(2)}
-              </div>
-              <div className="mt-3 md:mt-4">
-                <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
-                  <span></span>
-                  <span>{remainingPercent.toFixed(0)}%</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
-                  <div
-                    className={`h-1.5 md:h-2 rounded-full ${remainingPercent < 20 ? "bg-amber-500" : "bg-primary-500"}`}
-                    style={{ width: `${remainingPercent}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <div className="sm:col-span-2 xl:hidden">{renderRemainingBudgetCard()}</div>
           </div>
 
           {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
@@ -699,6 +703,7 @@ const Dashboard = () => {
         </div>
 
         <div className="hidden xl:block space-y-4">
+          {renderRemainingBudgetCard()}
           <CalendarSidebar expenses={expenses} />
           {renderRecentActivityCard()}
           <AIInsights
