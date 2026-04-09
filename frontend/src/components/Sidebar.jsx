@@ -67,7 +67,7 @@ const Sidebar = () => {
   const budgetUsed = Math.min((monthlyTotal / budget) * 100, 100);
 
   return (
-    <aside className="w-72 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 flex flex-col h-full z-20 relative overflow-hidden">
+    <aside className="sticky top-0 z-20 flex h-screen w-72 flex-col overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
       {/* Decorative background elements */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-primary-600/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-20 left-0 w-32 h-32 bg-primary-600/5 rounded-full -translate-x-1/2"></div>
