@@ -499,7 +499,11 @@ User question: ${question}`;
     }
 
     // Weekly trend comparison
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
     const last7Start = new Date(startOfToday);
     last7Start.setDate(startOfToday.getDate() - 6);
     const prev7Start = new Date(last7Start);
@@ -539,7 +543,10 @@ User question: ${question}`;
 
     // Frequent small transactions can silently add up
     const smallTxn = monthExpenses.filter((e) => Number(e.amount) <= 200);
-    const smallTxnTotal = smallTxn.reduce((sum, e) => sum + Number(e.amount), 0);
+    const smallTxnTotal = smallTxn.reduce(
+      (sum, e) => sum + Number(e.amount),
+      0,
+    );
     if (
       smallTxn.length >= 6 &&
       totalMonthly > 0 &&
