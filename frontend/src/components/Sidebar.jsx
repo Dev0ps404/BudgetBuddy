@@ -6,7 +6,6 @@ import {
   FiGrid,
   FiList,
   FiPieChart,
-  FiUser,
   FiLogOut,
   FiChevronRight,
   FiTrendingUp,
@@ -40,7 +39,7 @@ const Sidebar = () => {
       }
     };
     fetchStats();
-  }, [location.pathname]); // re-fetch when navigating
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -80,11 +79,9 @@ const Sidebar = () => {
 
   return (
     <aside className="relative z-20 flex h-full min-h-screen w-72 flex-col overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800">
-      {/* Decorative background elements */}
       <div className="absolute top-0 right-0 w-40 h-40 bg-primary-600/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-20 left-0 w-32 h-32 bg-primary-600/5 rounded-full -translate-x-1/2"></div>
 
-      {/* Brand Header */}
       <div className="p-6 pb-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-600/30">
@@ -101,7 +98,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* User Profile Card */}
       <div className="mx-4 mb-5">
         <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3">
@@ -127,7 +123,6 @@ const Sidebar = () => {
             </div>
           </div>
 
-          {/* Mini Budget Bar */}
           <div className="mt-3 pt-3 border-t border-white/10">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-[10px] font-semibold text-slate-300 uppercase tracking-wider">
@@ -153,15 +148,13 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Section Label */}
       <div className="px-6 mb-2">
         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
           Menu
         </p>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 flex flex-col gap-0.5">
+      <nav className="px-3 flex flex-col gap-0.5">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -176,7 +169,6 @@ const Sidebar = () => {
           >
             {({ isActive }) => (
               <>
-                {/* Active indicator bar */}
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary-500 rounded-r-full shadow-md shadow-primary-500/50"></div>
                 )}
@@ -204,7 +196,6 @@ const Sidebar = () => {
                   </p>
                 </div>
 
-                {/* Badge or Chevron */}
                 {item.badge ? (
                   <span className="bg-primary-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[22px] text-center shadow-sm">
                     {item.badge}
@@ -223,8 +214,7 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Pro Card */}
-      <div className="mx-4 mb-4">
+      <div className="mx-4 mt-4 mb-4">
         <div className="bg-gradient-to-r from-primary-600 to-violet-600 rounded-2xl p-4 relative overflow-hidden shadow-lg shadow-primary-900/30">
           <div className="absolute -top-3 -right-3 w-16 h-16 bg-white/10 rounded-full"></div>
           <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-white/5 rounded-full"></div>
@@ -244,7 +234,6 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Logout */}
       <div className="px-4 pb-5">
         <button
           onClick={handleLogout}
