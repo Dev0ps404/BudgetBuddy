@@ -338,6 +338,129 @@ const Dashboard = () => {
     setShowAllActivity(true);
   };
 
+  const renderRecentActivityCard = () => (
+    <div className="dashboard-card flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-slate-900 text-sm md:text-base">
+            Recent Activity
+          </h3>
+          {expenses.length > 0 && (
+            <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
+              {expenses.length}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => setShowAllActivity(true)}
+          className="text-primary-600 text-xs md:text-sm font-medium hover:text-primary-700 flex items-center gap-1 group justify-start sm:justify-end"
+        >
+          View All{" "}
+          <FiChevronRight
+            size={14}
+            className="group-hover:translate-x-0.5 transition-transform"
+          />
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-1 overflow-hidden">
+        {filteredExpenses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
+            <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
+              <FiClock size={20} className="md:w-6 md:h-6 text-slate-300" />
+            </div>
+            <p className="text-slate-400 font-medium text-xs md:text-sm">
+              No transactions found
+            </p>
+            <p className="text-[10px] md:text-xs text-slate-300 mt-1">
+              Try a different search term
+            </p>
+          </div>
+        ) : (
+          filteredExpenses.slice(0, 5).map((exp, i) => {
+            const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
+            const IconComp = cat.icon;
+            return (
+              <div
+                key={exp._id || i}
+                className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
+              >
+                <div className="flex items-center gap-2 md:gap-3 min-w-0">
+                  <div
+                    className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
+                  >
+                    <IconComp size={14} className="md:w-4 md:h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
+                      {exp.description || exp.category}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span
+                        className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded-md ${cat.pill}`}
+                      >
+                        {exp.category}
+                      </span>
+                      <span className="text-[8px] md:text-[10px] text-slate-400 flex items-center gap-0.5">
+                        <FiClock size={9} /> {getRelativeTime(exp.date)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-2">
+                  -₹{Number(exp.amount).toFixed(0)}
+                </span>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Dynamic Smart Insight — Rotating Cards */}
+      {currentInsight && (
+        <div
+          onClick={() =>
+            insights.length > 1 &&
+            setInsightIdx((prev) => (prev + 1) % insights.length)
+          }
+          className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
+        >
+          <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
+          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
+
+          <div className="flex gap-3 relative z-10">
+            <div className="text-2xl flex-shrink-0 mt-0.5">
+              {currentInsight.emoji}
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-bold text-sm tracking-tight">
+                {currentInsight.title}
+              </h4>
+              <p className="text-xs text-white/80 mt-1 leading-relaxed">
+                {currentInsight.text}
+              </p>
+            </div>
+          </div>
+
+          {insights.length > 1 && (
+            <div className="flex justify-center gap-1.5 mt-3 relative z-10">
+              {insights.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 rounded-full transition-all duration-300 ${
+                    i === insightIdx % insights.length
+                      ? "w-4 bg-white"
+                      : "w-1.5 bg-white/30"
+                  }`}
+                ></div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="max-w-7xl mx-auto space-y-3 md:space-y-6">
       {/* Header */}
@@ -457,10 +580,12 @@ const Dashboard = () => {
             <CompactExpenseCalendar expenses={expenses} />
           </div>
 
+          <div className="xl:hidden">{renderRecentActivityCard()}</div>
+
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 gap-3 md:gap-6">
             {/* Spending Analysis */}
-            <div className="dashboard-card lg:col-span-2">
+            <div className="dashboard-card">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
                 <h3 className="font-bold text-slate-900 text-sm md:text-base">
                   Spending Analysis
@@ -565,131 +690,6 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <div className="dashboard-card flex flex-col">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-900 text-sm md:text-base">
-                    Recent Activity
-                  </h3>
-                  {expenses.length > 0 && (
-                    <span className="text-[10px] md:text-xs font-bold bg-primary-100 text-primary-700 px-1.5 md:px-2 py-0.5 rounded-full">
-                      {expenses.length}
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={() => setShowAllActivity(true)}
-                  className="text-primary-600 text-xs md:text-sm font-medium hover:text-primary-700 flex items-center gap-1 group justify-start sm:justify-end"
-                >
-                  View All{" "}
-                  <FiChevronRight
-                    size={14}
-                    className="group-hover:translate-x-0.5 transition-transform"
-                  />
-                </button>
-              </div>
-
-              <div className="flex-1 space-y-1 overflow-hidden">
-                {filteredExpenses.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-6 md:py-8 text-center">
-                    <div className="w-10 md:w-14 h-10 md:h-14 rounded-full bg-slate-100 flex items-center justify-center mb-2 md:mb-3">
-                      <FiClock
-                        size={20}
-                        className="md:w-6 md:h-6 text-slate-300"
-                      />
-                    </div>
-                    <p className="text-slate-400 font-medium text-xs md:text-sm">
-                      No transactions found
-                    </p>
-                    <p className="text-[10px] md:text-xs text-slate-300 mt-1">
-                      Try a different search term
-                    </p>
-                  </div>
-                ) : (
-                  filteredExpenses.slice(0, 5).map((exp, i) => {
-                    const cat = CATEGORY_MAP[exp.category] || DEFAULT_CAT;
-                    const IconComp = cat.icon;
-                    return (
-                      <div
-                        key={exp._id || i}
-                        className="flex justify-between items-center p-2 md:p-2.5 rounded-xl hover:bg-slate-50 transition-colors group cursor-default gap-2"
-                      >
-                        <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                          <div
-                            className={`w-8 md:w-10 h-8 md:h-10 rounded-xl ${cat.bg} ${cat.text} flex items-center justify-center flex-shrink-0`}
-                          >
-                            <IconComp size={14} className="md:w-4 md:h-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="font-semibold text-slate-800 text-xs md:text-sm truncate">
-                              {exp.description || exp.category}
-                            </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span
-                                className={`text-[8px] md:text-[10px] font-semibold px-1 md:px-1.5 py-0.5 rounded-md ${cat.pill}`}
-                              >
-                                {exp.category}
-                              </span>
-                              <span className="text-[8px] md:text-[10px] text-slate-400 flex items-center gap-0.5">
-                                <FiClock size={9} /> {getRelativeTime(exp.date)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <span className="font-bold text-slate-800 text-sm flex-shrink-0 ml-2">
-                          -₹{Number(exp.amount).toFixed(0)}
-                        </span>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {/* Dynamic Smart Insight — Rotating Cards */}
-              {currentInsight && (
-                <div
-                  onClick={() =>
-                    insights.length > 1 &&
-                    setInsightIdx((prev) => (prev + 1) % insights.length)
-                  }
-                  className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
-                >
-                  <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
-                  <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
-
-                  <div className="flex gap-3 relative z-10">
-                    <div className="text-2xl flex-shrink-0 mt-0.5">
-                      {currentInsight.emoji}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-sm tracking-tight">
-                        {currentInsight.title}
-                      </h4>
-                      <p className="text-xs text-white/80 mt-1 leading-relaxed">
-                        {currentInsight.text}
-                      </p>
-                    </div>
-                  </div>
-
-                  {insights.length > 1 && (
-                    <div className="flex justify-center gap-1.5 mt-3 relative z-10">
-                      {insights.map((_, i) => (
-                        <div
-                          key={i}
-                          className={`h-1 rounded-full transition-all duration-300 ${
-                            i === insightIdx % insights.length
-                              ? "w-4 bg-white"
-                              : "w-1.5 bg-white/30"
-                          }`}
-                        ></div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
           </div>
 
           {/* AI Insights Section */}
@@ -698,8 +698,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="hidden xl:block">
+        <div className="hidden xl:block space-y-4">
           <CalendarSidebar expenses={expenses} />
+          {renderRecentActivityCard()}
         </div>
       </div>
 
