@@ -11,7 +11,6 @@ import {
   FiCalendar,
   FiBox,
   FiTrendingUp,
-  FiTrendingDown,
   FiPlus,
   FiDownload,
   FiArrowRight,
@@ -339,7 +338,7 @@ const Dashboard = () => {
   };
 
   const renderRemainingBudgetCard = () => (
-    <div className="dashboard-card group">
+    <div className="dashboard-card group h-full">
       <div className="flex justify-between items-start mb-3 md:mb-4">
         <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
           <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
@@ -370,7 +369,7 @@ const Dashboard = () => {
   );
 
   const renderRecentActivityCard = () => (
-    <div className="dashboard-card flex flex-col">
+    <div className="dashboard-card flex flex-col min-w-0">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 md:gap-0 mb-3 md:mb-5">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-slate-900 text-sm md:text-base">
@@ -493,7 +492,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-3 md:space-y-6">
+    <div className="mx-auto max-w-7xl space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
         <div>
@@ -521,12 +520,12 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:gap-6 xl:grid-cols-[minmax(0,1fr)_330px] xl:items-start">
-        <div className="min-w-0 space-y-3 md:space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <div className="min-w-0 space-y-4 md:space-y-6">
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid grid-cols-1 items-stretch gap-4 md:gap-6 sm:grid-cols-2 2xl:grid-cols-3">
             {/* Total Expenses */}
-            <div className="dashboard-card group">
+            <div className="dashboard-card group h-full">
               <div className="flex justify-between items-start mb-3 md:mb-4">
                 <div className="p-2 md:p-3 bg-primary-50 text-primary-600 rounded-xl group-hover:scale-110 transition-transform">
                   <FiBox className="w-4 md:w-6 h-4 md:h-6" />
@@ -547,7 +546,7 @@ const Dashboard = () => {
             </div>
 
             {/* Monthly Summary */}
-            <div className="dashboard-card group">
+            <div className="dashboard-card group h-full">
               <div className="flex justify-between items-start mb-3 md:mb-4">
                 <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
                   <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
@@ -576,7 +575,9 @@ const Dashboard = () => {
             </div>
 
             {/* Remaining Budget */}
-            <div className="sm:col-span-2 xl:hidden">{renderRemainingBudgetCard()}</div>
+            <div className="sm:col-span-2 xl:hidden">
+              {renderRemainingBudgetCard()}
+            </div>
           </div>
 
           {/* Calendar Fallback (shown below xl when right sidebar is hidden) */}
@@ -587,14 +588,14 @@ const Dashboard = () => {
           <div className="xl:hidden">{renderRecentActivityCard()}</div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 gap-4 md:gap-6">
             {/* Spending Analysis */}
             <div className="dashboard-card">
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 md:gap-0 mb-4 md:mb-6">
                 <h3 className="font-bold text-slate-900 text-sm md:text-base">
                   Spending Analysis
                 </h3>
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto pb-1">
                   <button
                     onClick={() => setChartRange("7d")}
                     className={`px-2 md:px-3 py-1 text-[10px] md:text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0 transition-colors ${
@@ -702,7 +703,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="hidden xl:block space-y-4">
+        <div className="hidden min-w-0 space-y-4 xl:block">
           {renderRemainingBudgetCard()}
           <CalendarSidebar expenses={expenses} />
           {renderRecentActivityCard()}

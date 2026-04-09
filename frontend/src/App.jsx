@@ -77,12 +77,12 @@ const PrivateLayout = ({ children }) => {
     <>
       <MobileMenu />
       <div className="flex min-h-screen bg-slate-50 overflow-hidden font-sans text-slate-800">
-        <div className="hidden md:block">
+        <div className="hidden md:block md:shrink-0">
           <Sidebar />
         </div>
         <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden pt-14 md:pt-0">
           {/* We can put a universal Topbar here if needed, or handle headers per-page */}
-          <div className="sticky top-14 z-10 flex w-full items-center justify-between border-b border-slate-100 bg-white/70 px-4 py-3.5 backdrop-blur-md md:top-0 md:px-8">
+          <div className="sticky top-14 z-10 flex w-full items-center justify-between border-b border-slate-100 bg-white/70 px-4 py-3 backdrop-blur-md md:top-0 md:px-8">
             {/* Left — Greeting & Date */}
             <div className="hidden md:block">
               <h2 className="text-sm font-bold text-slate-800">
@@ -98,7 +98,7 @@ const PrivateLayout = ({ children }) => {
               </p>
             </div>
             {/* Right — Search + Notification + Avatar */}
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-2 md:gap-3">
               <div className="relative hidden lg:block">
                 <form onSubmit={(e) => e.preventDefault()}>
                   <svg
@@ -123,7 +123,7 @@ const PrivateLayout = ({ children }) => {
                       setTimeout(() => setIsSearchFocused(false), 200)
                     }
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-4 py-2 w-56 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 transition-all font-medium"
+                    className="w-52 rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm font-medium text-slate-600 placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-300 xl:w-56"
                   />
                 </form>
                 {isSearchFocused && searchQuery.trim().length > 0 && (
@@ -135,7 +135,7 @@ const PrivateLayout = ({ children }) => {
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className={`text-slate-400 hover:text-slate-600 relative p-2 rounded-xl transition-all ${showNotifications ? "bg-slate-100 text-primary-600" : "hover:bg-slate-50"}`}
+                  className={`relative flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-all hover:text-slate-600 ${showNotifications ? "bg-slate-100 text-primary-600" : "hover:bg-slate-50"}`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -160,7 +160,7 @@ const PrivateLayout = ({ children }) => {
                   />
                 )}
               </div>
-              <div className="flex items-center gap-3 border-l border-slate-200 pl-3">
+              <div className="flex items-center gap-2 border-l border-slate-200 pl-3 md:gap-3 md:pl-4">
                 <div className="text-right hidden md:block">
                   <p className="text-sm font-semibold text-slate-800 leading-tight">
                     {sessionUser.name}
