@@ -37,9 +37,9 @@ const CalendarSidebar = ({ expenses = [] }) => {
   }, [expenses]);
 
   return (
-    <aside className="h-screen w-[360px] overflow-hidden border-l border-slate-200/70 bg-gradient-to-b from-white via-slate-50/70 to-white">
+    <aside className="h-screen w-[340px] overflow-hidden border-l border-slate-200/70 bg-gradient-to-b from-white via-slate-50/75 to-white shadow-[-18px_0_45px_-32px_rgba(15,23,42,0.55)] 2xl:w-[360px]">
       <div className="flex h-full flex-col">
-        <div className="border-b border-slate-200/70 bg-white/75 px-5 py-5 backdrop-blur-md">
+        <div className="border-b border-slate-200/70 bg-white/85 px-5 py-5 backdrop-blur-md">
           <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-primary-600">
             Calendar Sidebar
           </p>
@@ -51,9 +51,9 @@ const CalendarSidebar = ({ expenses = [] }) => {
           </p>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
           <div className="grid grid-cols-3 gap-2.5">
-            <div className="rounded-xl border border-slate-200/70 bg-white/80 p-2.5">
+            <div className="rounded-xl border border-slate-200/70 bg-gradient-to-br from-white to-primary-50/40 p-2.5">
               <div className="mb-1 flex items-center gap-1 text-slate-400">
                 <FiDollarSign size={13} />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">
@@ -65,7 +65,7 @@ const CalendarSidebar = ({ expenses = [] }) => {
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200/70 bg-white/80 p-2.5">
+            <div className="rounded-xl border border-slate-200/70 bg-gradient-to-br from-white to-emerald-50/45 p-2.5">
               <div className="mb-1 flex items-center gap-1 text-slate-400">
                 <FiActivity size={13} />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">
@@ -77,7 +77,7 @@ const CalendarSidebar = ({ expenses = [] }) => {
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200/70 bg-white/80 p-2.5">
+            <div className="rounded-xl border border-slate-200/70 bg-gradient-to-br from-white to-amber-50/45 p-2.5">
               <div className="mb-1 flex items-center gap-1 text-slate-400">
                 <FiCalendar size={13} />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">
@@ -86,6 +86,12 @@ const CalendarSidebar = ({ expenses = [] }) => {
               </div>
               <p className="text-xs font-bold text-slate-800">{activeDays}</p>
             </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200/70 bg-white/75 px-3 py-2.5">
+            <p className="text-[11px] font-medium text-slate-600">
+              Hover any date to see total spend and transaction count instantly.
+            </p>
           </div>
 
           <ExpenseCalendar expenses={expenses} />

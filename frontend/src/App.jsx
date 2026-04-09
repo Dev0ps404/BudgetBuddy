@@ -81,7 +81,7 @@ const PrivateLayout = ({ children }) => {
     <>
       <MobileMenu />
       <div className="flex min-h-screen bg-slate-50 overflow-hidden font-sans text-slate-800">
-        <div className="hidden md:block">
+        <div className="hidden shrink-0 md:block">
           <Sidebar />
         </div>
         <div className="flex-1 flex flex-col h-screen overflow-hidden pt-14 md:pt-0">
@@ -191,10 +191,12 @@ const PrivateLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 xl:p-7">
+            {children}
+          </main>
         </div>
         {showCalendarSidebar && (
-          <div className="hidden xl:block">
+          <div className="hidden shrink-0 xl:block">
             <CalendarSidebar expenses={expenses} />
           </div>
         )}
