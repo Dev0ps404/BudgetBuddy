@@ -76,11 +76,11 @@ const PrivateLayout = ({ children }) => {
   return (
     <>
       <MobileMenu />
-      <div className="flex min-h-screen bg-slate-50 overflow-hidden font-sans text-slate-800">
-        <div className="hidden md:block md:shrink-0">
+      <div className="flex min-h-screen bg-slate-50 overflow-x-hidden font-sans text-slate-800">
+        <div className="hidden md:block md:shrink-0 md:self-stretch">
           <Sidebar />
         </div>
-        <div className="flex-1 min-w-0 flex flex-col h-screen overflow-hidden pt-14 md:pt-0">
+        <div className="flex-1 min-w-0 flex flex-col pt-14 md:pt-0">
           {/* We can put a universal Topbar here if needed, or handle headers per-page */}
           <div className="sticky top-14 z-10 flex w-full items-center justify-between border-b border-slate-100 bg-white/70 px-4 py-3 backdrop-blur-md md:top-0 md:px-8">
             {/* Left — Greeting & Date */}
@@ -187,7 +187,7 @@ const PrivateLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="flex-1 overflow-y-auto p-4 md:p-8">{children}</main>
+          <main className="min-w-0 p-4 md:p-8">{children}</main>
         </div>
       </div>
     </>
