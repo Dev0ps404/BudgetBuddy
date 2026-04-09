@@ -493,7 +493,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 gap-3 md:gap-6 xl:grid-cols-[minmax(0,1fr)_330px] xl:items-start">
         <div className="min-w-0 space-y-3 md:space-y-6">
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
+          <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 2xl:grid-cols-3">
             {/* Total Expenses */}
             <div className="dashboard-card group">
               <div className="flex justify-between items-start mb-3 md:mb-4">
@@ -504,7 +504,7 @@ const Dashboard = () => {
                   <FiTrendingUp size={12} /> 12%
                 </span>
               </div>
-              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
                 Total Expenses
               </div>
               <div className="text-2xl md:text-3xl font-bold text-slate-900">
@@ -525,7 +525,7 @@ const Dashboard = () => {
                   On Track
                 </span>
               </div>
-              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
                 Monthly Budget Usage
               </div>
               <div className="text-2xl md:text-3xl font-bold text-slate-900">
@@ -545,7 +545,7 @@ const Dashboard = () => {
             </div>
 
             {/* Remaining Budget */}
-            <div className="dashboard-card group sm:col-span-2 lg:col-span-1">
+            <div className="dashboard-card group sm:col-span-2 2xl:col-span-1">
               <div className="flex justify-between items-start mb-3 md:mb-4">
                 <div className="p-2 md:p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-110 transition-transform">
                   <FiDollarSign className="w-4 md:w-6 h-4 md:h-6" />
@@ -554,7 +554,7 @@ const Dashboard = () => {
                   {remainingPercent < 20 ? "Low" : "Healthy"}
                 </span>
               </div>
-              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1">
+              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
                 Remaining Budget
               </div>
               <div className="text-2xl md:text-3xl font-bold text-slate-900">
@@ -691,7 +691,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-
         </div>
 
         <div className="hidden xl:block space-y-4">
