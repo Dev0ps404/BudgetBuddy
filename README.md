@@ -148,21 +148,43 @@ https://budget-buddy-two-zeta.vercel.app/
 
 ## 📸 Screenshots
 
+### 🏠 Authentication Flow
+
 <p align="center">
-  <img src="./Screenshots/Home%20Page.jpeg" width="300"/>
-  <img src="./Screenshots/Sign%20Up.jpeg" width="300"/>
-  <img src="./Screenshots/Login.jpeg" width="300"/>
+  <img src="./Screenshots/Home%20Page.jpeg" width="250"/>
+  <img src="./Screenshots/Sign%20Up.jpeg" width="250"/>
+  <img src="./Screenshots/Login.jpeg" width="250"/>
 </p>
 
 <p align="center">
-  <img src="./Screenshots/Dashboard.jpeg" width="300"/>
-  <img src="./Screenshots/Expenses.jpeg" width="300"/>
-  <img src="./Screenshots/Reports.jpeg" width="300"/>
+  <sub>Home Page &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Sign Up &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Login</sub>
+</p>
+
+---
+
+### 📊 Dashboard & Analytics
+
+<p align="center">
+  <img src="./Screenshots/Dashboard.jpeg" width="250"/>
+  <img src="./Screenshots/Expenses.jpeg" width="250"/>
+  <img src="./Screenshots/Reports.jpeg" width="250"/>
 </p>
 
 <p align="center">
-  <img src="./Screenshots/AI%20Assistant.jpeg" width="300"/>
-  <img src="./Screenshots/Settings.jpeg" width="300"/>
+  <sub>Dashboard &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Expenses &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Reports</sub>
+</p>
+
+---
+
+### 🤖 AI & Settings
+
+<p align="center">
+  <img src="./Screenshots/AI%20Assistant.jpeg" width="250"/>
+  <img src="./Screenshots/Settings.jpeg" width="250"/>
+</p>
+
+<p align="center">
+  <sub>AI Assistant &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Settings</sub>
 </p>
 
 ---
