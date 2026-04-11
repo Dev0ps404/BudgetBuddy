@@ -1,4 +1,4 @@
-# 💸 Personal Expense Tracker (MERN Stack)
+# 💸 BudgetBuddy (MERN Stack)
 
 A modern **Personal Expense Tracker Web App** built using the **MERN Stack** (MongoDB, Express.js, React.js, Node.js).
 Designed especially for students to manage and analyze their daily expenses with a clean and premium UI.
@@ -139,12 +139,16 @@ npm start
 * Export reports (PDF/CSV)
 * Budget alerts
 * AI-based expense insights
+* UPI Connection 
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Team & Responsibilities
 
-**Devansh Agarwal**
+- 🚀 Devansh Agarwal — Project Leader, Backend Developer & System Architect  
+- 🎨 Govind Rana — Frontend Developer  
+- 📊 Gagan — JavaScript & Charts Developer  
+- 🧪 Sanskar — Tester & Debugger  
 
 ---
 
