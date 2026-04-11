@@ -15,20 +15,27 @@ const chatWithAI = async (req, res) => {
     }
 
     console.log("Chat request received:", message);
-    console.log("User ID:", req.user.id);
 
-    // Fetch user's expenses
-    const expenses = await Expense.find({ user: req.user.id }).sort({
-      date: -1,
-    });
+    let expenses = [];
+    let user = null;
 
-    console.log("Expenses found:", expenses.length);
+    // If user is authenticated, fetch their expenses
+    if (req.user && req.user.id) {
+      console.log("User ID:", req.user.id);
+      expenses = await Expense.find({ user: req.user.id }).sort({
+        date: -1,
+      });
+      user = req.user;
+      console.log("Expenses found:", expenses.length);
+    } else {
+      console.log("Unauthenticated user - using demo mode");
+    }
 
     // Get AI response
     const reply = await aiService.generateChatResponse(
       message,
       expenses,
-      req.user,
+      user,
     );
 
     console.log("AI Response:", reply);
@@ -49,14 +56,18 @@ const chatWithAI = async (req, res) => {
 /**
  * @desc    Get AI-generated expense insights
  * @route   GET /api/ai/insights
- * @access  Private
+ * @access  Public
  */
 const getInsights = async (req, res) => {
   try {
-    // Fetch user's expenses
-    const expenses = await Expense.find({ user: req.user.id }).sort({
-      date: -1,
-    });
+    let expenses = [];
+
+    // If user is authenticated, fetch their expenses
+    if (req.user && req.user.id) {
+      expenses = await Expense.find({ user: req.user.id }).sort({
+        date: -1,
+      });
+    }
 
     // Generate insights
     const insights = aiService.generateInsights(expenses);
@@ -71,23 +82,29 @@ const getInsights = async (req, res) => {
 /**
  * @desc    Get spending recommendations
  * @route   GET /api/ai/recommendations
- * @access  Private
+ * @access  Public
  */
 const getRecommendations = async (req, res) => {
   try {
-    // Fetch user's expenses
-    const expenses = await Expense.find({ user: req.user.id }).sort({
-      date: -1,
-    });
+    let expenses = [];
+    let monthlyBudget = null;
 
-    // Get user for budget
-    const User = require("../models/User");
-    const user = await User.findById(req.user.id);
+    // If user is authenticated, fetch their expenses and budget
+    if (req.user && req.user.id) {
+      expenses = await Expense.find({ user: req.user.id }).sort({
+        date: -1,
+      });
+
+      // Get user for budget
+      const User = require("../models/User");
+      const user = await User.findById(req.user.id);
+      monthlyBudget = user?.monthlyBudget;
+    }
 
     // Generate recommendations
     const recommendations = aiService.generateRecommendations(
       expenses,
-      user?.monthlyBudget,
+      monthlyBudget,
     );
 
     res.json({ recommendations });
@@ -100,14 +117,18 @@ const getRecommendations = async (req, res) => {
 /**
  * @desc    Predict end-of-month spending
  * @route   GET /api/ai/predict
- * @access  Private
+ * @access  Public
  */
 const predictSpending = async (req, res) => {
   try {
-    // Fetch user's expenses
-    const expenses = await Expense.find({ user: req.user.id }).sort({
-      date: -1,
-    });
+    let expenses = [];
+
+    // If user is authenticated, fetch their expenses
+    if (req.user && req.user.id) {
+      expenses = await Expense.find({ user: req.user.id }).sort({
+        date: -1,
+      });
+    }
 
     // Generate prediction
     const prediction = aiService.predictMonthlySpending(expenses);
