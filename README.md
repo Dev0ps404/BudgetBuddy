@@ -54,21 +54,35 @@ Designed especially for students to manage and analyze their daily expenses with
 ## 📂 Project Structure
 
 ```
-expense-tracker-mern/
+BudgetBuddy/
 │
-├── client/         # React frontend
+├── frontend/                 # React Frontend
+│   ├── public/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── App.js
+│   │   ├── assets/           # Images, icons
+│   │   ├── components/       # Reusable UI components
+│   │   ├── pages/            # Pages (Dashboard, Login, etc.)
+│   │   ├── services/         # API calls
+│   │   ├── utils/            # Helper functions
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
 │
-├── server/         # Backend (Node + Express)
-│   ├── routes/
-│   ├── models/
-│   └── server.js
+├── backend/                  # Node.js Backend
+│   ├── config/               # DB & environment config
+│   ├── controllers/          # Business logic
+│   ├── models/               # MongoDB schemas
+│   ├── routes/               # API routes
+│   ├── middleware/           # Auth, error handling
+│   ├── services/             # AI services (Gemini, etc.)
+│   ├── utils/                # Helper functions
+│   ├── server.js             # Entry point
+│   └── package.json
 │
-└── README.md
-```
+├── .env                      # Environment variables
+├── README.md                 # Project documentation
+└── package.json              # Root (optional)
 
 ---
 
