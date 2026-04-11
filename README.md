@@ -86,29 +86,25 @@ BudgetBuddy/
 ```
 ---
 
-## ⚙️ Installation & Setup
-
 ### 1️⃣ Clone the repository
-
-```
-git clone https://github.com/Dev0ps404/Personal-Expense-Tracker
+```bash
+git clone https://github.com/Dev0ps404/Personal-Expense-Tracker.git
+cd Personal-Expense-Tracker
 ```
 
 ---
 
 ### 2️⃣ Install dependencies
 
-#### Frontend
-
-```
-cd client
+#### 📦 Frontend
+```bash
+cd frontend
 npm install
 ```
 
-#### Backend
-
-```
-cd ../server
+#### ⚙️ Backend
+```bash
+cd ../backend
 npm install
 ```
 
@@ -116,30 +112,37 @@ npm install
 
 ### 3️⃣ Setup Environment Variables
 
-Create a `.env` file inside `server/`:
+Create a `.env` file inside `backend/`:
 
-```
-MONGO_URI=your_mongodb_connection
+```env
+MONGO_URI=your_mongodb_connection_string
 PORT=5000
+JWT_SECRET=your_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ---
 
 ### 4️⃣ Run the project
 
-#### Start Backend
-
-```
-cd server
+#### ▶️ Start Backend
+```bash
+cd backend
 npm start
 ```
 
-#### Start Frontend
+#### ▶️ Start Frontend
+```bash
+cd frontend
+npm run dev
+```
 
-```
-cd client
-npm start
-```
+---
+
+### 🌐 Access the App
+https://budget-buddy-two-zeta.vercel.app/
+
 
 ---
 
