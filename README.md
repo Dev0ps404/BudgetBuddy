@@ -83,7 +83,7 @@ BudgetBuddy/
 ├── .env                      # Environment variables
 ├── README.md                 # Project documentation
 └── package.json              # Root (optional)
-
+```
 ---
 
 ## ⚙️ Installation & Setup
