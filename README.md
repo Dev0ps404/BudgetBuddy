@@ -191,10 +191,13 @@ https://budget-buddy-two-zeta.vercel.app/
 
 ## 🔐 Security
 
-* Password hashing
-* Input validation
-* Protected routes
+Our application follows industry-standard security practices to ensure data protection and safe user interactions:
 
+- 🔑 **Password Hashing:** User passwords are securely hashed using encryption techniques before storing in the database.
+- 🛡️ **Input Validation:** All user inputs are validated and sanitized to prevent malicious data and injection attacks.
+- 🚧 **Protected Routes:** Authentication-based access control ensures that only authorized users can access sensitive routes and resources.
+- 🔒 **JWT Authentication:** Secure token-based authentication is implemented for session management.
+- 🌐 **CORS Configuration:** Proper CORS policies are applied to restrict unauthorized cross-origin requests.
 ---
 
 ## 🚀 Future Improvements
