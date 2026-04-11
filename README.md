@@ -148,10 +148,29 @@ https://budget-buddy-two-zeta.vercel.app/
 
 ## 📸 Screenshots
 
-* 🏠 Landing Page
-* 🔐 Login / Signup
-* 📊 Dashboard
-* 💳 Expense Manager
+### 🤖 AI Assistant
+![AI Assistant](./Screenshots/AI%20Assistant.jpeg)
+
+### 🏠 Dashboard
+![Dashboard](./Screenshots/Dashboard.jpeg)
+
+### 💸 Expenses
+![Expenses](./Screenshots/Expenses.jpeg)
+
+### 🏡 Home Page
+![Home](./Screenshots/Home%20Page.jpeg)
+
+### 🔐 Login
+![Login](./Screenshots/Login.jpeg)
+
+### 📝 Sign Up
+![Sign Up](./Screenshots/Sign%20Up.jpeg)
+
+### 📊 Reports
+![Reports](./Screenshots/Reports.jpeg)
+
+### ⚙️ Settings
+![Settings](./Screenshots/Settings.jpeg)
 
 ---
 
