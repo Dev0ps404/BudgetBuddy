@@ -32,11 +32,7 @@ const chatWithAI = async (req, res) => {
     }
 
     // Get AI response
-    const reply = await aiService.generateChatResponse(
-      message,
-      expenses,
-      user,
-    );
+    const reply = await aiService.generateChatResponse(message, expenses, user);
 
     console.log("AI Response:", reply);
     res.json({ reply });

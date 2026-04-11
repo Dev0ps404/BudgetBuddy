@@ -112,7 +112,9 @@ const InfoPage = () => {
           BudgetBuddy
         </p>
         <h1 className="mt-2 text-3xl font-bold text-slate-900">{page.title}</h1>
-        <p className="mt-4 text-slate-600 leading-relaxed">{page.description}</p>
+        <p className="mt-4 text-slate-600 leading-relaxed">
+          {page.description}
+        </p>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
