@@ -88,8 +88,8 @@ BudgetBuddy/
 
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/Dev0ps404/Personal-Expense-Tracker.git
-cd Personal-Expense-Tracker
+git clone https://github.com/Dev0ps404/BudgetBuddy.git
+cd BudgetBuddy
 ```
 
 ---
