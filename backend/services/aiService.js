@@ -190,6 +190,8 @@ class AIService {
     - For finance questions include: a quick insight, what to do next, and one practical step for today.
     - Keep normal responses concise; expand only when user asks for detail.
     - Avoid repetitive phrases like "I understand" unless the user clearly shares an emotion or concern.
+    - For messages like "I am bored", "feeling low", or "tired", reply in a supportive human tone with practical next steps.
+    - Avoid filler lines like "Interesting question" for simple mood or chat messages.
 
     User data:
     ${JSON.stringify(contextData, null, 2)}
@@ -497,6 +499,26 @@ ${this.generateExpenseSummary(expenses)}`;
     // For general questions, provide helpful fallback
     if (!isExpenseQ) {
       if (
+        /(i am|i'm|im|feeling|feel)?\s*(bored|boring|bore ho raha|mann nahi lag raha|man nahi lag raha)/i.test(
+          lowerQ,
+        )
+      ) {
+        return isHinglish
+          ? "Bored feel ho raha hai? Fair. Chalo quick reset karte hain:\n- 10 min walk ya stretch\n- Ek chhota task finish karo\n- Fir wapas aake bolna, main next 1-hour plan bana dunga."
+          : "Feeling bored? Fair enough. Try a quick reset:\n- 10-minute walk or stretch\n- Finish one tiny task\n- Come back and I can set a focused 1-hour plan for you.";
+      }
+
+      if (
+        /(feeling low|sad|down|lonely|alone|tired|exhausted|burnout|demotivated|thak gaya|thak gya|udaas)/i.test(
+          lowerQ,
+        )
+      ) {
+        return isHinglish
+          ? "Samajh raha hoon. Aise din normal hote hain. Aaj ke liye bas 2 cheeze karo:\n- Paani piyo aur 5 min break lo\n- Ek easy kaam complete karo\nChaho to main tumhare liye low-energy plan bana deta hoon."
+          : "I get it. Days like this are normal. For now, do just two things:\n- Drink water and take a 5-minute break\n- Complete one easy task\nIf you want, I can make a low-energy plan for the rest of the day.";
+      }
+
+      if (
         /(how are you|how r you|how're you|hows it going|what's up|wassup|sup|kaise ho|kaisa hai|kya haal)/i.test(
           lowerQ,
         )
@@ -539,8 +561,8 @@ ${this.generateExpenseSummary(expenses)}`;
       }
 
       return isHinglish
-        ? "Interesting laga. Thoda aur detail doge to main better aur real jawab de paunga."
-        : "Interesting question. Share a little more detail and I'll give you a more concrete, real answer.";
+        ? "Got it. Main sun raha hoon. Jo bolna hai seedha bolo, main natural tone me reply dunga."
+        : "Got it. I'm listening. Say it the way you'd tell a friend, and I'll reply naturally.";
     }
 
     if (monthExpenses.length === 0) {
