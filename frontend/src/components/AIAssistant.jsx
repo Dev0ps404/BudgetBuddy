@@ -4,14 +4,15 @@ import { FiMessageSquare, FiX, FiSend, FiRefreshCw } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 const AIAssistant = () => {
+  const createIntroMessage = () => ({
+    type: "ai",
+    text: "Hi! I'm BudgetBuddy AI. I can help with budgets, savings, and everyday questions too. Tell me what you're feeling or trying to solve.",
+    timestamp: new Date(),
+    isIntro: true,
+  });
+
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      type: "ai",
-      text: "Hey! I'm ExpenseIQ, your smart expense analyzer. Ask me anything about your spending! 🧠💰",
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState(() => [createIntroMessage()]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -36,6 +37,19 @@ const AIAssistant = () => {
       timestamp: new Date(),
     };
 
+    const conversationHistory = [...messages, userMessage]
+      .filter(
+        (msg) =>
+          (msg.type === "user" || msg.type === "ai") &&
+          !msg.error &&
+          !msg.isIntro,
+      )
+      .slice(-12)
+      .map((msg) => ({
+        role: msg.type === "user" ? "user" : "assistant",
+        content: msg.text,
+      }));
+
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
@@ -43,6 +57,7 @@ const AIAssistant = () => {
     try {
       const response = await axios.post("/ai/query", {
         query: messageText,
+        history: conversationHistory,
       });
 
       const aiMessage = {
@@ -82,13 +97,7 @@ const AIAssistant = () => {
   };
 
   const clearChat = () => {
-    setMessages([
-      {
-        type: "ai",
-        text: "Hey! I'm ExpenseIQ, your smart expense analyzer. Ask me anything about your spending! 🧠💰",
-        timestamp: new Date(),
-      },
-    ]);
+    setMessages([createIntroMessage()]);
   };
 
   return (

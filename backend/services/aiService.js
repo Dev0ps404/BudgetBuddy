@@ -78,6 +78,14 @@ class AIService {
       .digest("hex");
   }
 
+  createHistoryHash(history = []) {
+    const safeHistory = Array.isArray(history) ? history.slice(-12) : [];
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(safeHistory))
+      .digest("hex");
+  }
+
   async generateDatabaseQueryResponse(question, contextData, options = {}) {
     const normalizedQuestion =
       typeof question === "string" ? question.trim() : "";
@@ -101,6 +109,17 @@ class AIService {
       description: item.description || "",
       date: item.date,
     }));
+    const history = Array.isArray(options.history)
+      ? options.history.slice(-12)
+      : [];
+    const conversationHistoryText = history.length
+      ? history
+          .map(
+            (item, index) =>
+              `${index + 1}. ${item.role === "assistant" ? "Assistant" : "User"}: ${item.content}`,
+          )
+          .join("\n")
+      : "No prior conversation.";
 
     try {
       if (!this.apiKey) {
@@ -124,9 +143,12 @@ class AIService {
       const contextHash =
         options.contextHash || this.createContextHash(contextData);
       const userId = options.userId || "anonymous";
+      const historyHash = this.createHistoryHash(history);
       const cacheKey = crypto
         .createHash("sha256")
-        .update(`${userId}|${normalizedQuestion.toLowerCase()}|${contextHash}`)
+        .update(
+          `${userId}|${normalizedQuestion.toLowerCase()}|${contextHash}|${historyHash}`,
+        )
         .digest("hex");
 
       const cachedReply = this.getCachedResponse(cacheKey);
@@ -134,31 +156,46 @@ class AIService {
         return { reply: cachedReply, cached: true };
       }
 
-      const prompt = `You are ExpenseIQ, a smart financial assistant for a personal expense tracker app.
+      const prompt = `You are a smart, friendly and professional AI financial assistant for a web app called BudgetBuddy.
 
-    User Data:
+    Your behavior should be similar to ChatGPT:
+    - Understand user intent deeply
+    - Give human-like, natural responses
+    - Avoid generic replies
+    - Be conversational and helpful
+    - Detect emotional tone (stress, confusion, motivation, frustration) and acknowledge it naturally before advice.
+
+    Your expertise:
+    - Personal finance
+    - Expense tracking
+    - Budget planning
+    - Saving strategies
+
+    Rules:
+    - Always give useful and actionable advice.
+    - Use user's actual data when available.
+    - If user asks casual or non-finance questions, respond naturally and helpfully.
+    - Keep responses clear and structured.
+    - Use bullet points when helpful.
+    - For finance claims based on spending, rely only on provided data.
+    - If finance data is missing, clearly mention what is missing and ask a helpful follow-up question.
+    - Do not sound robotic.
+    - Respond in the same language as the user when possible.
+
+    Response style:
+    - If user sounds emotional, begin with one short empathetic line.
+    - Then give the direct answer.
+    - For finance questions include: a quick insight, what to do next, and one practical step for today.
+    - Keep normal responses concise; expand only when user asks for detail.
+
+    User data:
     ${JSON.stringify(contextData, null, 2)}
 
-    User Question:
-    ${normalizedQuestion}
+    Recent conversation:
+    ${conversationHistoryText}
 
-    Instructions:
-    - Analyze the data deeply before responding.
-    - Give personalized financial advice using the user's actual spending patterns.
-    - Suggest how much the user should spend (clear amount in ₹).
-    - Identify overspending categories with data-backed reasoning.
-    - Give actionable suggestions (reduce, optimize, save).
-    - Keep response clear, structured, and helpful.
-    - Use bullet points where useful.
-    - Do NOT give generic answers.
-    - Use only the provided data. Never invent transactions, amounts, categories, or trends.
-    - If key data is missing, clearly mention what is missing and any assumption made.
-
-    Also include:
-    1. Spending summary
-    2. Problem areas
-    3. Recommended spending limit
-    4. Smart tips to improve savings`;
+    Current user message:
+    ${normalizedQuestion}`;
 
       const result = await this.model.generateContent(prompt);
       const aiText = result?.response?.text()?.trim();

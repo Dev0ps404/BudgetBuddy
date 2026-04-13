@@ -6,6 +6,8 @@ const aiService = require("../services/aiService");
 const DEFAULT_LOOKBACK_DAYS = 30;
 const MAX_LOOKBACK_DAYS = 90;
 const MAX_CONTEXT_TRANSACTIONS = 50;
+const MAX_CHAT_HISTORY_MESSAGES = 12;
+const MAX_HISTORY_CONTENT_LENGTH = 500;
 
 const clampLookbackDays = (value) => {
   const parsed = Number(value);
@@ -14,6 +16,30 @@ const clampLookbackDays = (value) => {
   }
 
   return Math.min(Math.max(Math.floor(parsed), 1), MAX_LOOKBACK_DAYS);
+};
+
+const sanitizeChatHistory = (history) => {
+  if (!Array.isArray(history)) {
+    return [];
+  }
+
+  return history
+    .filter((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return false;
+      }
+
+      if (entry.role !== "user" && entry.role !== "assistant") {
+        return false;
+      }
+
+      return typeof entry.content === "string" && entry.content.trim();
+    })
+    .slice(-MAX_CHAT_HISTORY_MESSAGES)
+    .map((entry) => ({
+      role: entry.role,
+      content: entry.content.trim().slice(0, MAX_HISTORY_CONTENT_LENGTH),
+    }));
 };
 
 const toCurrencyNumber = (value) => Number(Number(value || 0).toFixed(2));
@@ -75,6 +101,7 @@ const queryAIWithDatabase = async (req, res) => {
   try {
     const rawQuery = req.body?.query ?? req.body?.message;
     const userQuery = typeof rawQuery === "string" ? rawQuery.trim() : "";
+    const conversationHistory = sanitizeChatHistory(req.body?.history);
 
     if (!userQuery) {
       return res.status(400).json({ message: "Query cannot be empty" });
@@ -212,7 +239,10 @@ const queryAIWithDatabase = async (req, res) => {
     const aiResult = await aiService.generateDatabaseQueryResponse(
       userQuery,
       contextData,
-      { userId: String(userDoc._id) },
+      {
+        userId: String(userDoc._id),
+        history: conversationHistory,
+      },
     );
 
     return res.json({
@@ -222,6 +252,7 @@ const queryAIWithDatabase = async (req, res) => {
         lookbackDays,
         totalTransactions: contextData.expenses.summary.totalTransactions,
         transactionsInPrompt: contextData.expenses.recentTransactions.length,
+        historyMessages: conversationHistory.length,
       },
     });
   } catch (error) {
