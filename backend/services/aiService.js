@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 /**
@@ -10,6 +11,9 @@ class AIService {
     this.apiKey = process.env.GEMINI_API_KEY;
     this.client = null;
     this.model = null;
+    this.responseCache = new Map();
+    this.cacheTtlMs = Number(process.env.AI_CACHE_TTL_MS || 60 * 1000);
+    this.maxCacheEntries = Number(process.env.AI_CACHE_MAX_ENTRIES || 300);
 
     if (this.apiKey) {
       try {
@@ -23,6 +27,148 @@ class AIService {
       }
     } else {
       console.warn("⚠️ GEMINI_API_KEY not found in environment variables");
+    }
+  }
+
+  getCachedResponse(cacheKey) {
+    const cachedEntry = this.responseCache.get(cacheKey);
+    if (!cachedEntry) {
+      return null;
+    }
+
+    if (cachedEntry.expiresAt <= Date.now()) {
+      this.responseCache.delete(cacheKey);
+      return null;
+    }
+
+    return cachedEntry.reply;
+  }
+
+  setCachedResponse(cacheKey, reply) {
+    if (this.responseCache.size >= this.maxCacheEntries) {
+      const oldestKey = this.responseCache.keys().next().value;
+      if (oldestKey) {
+        this.responseCache.delete(oldestKey);
+      }
+    }
+
+    this.responseCache.set(cacheKey, {
+      reply,
+      expiresAt: Date.now() + this.cacheTtlMs,
+    });
+  }
+
+  createContextHash(contextData) {
+    const compactContext = {
+      dataWindow: contextData?.dataWindow,
+      user: {
+        id: contextData?.user?.id,
+        monthlyBudget: contextData?.user?.monthlyBudget,
+      },
+      summary: contextData?.expenses?.summary,
+      byCategory: contextData?.expenses?.byCategory || [],
+      recentTransactions: (
+        contextData?.expenses?.recentTransactions || []
+      ).slice(0, 25),
+    };
+
+    return crypto
+      .createHash("sha256")
+      .update(JSON.stringify(compactContext))
+      .digest("hex");
+  }
+
+  async generateDatabaseQueryResponse(question, contextData, options = {}) {
+    const normalizedQuestion =
+      typeof question === "string" ? question.trim() : "";
+
+    if (!normalizedQuestion) {
+      return {
+        reply: "Please ask a valid question.",
+        cached: false,
+      };
+    }
+
+    const fallbackUser = {
+      name: contextData?.user?.name || "Friend",
+      monthlyBudget: Number(contextData?.user?.monthlyBudget || 0),
+    };
+    const fallbackExpenses = (
+      contextData?.expenses?.recentTransactions || []
+    ).map((item) => ({
+      amount: item.amount,
+      category: item.category,
+      description: item.description || "",
+      date: item.date,
+    }));
+
+    try {
+      if (!this.apiKey) {
+        return {
+          reply: this.generateLocalResponse(
+            normalizedQuestion,
+            fallbackExpenses,
+            fallbackUser,
+          ),
+          cached: false,
+        };
+      }
+
+      if (!this.model) {
+        this.client = new GoogleGenerativeAI(this.apiKey);
+        this.model = this.client.getGenerativeModel({
+          model: "gemini-1.5-flash",
+        });
+      }
+
+      const contextHash =
+        options.contextHash || this.createContextHash(contextData);
+      const userId = options.userId || "anonymous";
+      const cacheKey = crypto
+        .createHash("sha256")
+        .update(`${userId}|${normalizedQuestion.toLowerCase()}|${contextHash}`)
+        .digest("hex");
+
+      const cachedReply = this.getCachedResponse(cacheKey);
+      if (cachedReply) {
+        return { reply: cachedReply, cached: true };
+      }
+
+      const prompt = `You are ExpenseIQ, a financial AI assistant.
+Rules:
+- Use only the JSON data provided below when answering finance questions.
+- Never invent transactions, amounts, categories, or trends.
+- If the data is insufficient, clearly say what is missing.
+- Keep the response concise and actionable (2-6 sentences).
+
+Database context (JSON):
+${JSON.stringify(contextData, null, 2)}
+
+User question:
+${normalizedQuestion}`;
+
+      const result = await this.model.generateContent(prompt);
+      const aiText = result?.response?.text()?.trim();
+
+      if (!aiText) {
+        throw new Error("Empty response from AI provider");
+      }
+
+      this.setCachedResponse(cacheKey, aiText);
+      return { reply: aiText, cached: false };
+    } catch (error) {
+      console.error("❌ Database AI Query Error:", {
+        message: error.message,
+        code: error.code,
+      });
+      return {
+        reply: this.generateLocalResponse(
+          normalizedQuestion,
+          fallbackExpenses,
+          fallbackUser,
+        ),
+        cached: false,
+      };
     }
   }
 

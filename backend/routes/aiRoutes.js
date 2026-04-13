@@ -2,15 +2,19 @@ const express = require("express");
 const router = express.Router();
 const {
   chatWithAI,
+  queryAIWithDatabase,
   getInsights,
   getRecommendations,
   predictSpending,
 } = require("../controllers/aiController");
+const { protect } = require("../middleware/authMiddleware");
 
 /**
  * AI Routes
- * No authentication required - AI features are available to all users
  */
+
+// POST /api/ai/query - Ask AI with role-scoped database context
+router.post("/query", protect, queryAIWithDatabase);
 
 // POST /api/ai/chat - Chat with AI assistant
 router.post("/chat", chatWithAI);

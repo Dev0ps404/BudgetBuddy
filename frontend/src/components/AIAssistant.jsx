@@ -1,12 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import {
-  FiMessageSquare,
-  FiX,
-  FiSend,
-  FiLoader,
-  FiRefreshCw,
-} from "react-icons/fi";
+import { FiMessageSquare, FiX, FiSend, FiRefreshCw } from "react-icons/fi";
 import { toast } from "react-toastify";
 
 const AIAssistant = () => {
@@ -27,13 +21,18 @@ const AIAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = async (messageOverride) => {
+    const messageText =
+      typeof messageOverride === "string"
+        ? messageOverride.trim()
+        : inputValue.trim();
+
+    if (!messageText) return;
 
     // Add user message to chat
     const userMessage = {
       type: "user",
-      text: inputValue,
+      text: messageText,
       timestamp: new Date(),
     };
 
@@ -42,27 +41,34 @@ const AIAssistant = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/ai/chat", {
-        message: inputValue,
+      const response = await axios.post("/ai/query", {
+        query: messageText,
       });
 
       const aiMessage = {
         type: "ai",
-        text: response.data.reply,
+        text: response?.data?.reply || "I could not generate a response.",
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Chat error:", error);
+      const isUnauthorized = error.response?.status === 401;
       const errorMessage = {
         type: "ai",
-        text: "Sorry, I encountered an error. Please try again.",
+        text: isUnauthorized
+          ? "Please log in to get personalized AI answers from your expense data."
+          : "Sorry, I encountered an error. Please try again.",
         timestamp: new Date(),
         error: true,
       };
       setMessages((prev) => [...prev, errorMessage]);
-      toast.error("Failed to get AI response");
+      toast.error(
+        isUnauthorized
+          ? "Login required for AI insights"
+          : "Failed to get AI response",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -185,8 +191,7 @@ const AIAssistant = () => {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => {
-                    setInputValue("Where did I spend the most?");
-                    setTimeout(() => handleSendMessage(), 100);
+                    handleSendMessage("Where did I spend the most?");
                   }}
                   className="text-xs px-2 py-1.5 bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors font-medium border border-primary-200"
                 >
@@ -194,8 +199,7 @@ const AIAssistant = () => {
                 </button>
                 <button
                   onClick={() => {
-                    setInputValue("Show my budget status");
-                    setTimeout(() => handleSendMessage(), 100);
+                    handleSendMessage("Show my budget status");
                   }}
                   className="text-xs px-2 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium border border-indigo-200"
                 >
