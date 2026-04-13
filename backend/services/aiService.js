@@ -327,19 +327,37 @@ ${this.generateExpenseSummary(expenses)}`;
       "rupee",
       "₹",
       "save",
-      "expense",
+      "savings",
       "category",
       "spent",
       "total",
       "monthly",
       "daily",
       "financial",
+      "finance",
       "income",
+      "salary",
       "spending",
       "transaction",
       "purchase",
+      "bill",
+      "bills",
+      "rent",
+      "loan",
+      "emi",
+      "debt",
+      "credit",
+      "cashflow",
+      "cash flow",
+      "paisa",
+      "paise",
+      "kharcha",
+      "kharche",
+      "bachat",
+      "karza",
+      "udhaar",
     ];
-    const lowerQ = question.toLowerCase();
+    const lowerQ = String(question || "").toLowerCase();
     return expenseKeywords.some((kw) => lowerQ.includes(kw));
   }
 
@@ -354,63 +372,155 @@ ${this.generateExpenseSummary(expenses)}`;
   generateLocalResponse(question, expenses, user) {
     console.log("⚡ Using fallback local response generation...");
 
-    const isExpenseQ = this.isExpenseQuestion(question);
-    const lowerQ = question.toLowerCase();
+    const questionText = String(question || "").trim();
+    const lowerQ = questionText.toLowerCase();
+    const isExpenseQ = this.isExpenseQuestion(questionText);
+    const isHinglish = [
+      "kya",
+      "kaise",
+      "main",
+      "mujhe",
+      "mera",
+      "meri",
+      "paisa",
+      "paise",
+      "kharcha",
+      "kharche",
+      "bachat",
+      "karun",
+      "hoon",
+      "nahi",
+      "yaar",
+      "bhai",
+      "pareshan",
+      "tension",
+    ].some((kw) => lowerQ.includes(kw));
 
-    // For general questions, provide helpful fallback
-    if (!isExpenseQ) {
-      const responses = {
-        hello:
-          "👋 Hi there! I'm ExpenseIQ. While I'm great at analyzing expenses, I can also help with general questions. What would you like to know?",
-        hi: "👋 Hey! Ready to manage your finances? Ask me anything about your expenses or any other topic!",
-        help: "📚 I can help you with: \n• Expense analysis & budgeting\n• Spending insights & predictions\n• Financial tips & recommendations\n• Or any general question you have!",
-        thanks: "😊 You're welcome! Need help with anything else?",
-        how: "🤔 I'm here to help! Feel free to ask me about your expenses or anything else on your mind.",
-        what: "❓ You can ask me about your spending habits, budget analysis, financial tips, or pretty much anything!",
-      };
+    const emotionKeywords = [
+      "stress",
+      "stressed",
+      "tension",
+      "anxious",
+      "anxiety",
+      "worried",
+      "overwhelmed",
+      "panic",
+      "pressure",
+      "pareshan",
+      "ghabra",
+    ];
+    const moneyKeywords = [
+      "money",
+      "paisa",
+      "paise",
+      "expense",
+      "spend",
+      "budget",
+      "bill",
+      "loan",
+      "emi",
+      "debt",
+      "salary",
+      "income",
+      "finance",
+      "financial",
+      "kharcha",
+      "kharche",
+      "bachat",
+      "save",
+    ];
+    const isFinancialStress =
+      emotionKeywords.some((kw) => lowerQ.includes(kw)) &&
+      moneyKeywords.some((kw) => lowerQ.includes(kw));
 
-      // Find matching response
-      for (const [keyword, response] of Object.entries(responses)) {
-        if (lowerQ.includes(keyword)) {
-          return response;
-        }
-      }
+    const safeExpenses = Array.isArray(expenses) ? expenses : [];
+    const monthlyBudget = Number(user?.monthlyBudget || 0);
 
-      // Default response for general questions
-      return `🤖 That's an interesting question! While I'm specialized in expense management, I can try to help. For more detailed answers, I work best with the AI API. What else would you like to know about your finances? 💰`;
-    }
-
-    // For expense-related questions, use expense data
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
 
-    const monthExpenses = expenses.filter((e) => {
+    const monthExpenses = safeExpenses.filter((e) => {
       const expDate = new Date(e.date);
       return (
+        !Number.isNaN(expDate.getTime()) &&
         expDate.getMonth() === currentMonth &&
         expDate.getFullYear() === currentYear
       );
     });
 
-    if (monthExpenses.length === 0) {
-      return "📭 No expenses recorded yet this month. Start tracking to get personalized insights!";
-    }
-
     const totalMonthly = monthExpenses.reduce(
-      (sum, e) => sum + Number(e.amount),
+      (sum, e) => sum + Number(e.amount || 0),
       0,
     );
 
     const categoryBreakdown = {};
     monthExpenses.forEach((e) => {
-      categoryBreakdown[e.category] =
-        (categoryBreakdown[e.category] || 0) + Number(e.amount);
+      const category = e.category || "Other";
+      categoryBreakdown[category] =
+        (categoryBreakdown[category] || 0) + Number(e.amount || 0);
     });
 
     const sortedCategories = Object.entries(categoryBreakdown).sort(
       (a, b) => b[1] - a[1],
     );
+
+    if (isFinancialStress) {
+      if (monthExpenses.length > 0 && sortedCategories.length > 0) {
+        const [topCategory, topAmount] = sortedCategories[0];
+        const topShare =
+          totalMonthly > 0
+            ? ((topAmount / totalMonthly) * 100).toFixed(0)
+            : "0";
+        const avgDaily = totalMonthly / Math.max(now.getDate(), 1);
+        const suggestedDailyCap = Math.max(100, Math.round(avgDaily * 0.8));
+        const budgetLine =
+          monthlyBudget > 0 ? ` (budget: ₹${monthlyBudget.toFixed(0)})` : "";
+
+        if (isHinglish) {
+          return `Samajh sakta hoon, paise ka stress heavy lagta hai. Tum akela feel mat karo.\n- Is month spend: ₹${totalMonthly.toFixed(0)}${budgetLine}\n- Top pressure category: ${topCategory} (₹${topAmount.toFixed(0)}, ${topShare}%)\n- Aaj ka action: agle 7 din ${topCategory} spend ko 20% cut karo.\n- Daily cap try karo: ₹${suggestedDailyCap}\nAgar chaho to main abhi tumhare liye exact 7-day recovery plan bana deta hoon.`;
+        }
+
+        return `I hear you. Money stress can feel overwhelming, and you are not alone.\n- This month spend: ₹${totalMonthly.toFixed(0)}${budgetLine}\n- Biggest pressure category: ${topCategory} (₹${topAmount.toFixed(0)}, ${topShare}%)\n- Action for today: reduce ${topCategory} spend by 20% for the next 7 days.\n- Suggested daily cap: ₹${suggestedDailyCap}\nIf you want, I can create an exact 7-day recovery plan right now.`;
+      }
+
+      if (isHinglish) {
+        return "Samajh sakta hoon, paise ka stress real hota hai.\n- Pehle 3 fixed kharche likho (rent, bill, EMI).\n- Next 7 din non-essential spending pause karo.\n- Daily limit set karo (₹300-₹500).\nAgar tum monthly budget share karo, main exact step-by-step plan de dunga.";
+      }
+
+      return "I hear you. Financial stress is real.\n- List your 3 fixed costs first (rent, bills, EMI/loan).\n- Pause non-essential spending for 7 days.\n- Set a temporary daily limit (₹300-₹500).\nShare your monthly budget, and I will build a concrete step-by-step plan.";
+    }
+
+    // For general questions, provide helpful fallback
+    if (!isExpenseQ) {
+      if (/(^|\s)(hello|hi|hey|namaste|namaskar)(\s|$)/i.test(lowerQ)) {
+        return isHinglish
+          ? "Hi! Main yahin hoon. Aap finance, budgeting, savings ya general sawal kuch bhi pooch sakte ho."
+          : "Hi! I'm here to help. You can ask me about finance, budgeting, savings, or general questions.";
+      }
+
+      if (/(^|\s)(thanks|thank you|shukriya|dhanyavaad)(\s|$)/i.test(lowerQ)) {
+        return isHinglish
+          ? "Hamesha. Agar chaho to main aapke liye next best financial step bhi suggest kar sakta hoon."
+          : "Anytime. If you want, I can suggest your best next financial step too.";
+      }
+
+      if (lowerQ.includes("help") || lowerQ.includes("madad")) {
+        return isHinglish
+          ? "Main aapki help kar sakta hoon:\n- Budget breakdown\n- Expense analysis\n- Savings strategy\n- Debt/EMI planning\nBas apna goal likho, main practical plan bana dunga."
+          : "I can help with:\n- Budget breakdown\n- Expense analysis\n- Savings strategy\n- Debt/EMI planning\nShare your goal and I will create a practical plan.";
+      }
+
+      return isHinglish
+        ? "Main samajh raha hoon. Thoda aur context do, main direct aur practical jawab dunga."
+        : "I understand. Share a bit more context and I will give you a direct, practical answer.";
+    }
+
+    if (monthExpenses.length === 0) {
+      return isHinglish
+        ? "Is month ka expense data abhi empty hai. Start karne ke liye:\n- Har spend add karo\n- Category select karo\n- Daily limit set karo\nPhir main exact personalized advice dunga."
+        : "I do not see expense data for this month yet. To get strong personalized advice:\n- Add each spend\n- Tag categories\n- Set a daily limit\nThen I can generate an exact plan for you.";
+    }
 
     const questionLower = question.toLowerCase();
 
@@ -419,42 +529,69 @@ ${this.generateExpenseSummary(expenses)}`;
       questionLower.includes("where") ||
       questionLower.includes("most") ||
       questionLower.includes("spend") ||
-      questionLower.includes("highest")
+      questionLower.includes("highest") ||
+      questionLower.includes("kaha") ||
+      questionLower.includes("sabse")
     ) {
       const topCategory = sortedCategories[0];
       const percentage = ((topCategory[1] / totalMonthly) * 100).toFixed(0);
-      return `Your highest spending is on ${topCategory[0]}: ₹${topCategory[1].toFixed(0)} (${percentage}% of total). Total this month: ₹${totalMonthly.toFixed(0)}.`;
+      return isHinglish
+        ? `Sabse zyada spend ${topCategory[0]} me hai: ₹${topCategory[1].toFixed(0)} (${percentage}% of total). Is month total spend: ₹${totalMonthly.toFixed(0)}.`
+        : `Your highest spending is on ${topCategory[0]}: ₹${topCategory[1].toFixed(0)} (${percentage}% of total). Total this month: ₹${totalMonthly.toFixed(0)}.`;
     }
 
     if (
       questionLower.includes("total") ||
       questionLower.includes("spent") ||
-      questionLower.includes("budget")
+      questionLower.includes("budget") ||
+      questionLower.includes("kitna") ||
+      questionLower.includes("bacha") ||
+      questionLower.includes("remaining")
     ) {
-      return `You've spent ₹${totalMonthly.toFixed(0)} this month across ${sortedCategories.length} categories. Remaining budget: ₹${(user.monthlyBudget - totalMonthly).toFixed(0)}.`;
+      let budgetStatus = "";
+      if (monthlyBudget > 0) {
+        const remaining = monthlyBudget - totalMonthly;
+        budgetStatus =
+          remaining >= 0
+            ? ` Remaining budget: ₹${remaining.toFixed(0)}.`
+            : ` You are over budget by ₹${Math.abs(remaining).toFixed(0)}.`;
+      }
+
+      return isHinglish
+        ? `Aapne is month ₹${totalMonthly.toFixed(0)} spend kiya hai across ${sortedCategories.length} categories.${budgetStatus}`
+        : `You've spent ₹${totalMonthly.toFixed(0)} this month across ${sortedCategories.length} categories.${budgetStatus}`;
     }
 
     if (
       questionLower.includes("category") ||
-      questionLower.includes("breakdown")
+      questionLower.includes("breakdown") ||
+      questionLower.includes("kharche") ||
+      questionLower.includes("kharcha")
     ) {
       const breakdown = sortedCategories
         .map((c) => `${c[0]}: ₹${c[1].toFixed(0)}`)
         .join(", ");
-      return `Here's your spending by category: ${breakdown}`;
+      return isHinglish
+        ? `Category-wise spend: ${breakdown}`
+        : `Here's your spending by category: ${breakdown}`;
     }
 
     if (
       questionLower.includes("save") ||
       questionLower.includes("reduce") ||
-      questionLower.includes("cut")
+      questionLower.includes("cut") ||
+      questionLower.includes("bachat")
     ) {
       const topCategory = sortedCategories[0];
-      return `To save money, focus on reducing ${topCategory[0]} spending, which is your highest expense at ₹${topCategory[1].toFixed(0)}.`;
+      return isHinglish
+        ? `Bachat ke liye pehle ${topCategory[0]} reduce karo. Ye aapka highest expense hai: ₹${topCategory[1].toFixed(0)}.`
+        : `To save money, focus on reducing ${topCategory[0]} spending, which is your highest expense at ₹${topCategory[1].toFixed(0)}.`;
     }
 
     // Default response
-    return `You've spent ₹${totalMonthly.toFixed(0)} this month. Your top spending category is ${sortedCategories[0][0]} (₹${sortedCategories[0][1].toFixed(0)}).`;
+    return isHinglish
+      ? `Is month aapne ₹${totalMonthly.toFixed(0)} spend kiya hai. Top category ${sortedCategories[0][0]} hai (₹${sortedCategories[0][1].toFixed(0)}). Aaj ka practical step: is category par agle 7 din 15-20% cut target rakho.`
+      : `You've spent ₹${totalMonthly.toFixed(0)} this month. Your top spending category is ${sortedCategories[0][0]} (₹${sortedCategories[0][1].toFixed(0)}). Practical next step: target a 15-20% cut in this category for the next 7 days.`;
   }
 
   /**
