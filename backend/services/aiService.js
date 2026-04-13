@@ -181,12 +181,15 @@ class AIService {
     - If finance data is missing, clearly mention what is missing and ask a helpful follow-up question.
     - Do not sound robotic.
     - Respond in the same language as the user when possible.
+    - For greetings or casual chat, reply like a real person in 1-2 lines.
+    - Do not force financial advice when the user is only having a normal conversation.
 
     Response style:
     - If user sounds emotional, begin with one short empathetic line.
     - Then give the direct answer.
     - For finance questions include: a quick insight, what to do next, and one practical step for today.
     - Keep normal responses concise; expand only when user asks for detail.
+    - Avoid repetitive phrases like "I understand" unless the user clearly shares an emotion or concern.
 
     User data:
     ${JSON.stringify(contextData, null, 2)}
@@ -493,10 +496,34 @@ ${this.generateExpenseSummary(expenses)}`;
 
     // For general questions, provide helpful fallback
     if (!isExpenseQ) {
+      if (
+        /(how are you|how r you|how're you|hows it going|what's up|wassup|sup|kaise ho|kaisa hai|kya haal)/i.test(
+          lowerQ,
+        )
+      ) {
+        return isHinglish
+          ? "Main theek hoon, thanks puchne ke liye. Tum kaise ho? Agar chaho to normal chat bhi kar sakte hain ya budget pe kaam karte hain."
+          : "I'm doing well, thanks for asking. How are you? We can chat normally, or I can help with your budget whenever you want.";
+      }
+
+      if (/(who are you|tum kaun ho|aap kaun ho)/i.test(lowerQ)) {
+        return isHinglish
+          ? "Main BudgetBuddy ka AI assistant hoon. Main normal baat-cheet bhi kar sakta hoon aur finance planning me bhi help karta hoon."
+          : "I'm BudgetBuddy's AI assistant. I can have normal conversations and also help with finance planning.";
+      }
+
+      if (
+        /(good morning|good night|good evening|good afternoon)/i.test(lowerQ)
+      ) {
+        return isHinglish
+          ? "Same to you. Hope aaj ka din smooth jaaye."
+          : "Same to you. Hope your day goes smoothly.";
+      }
+
       if (/(^|\s)(hello|hi|hey|namaste|namaskar)(\s|$)/i.test(lowerQ)) {
         return isHinglish
-          ? "Hi! Main yahin hoon. Aap finance, budgeting, savings ya general sawal kuch bhi pooch sakte ho."
-          : "Hi! I'm here to help. You can ask me about finance, budgeting, savings, or general questions.";
+          ? "Hi! Kaise chal raha hai? Aaj kis baare me baat karni hai?"
+          : "Hey! How's it going? What would you like to talk about today?";
       }
 
       if (/(^|\s)(thanks|thank you|shukriya|dhanyavaad)(\s|$)/i.test(lowerQ)) {
@@ -512,8 +539,8 @@ ${this.generateExpenseSummary(expenses)}`;
       }
 
       return isHinglish
-        ? "Main samajh raha hoon. Thoda aur context do, main direct aur practical jawab dunga."
-        : "I understand. Share a bit more context and I will give you a direct, practical answer.";
+        ? "Interesting laga. Thoda aur detail doge to main better aur real jawab de paunga."
+        : "Interesting question. Share a little more detail and I'll give you a more concrete, real answer.";
     }
 
     if (monthExpenses.length === 0) {
