@@ -23,6 +23,11 @@ import {
   FiMoreHorizontal,
   FiClock,
   FiChevronRight,
+  FiTarget,
+  FiActivity,
+  FiShield,
+  FiCompass,
+  FiCheckCircle,
 } from "react-icons/fi";
 
 // Category icon & color mapping
@@ -282,6 +287,126 @@ const Dashboard = () => {
   const budgetPercent = Math.min((totalMonthly / budget) * 100, 100);
   const remainingPercent = 100 - budgetPercent;
 
+  const advancedData = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const monthExpenses = expenses.filter((e) => {
+      const d = new Date(e.date);
+      return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    const monthTotal = monthExpenses.reduce(
+      (sum, e) => sum + Number(e.amount),
+      0,
+    );
+    const daysElapsed = Math.max(now.getDate(), 1);
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const daysLeft = Math.max(daysInMonth - daysElapsed, 1);
+    const dailyBurn = monthTotal / daysElapsed;
+    const projectedTotal = dailyBurn * daysInMonth;
+    const remainingBudgetValue = budget - monthTotal;
+    const safeDailyLimit =
+      remainingBudgetValue > 0 ? remainingBudgetValue / daysLeft : 0;
+    const runwayDays =
+      dailyBurn > 0 && remainingBudgetValue > 0
+        ? Math.floor(remainingBudgetValue / dailyBurn)
+        : remainingBudgetValue > 0
+          ? daysLeft
+          : 0;
+
+    const categoryTotals = {};
+    monthExpenses.forEach((e) => {
+      const key = e.category || "Other";
+      categoryTotals[key] = (categoryTotals[key] || 0) + Number(e.amount);
+    });
+
+    const sortedCategories = Object.entries(categoryTotals).sort(
+      (a, b) => b[1] - a[1],
+    );
+    const topCategory = sortedCategories[0] || null;
+
+    const last7ByDay = Array(7).fill(0);
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(now.getDate() - 6);
+
+    monthExpenses.forEach((e) => {
+      const exp = new Date(e.date);
+      const normalized = new Date(
+        exp.getFullYear(),
+        exp.getMonth(),
+        exp.getDate(),
+      );
+      if (normalized >= weekStart && normalized <= now) {
+        const diffDays = Math.floor(
+          (normalized - weekStart) / (1000 * 60 * 60 * 24),
+        );
+        if (diffDays >= 0 && diffDays < 7) {
+          last7ByDay[diffDays] += Number(e.amount);
+        }
+      }
+    });
+
+    const maxDaySpend = Math.max(...last7ByDay, 1);
+
+    let riskTone = "safe";
+    let riskLabel = "On Track";
+    if (projectedTotal > budget) {
+      riskTone = "high";
+      riskLabel = "Overshoot Risk";
+    } else if (projectedTotal > budget * 0.9) {
+      riskTone = "watch";
+      riskLabel = "Watch Zone";
+    }
+
+    const scenarios = [10, 20, 30].map((pct) => ({
+      pct,
+      savings: topCategory ? (Number(topCategory[1]) * pct) / 100 : 0,
+    }));
+
+    const actionPlan =
+      monthExpenses.length === 0
+        ? [
+            "Add 3 expenses today to activate stronger AI forecasting.",
+            "Set your monthly budget cap for better pace tracking.",
+            "Track one fixed and one flexible expense category.",
+          ]
+        : projectedTotal > budget
+          ? [
+              `Keep daily spending close to ₹${safeDailyLimit.toFixed(0)} for the next 7 days.`,
+              topCategory
+                ? `Cut ${topCategory[0]} by 20% to recover around ₹${((Number(topCategory[1]) * 20) / 100).toFixed(0)}.`
+                : "Trim discretionary spending by 20% this week.",
+              "Run a 2-minute nightly review: planned vs actual spend.",
+            ]
+          : [
+              `Maintain a daily spending ceiling near ₹${Math.max(safeDailyLimit, dailyBurn).toFixed(0)}.`,
+              topCategory
+                ? `Optimize ${topCategory[0]} by 10% to unlock extra savings.`
+                : "Keep category mix balanced to avoid sudden spikes.",
+              `Auto-save ₹${Math.max(50, Math.round(Math.max(remainingBudgetValue, 0) * 0.1))} from the remaining budget.`,
+            ];
+
+    return {
+      monthTotal,
+      projectedTotal,
+      remainingBudgetValue,
+      daysLeft,
+      dailyBurn,
+      safeDailyLimit,
+      runwayDays,
+      topCategory,
+      last7ByDay,
+      maxDaySpend,
+      riskTone,
+      riskLabel,
+      scenarios,
+      actionPlan,
+    };
+  }, [expenses, budget]);
+
   const handleExportReport = () => {
     const reportData = {
       month: new Date().toLocaleString("default", {
@@ -490,6 +615,151 @@ const Dashboard = () => {
       )}
     </div>
   );
+
+  const renderFinanceCommandCenter = () => {
+    const riskBadgeClass =
+      advancedData.riskTone === "high"
+        ? "bg-red-50 text-red-600"
+        : advancedData.riskTone === "watch"
+          ? "bg-amber-50 text-amber-600"
+          : "bg-emerald-50 text-emerald-600";
+
+    return (
+      <div className="dashboard-card overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+          <h3 className="font-bold text-slate-900 text-sm md:text-base flex items-center gap-2">
+            <FiCompass className="text-primary-600" /> Finance Command Center
+          </h3>
+          <span
+            className={`inline-flex w-fit px-2.5 py-1 rounded-full text-[11px] font-semibold ${riskBadgeClass}`}
+          >
+            {advancedData.riskLabel}
+          </span>
+        </div>
+
+        <div className="mt-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white rounded-2xl p-4 md:p-5">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <p className="text-white/70 text-xs uppercase tracking-wide">
+                Month-End Projection
+              </p>
+              <p className="text-2xl md:text-3xl font-black mt-1">
+                ₹{advancedData.projectedTotal.toFixed(0)}
+              </p>
+              <p className="text-xs text-white/70 mt-2">
+                Budget ₹{budget.toFixed(0)} • Remaining ₹
+                {Math.max(0, advancedData.remainingBudgetValue).toFixed(0)}
+              </p>
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-white/70 text-[11px] uppercase tracking-wide mb-2">
+                7-Day Spending Pulse
+              </p>
+              <div className="flex items-end gap-1.5 h-11">
+                {advancedData.last7ByDay.map((amount, idx) => {
+                  const height =
+                    amount > 0
+                      ? Math.max((amount / advancedData.maxDaySpend) * 100, 14)
+                      : 6;
+                  return (
+                    <div
+                      key={`${idx}-${amount}`}
+                      className="w-3.5 bg-white/15 rounded-md overflow-hidden"
+                    >
+                      <div
+                        className="w-full bg-cyan-300 rounded-md"
+                        style={{ height: `${height}%` }}
+                      ></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-xl border border-slate-200 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
+              <FiActivity className="text-primary-600" /> Daily Burn
+            </p>
+            <p className="text-lg font-bold text-slate-900 mt-1">
+              ₹{advancedData.dailyBurn.toFixed(0)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
+              <FiTarget className="text-emerald-600" /> Safe Daily Limit
+            </p>
+            <p className="text-lg font-bold text-slate-900 mt-1">
+              ₹{advancedData.safeDailyLimit.toFixed(0)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 p-3">
+            <p className="text-[11px] uppercase tracking-wide text-slate-500 flex items-center gap-1.5">
+              <FiShield className="text-indigo-600" /> Runway
+            </p>
+            <p className="text-lg font-bold text-slate-900 mt-1">
+              {advancedData.runwayDays}d
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="rounded-xl border border-slate-200 p-4 bg-slate-50/70">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              What-If Simulator
+            </p>
+            {advancedData.topCategory ? (
+              <>
+                <p className="text-sm text-slate-700 mt-2">
+                  If you reduce <strong>{advancedData.topCategory[0]}</strong>,
+                  this is the possible monthly recovery:
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  {advancedData.scenarios.map((item) => (
+                    <div
+                      key={item.pct}
+                      className="rounded-lg border border-slate-200 bg-white p-2 text-center"
+                    >
+                      <p className="text-[11px] font-semibold text-slate-500">
+                        -{item.pct}%
+                      </p>
+                      <p className="text-sm font-bold text-primary-700 mt-1">
+                        ₹{item.savings.toFixed(0)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-slate-600 mt-2">
+                Add a few categorized expenses to activate targeted cut
+                simulations.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-slate-200 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Next 7-Day Action Protocol
+            </p>
+            <div className="mt-3 space-y-2">
+              {advancedData.actionPlan.map((step, idx) => (
+                <div key={`${step}-${idx}`} className="flex items-start gap-2">
+                  <FiCheckCircle className="mt-0.5 text-emerald-600" />
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-4 md:space-y-6">
@@ -701,6 +971,9 @@ const Dashboard = () => {
           <div>
             <AIInsights showRecommendations={false} />
           </div>
+
+          {/* Advanced Space Filler Section */}
+          <div>{renderFinanceCommandCenter()}</div>
         </div>
 
         <div className="hidden min-w-0 space-y-4 xl:block">
