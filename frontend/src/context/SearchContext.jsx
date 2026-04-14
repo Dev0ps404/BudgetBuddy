@@ -55,6 +55,7 @@ export const SearchProvider = ({ children }) => {
       setExpenses([]);
     }
     // We intentionally key this off `user` updates; token fallback handles page reload cases.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   return (
