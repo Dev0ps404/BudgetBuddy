@@ -61,10 +61,22 @@ const AIInsights = ({
     );
   }
 
+  const hasInsights =
+    showInsights &&
+    Array.isArray(insights?.insights) &&
+    insights.insights.length > 0;
+  const hasPrediction =
+    showPrediction && prediction && Number(prediction.predicted) > 0;
+  const hasRecommendations = showRecommendations && recommendations.length > 0;
+  const showEmptyState = !hasInsights && !hasPrediction && !hasRecommendations;
+  const emptyStateMessage =
+    insights?.message ||
+    "Add a few expenses this month to unlock smarter AI insights and predictions.";
+
   return (
     <div className="space-y-6">
       {/* Key Insights */}
-      {showInsights && insights?.insights && insights.insights.length > 0 && (
+      {hasInsights && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -108,7 +120,7 @@ const AIInsights = ({
       )}
 
       {/* Predictions */}
-      {showPrediction && prediction && prediction.predicted > 0 && (
+      {hasPrediction && (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-indigo-200 shadow-lg p-7 hover:shadow-xl transition-shadow duration-300 group">
           <div className="flex flex-col md:flex-row md:items-start gap-6">
             <div className="flex-shrink-0 text-6xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300">
@@ -186,7 +198,7 @@ const AIInsights = ({
       )}
 
       {/* Recommendations */}
-      {showRecommendations && recommendations.length > 0 && (
+      {hasRecommendations && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
             <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
@@ -293,6 +305,27 @@ const AIInsights = ({
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {showEmptyState && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0">
+              <FiAlertCircle size={18} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-slate-900 mb-1">
+                AI Insights Coming Up
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {emptyStateMessage}
+              </p>
+              <p className="text-xs text-slate-500 mt-2">
+                Tip: Add 3-5 expenses across categories for stronger results.
+              </p>
+            </div>
           </div>
         </div>
       )}
