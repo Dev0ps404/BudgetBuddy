@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useParams } from "react-router-dom";
+import BrandLogo from "../components/BrandLogo";
 
 const PAGE_CONTENT = {
   features: {
@@ -108,9 +109,7 @@ const InfoPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-16">
       <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-          BudgetBuddy
-        </p>
+        <BrandLogo size="sm" titleClassName="text-indigo-700" />
         <h1 className="mt-2 text-3xl font-bold text-slate-900">{page.title}</h1>
         <p className="mt-4 text-slate-600 leading-relaxed">
           {page.description}

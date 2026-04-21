@@ -1,7 +1,8 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { FiLogOut, FiPieChart } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
+import BrandLogo from "./BrandLogo";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -19,19 +20,11 @@ const Navbar = () => {
         className="brand"
         style={{ display: "flex", alignItems: "center", gap: "10px" }}
       >
-        <FiPieChart size={24} color="var(--accent-color)" />
-        <h2
-          style={{
-            marginBottom: 0,
-            background: "linear-gradient(135deg, #60a5fa, #a78bfa)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontSize: "1rem",
-            lineHeight: 1,
-          }}
-        >
-          BudgetBuddy
-        </h2>
+        <BrandLogo
+          size="md"
+          markClassName="shadow-indigo-500/30"
+          titleClassName="text-base bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent"
+        />
       </Link>
 
       <div className="nav-links">

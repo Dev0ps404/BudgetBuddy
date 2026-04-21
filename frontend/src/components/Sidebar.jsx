@@ -9,9 +9,9 @@ import {
   FiLogOut,
   FiChevronRight,
   FiTrendingUp,
-  FiZap,
   FiSettings,
 } from "react-icons/fi";
+import BrandLogo from "./BrandLogo";
 
 const Sidebar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -83,19 +83,13 @@ const Sidebar = () => {
       <div className="absolute bottom-20 left-0 w-32 h-32 bg-primary-600/5 rounded-full -translate-x-1/2"></div>
 
       <div className="p-6 pb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary-600/30">
-            <FiZap size={20} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white tracking-tight leading-tight">
-              BudgetBuddy
-            </h2>
-            <p className="text-[0.6rem] uppercase font-semibold text-primary-400 tracking-widest">
-              Smart Finance
-            </p>
-          </div>
-        </div>
+        <BrandLogo
+          size="md"
+          showSubtitle
+          titleClassName="text-white"
+          subtitleClassName="text-primary-400"
+          markClassName="from-sky-500 via-indigo-500 to-primary-700 shadow-primary-700/30"
+        />
       </div>
 
       <div className="mx-4 mb-5">

@@ -14,15 +14,18 @@ import {
   FiShare2,
   FiAtSign,
 } from "react-icons/fi";
+import BrandLogo from "../components/BrandLogo";
 
 const Landing = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-indigo-200">
       {/* --- NAVBAR --- */}
       <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto border-b border-transparent">
-        <div className="font-bold text-xl tracking-tight text-indigo-700">
-          BudgetBuddy
-        </div>
+        <BrandLogo
+          size="sm"
+          titleClassName="text-xl text-indigo-700"
+          markClassName="shadow-indigo-500/25"
+        />
         <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-500">
           <a href="#home" className="hover:text-indigo-600 transition-colors">
             Home
@@ -398,9 +401,11 @@ const Landing = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             {/* Brand Col */}
             <div className="md:col-span-1 space-y-6">
-              <div className="font-bold text-2xl tracking-tight text-indigo-700">
-                BudgetBuddy
-              </div>
+              <BrandLogo
+                size="md"
+                titleClassName="text-2xl text-indigo-700"
+                markClassName="shadow-indigo-500/25"
+              />
               <p className="text-slate-500 text-sm leading-relaxed">
                 Financial Intelligence for the modern lifestyle. Secure,
                 intuitive, powerful.

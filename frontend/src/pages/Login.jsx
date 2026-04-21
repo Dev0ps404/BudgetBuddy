@@ -6,6 +6,7 @@ import { FiEye, FiEyeOff, FiTrendingUp } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
+import BrandLogo from "../components/BrandLogo";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -77,9 +78,7 @@ const Login = () => {
         {/* Left Side: Form */}
         <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
           <div className="flex justify-between items-center mb-6">
-            <div className="font-bold text-xl tracking-tight text-primary-700">
-              BudgetBuddy
-            </div>
+            <BrandLogo size="sm" titleClassName="text-xl text-primary-700" />
             <div className="text-xs font-semibold text-slate-400 tracking-wider">
               NEED HELP?
             </div>
@@ -314,7 +313,7 @@ const Login = () => {
           </div>
 
           {/* Small Floating Savings Goal Block */}
-          <div className="absolute bottom-12 right-12 bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl flex gap-4 hidden lg:flex shadow-xl">
+          <div className="absolute bottom-12 right-12 bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl gap-4 hidden lg:flex shadow-xl">
             <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
               <FiTrendingUp size={24} />
             </div>

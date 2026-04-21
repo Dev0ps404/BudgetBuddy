@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
+import BrandLogo from "../components/BrandLogo";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -75,17 +76,8 @@ const Register = () => {
       <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl md:h-[680px]">
         {/* Left Side: Form */}
         <div className="w-full md:w-[45%] flex flex-col pt-8 px-6 sm:px-10 pb-6 h-full bg-white relative">
-          <div className="flex items-center gap-2 mb-6">
-            <svg
-              className="w-6 h-6 text-primary-600"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2.12-1.15V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72l5 2.73 5-2.73v3.72z" />
-            </svg>
-            <div className="font-bold text-xl tracking-tight text-primary-700">
-              BudgetBuddy
-            </div>
+          <div className="mb-6">
+            <BrandLogo size="sm" titleClassName="text-xl text-primary-700" />
           </div>
 
           <div className="flex-1 flex flex-col justify-center max-w-sm w-full mx-auto">

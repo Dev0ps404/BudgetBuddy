@@ -11,23 +11,105 @@ class AIService {
     this.apiKey = process.env.GEMINI_API_KEY;
     this.client = null;
     this.model = null;
+    this.modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+    this.modelCandidates = [
+      process.env.GEMINI_MODEL,
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash-latest",
+      "gemini-1.5-flash",
+    ];
     this.responseCache = new Map();
     this.cacheTtlMs = Number(process.env.AI_CACHE_TTL_MS || 60 * 1000);
     this.maxCacheEntries = Number(process.env.AI_CACHE_MAX_ENTRIES || 300);
 
     if (this.apiKey) {
       try {
-        this.client = new GoogleGenerativeAI(this.apiKey);
-        this.model = this.client.getGenerativeModel({
-          model: "gemini-1.5-flash",
-        });
-        console.log("✅ Gemini AI Model initialized successfully");
+        this.initializeClient();
+        console.log(
+          `✅ Gemini AI Model initialized successfully (${this.modelName})`,
+        );
       } catch (error) {
         console.error("❌ Failed to initialize Gemini model:", error.message);
       }
     } else {
       console.warn("⚠️ GEMINI_API_KEY not found in environment variables");
     }
+  }
+
+  getModelCandidateList() {
+    return [
+      ...new Set([this.modelName, ...this.modelCandidates].filter(Boolean)),
+    ];
+  }
+
+  initializeClient() {
+    if (!this.apiKey) {
+      return false;
+    }
+
+    if (!this.client) {
+      this.client = new GoogleGenerativeAI(this.apiKey);
+    }
+
+    if (!this.model) {
+      this.setModel(this.modelName);
+    }
+
+    return true;
+  }
+
+  setModel(modelName) {
+    if (!this.client || !modelName) {
+      return;
+    }
+
+    if (this.model && this.modelName === modelName) {
+      return;
+    }
+
+    this.model = this.client.getGenerativeModel({ model: modelName });
+    this.modelName = modelName;
+  }
+
+  isModelNotFoundError(error) {
+    const message = String(error?.message || "").toLowerCase();
+    return (
+      message.includes("404") &&
+      message.includes("models/") &&
+      message.includes("not found")
+    );
+  }
+
+  async generateWithModelFallback(prompt) {
+    if (!this.initializeClient()) {
+      throw new Error("Gemini API key is not configured");
+    }
+
+    let lastError = null;
+    const candidates = this.getModelCandidateList();
+
+    for (const candidate of candidates) {
+      try {
+        this.setModel(candidate);
+        return await this.model.generateContent(prompt);
+      } catch (error) {
+        lastError = error;
+
+        if (this.isModelNotFoundError(error)) {
+          console.warn(
+            `⚠️ Gemini model \"${candidate}\" unavailable. Trying next model...`,
+          );
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw (
+      lastError || new Error("No compatible Gemini model could be initialized")
+    );
   }
 
   getCachedResponse(cacheKey) {
@@ -133,13 +215,6 @@ class AIService {
         };
       }
 
-      if (!this.model) {
-        this.client = new GoogleGenerativeAI(this.apiKey);
-        this.model = this.client.getGenerativeModel({
-          model: "gemini-1.5-flash",
-        });
-      }
-
       const contextHash =
         options.contextHash || this.createContextHash(contextData);
       const userId = options.userId || "anonymous";
@@ -202,7 +277,7 @@ class AIService {
     Current user message:
     ${normalizedQuestion}`;
 
-      const result = await this.model.generateContent(prompt);
+      const result = await this.generateWithModelFallback(prompt);
       const aiText = result?.response?.text()?.trim();
 
       if (!aiText) {
@@ -242,13 +317,7 @@ class AIService {
         return "ExpenseIQ is not configured. Please add GEMINI_API_KEY to environment variables.";
       }
 
-      if (!this.model) {
-        console.error("Model not initialized. Creating new client...");
-        this.client = new GoogleGenerativeAI(this.apiKey);
-        this.model = this.client.getGenerativeModel({
-          model: "gemini-1.5-flash",
-        });
-      }
+      this.initializeClient();
 
       // Check if question is expense-related
       const isExpenseRelated = this.isExpenseQuestion(question);
@@ -292,7 +361,7 @@ ${this.generateExpenseSummary(expenses)}`;
     User question: ${question}`;
 
       console.log("Calling Gemini API...");
-      const result = await this.model.generateContent(systemPrompt);
+      const result = await this.generateWithModelFallback(systemPrompt);
 
       if (!result || !result.response) {
         console.error("Invalid response from Gemini API");
@@ -554,15 +623,48 @@ ${this.generateExpenseSummary(expenses)}`;
           : "Anytime. If you want, I can suggest your best next financial step too.";
       }
 
+      if (/(joke|funny|mazak|mazaak)/i.test(lowerQ)) {
+        return isHinglish
+          ? "Chalo ek halka sa joke: Salary aati hai VIP entry ke saath, aur expenses usse bina ticket ke nikal dete hain. Agar chaho to finance meme mode bhi on kar dete hain."
+          : "Here is a quick one: My salary arrives like a VIP, and my expenses escort it out like bodyguards. If you want, I can switch to full finance-meme mode.";
+      }
+
+      if (
+        /(what should i do|what to do|kya karu|kya karun|suggest|any idea|this evening|tonight|aaj kya)/i.test(
+          lowerQ,
+        )
+      ) {
+        return isHinglish
+          ? "Evening ke liye simple 3-step plan try karo:\n- 20 min walk ya stretch\n- 30 min pending kaam complete\n- 15 min kal ka mini-plan\nAgar chaaho to main tumhare mood ke hisaab se custom plan bana doon."
+          : "Try this simple evening plan:\n- 20 minutes of walk or stretch\n- 30 minutes to finish one pending task\n- 15 minutes to plan tomorrow\nIf you want, I can personalize this plan to your mood and energy.";
+      }
+
       if (lowerQ.includes("help") || lowerQ.includes("madad")) {
         return isHinglish
           ? "Main aapki help kar sakta hoon:\n- Budget breakdown\n- Expense analysis\n- Savings strategy\n- Debt/EMI planning\nBas apna goal likho, main practical plan bana dunga."
           : "I can help with:\n- Budget breakdown\n- Expense analysis\n- Savings strategy\n- Debt/EMI planning\nShare your goal and I will create a practical plan.";
       }
 
+      if (
+        /(am i\s+(good|ok|okay|fine|doing well|enough)|i am\s+(good|ok|okay|fine)|kya main\s+(thik|theek|sahi)|main\s+(thik|theek|sahi)\s+hoon)/i.test(
+          lowerQ,
+        )
+      ) {
+        return isHinglish
+          ? "Agar tum yeh pooch rahe ho ki tum theek kar rahe ho: haan, tum effort kar rahe ho aur woh important hai. Agar chaho to jo situation chal rahi hai woh 1-2 lines me bolo, main honest feedback dunga."
+          : "If you are asking whether you are doing okay: yes, the fact that you are checking in already shows self-awareness. Share the situation in 1-2 lines and I will give you honest feedback.";
+      }
+
+      const cleanQuestion = questionText.replace(/\s+/g, " ").trim();
+      const shortQuestion =
+        cleanQuestion.length > 100
+          ? `${cleanQuestion.slice(0, 97)}...`
+          : cleanQuestion;
+      const quotedQuestion = shortQuestion.replace(/"/g, "'");
+
       return isHinglish
-        ? "Got it. Main sun raha hoon. Jo bolna hai seedha bolo, main natural tone me reply dunga."
-        : "Got it. I'm listening. Say it the way you'd tell a friend, and I'll reply naturally.";
+        ? `Samajh gaya: "${quotedQuestion}". Main normal chat style me reply kar sakta hoon, ya practical next-step de sakta hoon. Bolo kis direction me chalte hain.`
+        : `I hear you: "${quotedQuestion}". I can reply in normal chat mode, or turn this into a practical next step. Tell me which direction you want.`;
     }
 
     if (monthExpenses.length === 0) {

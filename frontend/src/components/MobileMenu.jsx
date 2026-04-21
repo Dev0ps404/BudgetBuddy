@@ -11,6 +11,7 @@ import {
   FiLogOut,
   FiHome,
 } from "react-icons/fi";
+import BrandLogo from "./BrandLogo";
 
 const MobileMenu = () => {
   const { user, logout } = useContext(AuthContext);
@@ -33,7 +34,7 @@ const MobileMenu = () => {
   return (
     <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-50">
       <div className="flex justify-between items-center px-4 py-3">
-        <h1 className="text-lg font-bold text-primary-600">BudgetBuddy</h1>
+        <BrandLogo size="sm" titleClassName="text-primary-700" />
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
