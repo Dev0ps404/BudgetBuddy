@@ -164,6 +164,38 @@ const Dashboard = () => {
           text: `You're spending ~₹${dailyAvg.toFixed(0)}/day. Projected total: ₹${projectedTotal.toFixed(0)} by month end.`,
           gradient: "from-blue-600 to-cyan-600",
         });
+
+        // Budget vs Actual comparison
+        if (user?.monthlyBudget) {
+          const budgetUsedPct = (
+            (monthTotal / user.monthlyBudget) *
+            100
+          ).toFixed(0);
+          const remaining = user.monthlyBudget - monthTotal;
+          if (budgetUsedPct >= 80) {
+            list.push({
+              emoji: "⚠️",
+              title: "Budget Alert",
+              text: `You've used ${budgetUsedPct}% of your ₹${user.monthlyBudget} budget! Only ₹${remaining.toFixed(0)} left.`,
+              gradient: "from-red-600 to-pink-600",
+            });
+          } else if (budgetUsedPct >= 60) {
+            list.push({
+              emoji: "📈",
+              title: "Budget Status",
+              text: `${budgetUsedPct}% of your budget spent. ${remaining > 0 ? `₹${remaining.toFixed(0)} remaining for smart spending.` : "You're over budget!"}`,
+              gradient: "from-amber-600 to-orange-600",
+            });
+          } else {
+            list.push({
+              emoji: "💰",
+              title: "On Track",
+              text: `Only ${budgetUsedPct}% spent! Keep this pace to save ₹${remaining.toFixed(0)} this month.`,
+              gradient: "from-emerald-600 to-green-600",
+            });
+          }
+        }
+
         const biggest = monthExpenses.reduce(
           (max, e) => (Number(e.amount) > Number(max.amount) ? e : max),
           monthExpenses[0],
@@ -176,6 +208,7 @@ const Dashboard = () => {
             gradient: "from-pink-600 to-rose-600",
           });
         }
+
         const uniqueCats = Object.keys(cats).length;
         list.push({
           emoji: uniqueCats >= 4 ? "🌈" : "🎯",
@@ -186,10 +219,58 @@ const Dashboard = () => {
               : `Only ${uniqueCats} categories this month. Try tracking more for better insights.`,
           gradient: "from-emerald-600 to-teal-600",
         });
+
+        // Savings potential
+        if (sorted.length > 1 && topCat) {
+          const savingsPotential = (topCat[1] * 0.2).toFixed(0);
+          list.push({
+            emoji: "🎯",
+            title: "Savings Opportunity",
+            text: `Cutting ${topCat[0]} by 20% could save you ₹${savingsPotential}/month. That's ₹${(savingsPotential * 12).toFixed(0)}/year!`,
+            gradient: "from-cyan-600 to-blue-600",
+          });
+        }
+
+        // Days remaining in month alert
+        const daysLeft = daysInMonth - dayOfMonth;
+        if (daysLeft <= 5) {
+          list.push({
+            emoji: "⏰",
+            title: "Month Ending Soon",
+            text: `Only ${daysLeft} days left! Your current pace will total ~₹${projectedTotal.toFixed(0)} this month.`,
+            gradient: "from-violet-600 to-purple-600",
+          });
+        } else if (daysLeft <= 10 && projectedTotal > user?.monthlyBudget) {
+          list.push({
+            emoji: "🚨",
+            title: "Budget Overshoot Risk",
+            text: `At current pace (₹${dailyAvg.toFixed(0)}/day), you'll exceed budget by ₹${(projectedTotal - user.monthlyBudget).toFixed(0)}!`,
+            gradient: "from-red-600 to-red-700",
+          });
+        }
+
+        // Best performing category (least spent in main categories)
+        const worstCat = sorted[sorted.length - 1];
+        if (worstCat && sorted.length >= 3) {
+          list.push({
+            emoji: "👍",
+            title: "Best Controlled Category",
+            text: `${worstCat[0]} is your most controlled spending at ₹${worstCat[1].toFixed(0)}. Keep it up!`,
+            gradient: "from-lime-600 to-green-600",
+          });
+        }
+
+        // Transaction frequency
+        list.push({
+          emoji: "📱",
+          title: "Transaction Pace",
+          text: `${monthExpenses.length} transactions so far. Average ${(monthExpenses.length / dayOfMonth).toFixed(1)} per day.`,
+          gradient: "from-indigo-600 to-indigo-700",
+        });
       }
     }
     return list;
-  }, [expenses]);
+  }, [expenses, user]);
 
   // Insight rotation timer
   useEffect(() => {
@@ -571,44 +652,54 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Dynamic Smart Insight — Rotating Cards */}
+      {/* Dynamic Smart Insight — Enhanced Rotating Cards */}
       {currentInsight && (
         <div
           onClick={() =>
             insights.length > 1 &&
             setInsightIdx((prev) => (prev + 1) % insights.length)
           }
-          className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-xl p-4 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] relative overflow-hidden`}
+          className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group`}
         >
-          <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/5 rounded-full"></div>
-          <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full"></div>
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl transition-all duration-500 group-hover:w-32 group-hover:h-32"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-xl transition-all duration-500 group-hover:w-40 group-hover:h-40"></div>
 
-          <div className="flex gap-3 relative z-10">
-            <div className="text-2xl flex-shrink-0 mt-0.5">
+          <div className="flex gap-4 relative z-10">
+            <div className="text-4xl flex-shrink-0 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
               {currentInsight.emoji}
             </div>
-            <div className="min-w-0">
-              <h4 className="font-bold text-sm tracking-tight">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-base tracking-tight group-hover:text-white/95 transition-colors">
                 {currentInsight.title}
               </h4>
-              <p className="text-xs text-white/80 mt-1 leading-relaxed">
+              <p className="text-sm text-white/85 mt-2 leading-relaxed group-hover:text-white transition-colors">
                 {currentInsight.text}
               </p>
             </div>
           </div>
 
+          {/* Action hint */}
           {insights.length > 1 && (
-            <div className="flex justify-center gap-1.5 mt-3 relative z-10">
-              {insights.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1 rounded-full transition-all duration-300 ${
-                    i === insightIdx % insights.length
-                      ? "w-4 bg-white"
-                      : "w-1.5 bg-white/30"
-                  }`}
-                ></div>
-              ))}
+            <div className="mt-4 flex items-center justify-between relative z-10">
+              <div className="flex gap-1.5">
+                {insights.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInsightIdx(i);
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 hover:opacity-100 ${
+                      i === insightIdx % insights.length
+                        ? "w-6 bg-white shadow-lg"
+                        : "w-2 bg-white/40 hover:bg-white/60"
+                    }`}
+                  ></button>
+                ))}
+              </div>
+              <span className="text-[10px] text-white/70 font-medium">
+                {(insightIdx % insights.length) + 1}/{insights.length}
+              </span>
             </div>
           )}
         </div>
