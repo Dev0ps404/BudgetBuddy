@@ -92,7 +92,7 @@ const getBudgetStats = async (req, res) => {
   try {
     // Get user's monthly budget
     const user = await User.findById(req.user.id);
-    const monthlyBudget = user?.monthlyBudget || 0;
+    const monthlyBudget = user?.monthlyBudget || 1000;
 
     // Get current month's expenses
     const now = new Date();

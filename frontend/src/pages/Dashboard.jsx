@@ -282,7 +282,7 @@ const Dashboard = () => {
       try {
         // Check if alert was already dismissed this session
         const dismissed = sessionStorage.getItem("budgetAlertDismissed");
-        
+
         const token = localStorage.getItem("authToken");
         const response = await axios.get("/api/expenses/budget-stats", {
           headers: {
@@ -304,7 +304,7 @@ const Dashboard = () => {
     if (user) {
       fetchBudgetStats();
     }
-  }, [user]);
+  }, [user, expenses]);
 
   // Filtered expenses for "Recent Activity" and other lists based on global search
   const filteredExpenses = useMemo(() => {
@@ -861,33 +861,15 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Monthly Summary */}
+            {/* Monthly Summary progress bar from component */}
             <div className="dashboard-card group h-full">
-              <div className="flex justify-between items-start mb-3 md:mb-4">
-                <div className="p-2 md:p-3 bg-success-50 text-success-600 rounded-xl group-hover:scale-110 transition-transform">
-                  <FiCalendar className="w-4 md:w-6 h-4 md:h-6" />
-                </div>
-                <span className="flex items-center gap-1 text-[10px] md:text-xs font-semibold px-2 py-0.5 md:px-2.5 md:py-1 bg-success-50 text-success-600 rounded-full">
-                  On Track
-                </span>
-              </div>
-              <div className="text-slate-500 text-xs md:text-sm font-medium mb-1 min-h-[2.75rem] md:min-h-[3rem]">
-                Monthly Budget Usage
-              </div>
-              <div className="text-2xl md:text-3xl font-bold text-slate-900">
-                ₹{totalMonthly.toFixed(2)}
-              </div>
-              <div className="mt-3 md:mt-4">
-                <div className="flex justify-between text-[10px] md:text-xs mb-1 font-medium text-slate-500">
-                  <span>{budgetPercent.toFixed(0)}% Used</span>
-                </div>
-                <div className="w-full bg-slate-100 rounded-full h-1.5 md:h-2">
-                  <div
-                    className="bg-success-500 h-1.5 md:h-2 rounded-full"
-                    style={{ width: `${budgetPercent}%` }}
-                  ></div>
-                </div>
-              </div>
+              <BudgetProgressBar
+                percentageUsed={budgetStats?.percentageUsed || budgetPercent}
+                monthlyBudget={
+                  budgetStats?.monthlyBudget || user?.monthlyBudget || 1000
+                }
+                totalExpenses={budgetStats?.totalExpenses || totalMonthly}
+              />
             </div>
 
             {/* Remaining Budget */}
@@ -1024,16 +1006,6 @@ const Dashboard = () => {
 
         <div className="hidden min-w-0 space-y-4 xl:block">
           {renderRemainingBudgetCard()}
-          {/* Budget Progress Bar */}
-          {budgetStats && (
-            <div className="dashboard-card">
-              <BudgetProgressBar
-                percentageUsed={budgetStats.percentageUsed}
-                monthlyBudget={budgetStats.monthlyBudget}
-                totalExpenses={budgetStats.totalExpenses}
-              />
-            </div>
-          )}
           <CalendarSidebar expenses={expenses} />
           {renderRecentActivityCard()}
           <AIInsights
