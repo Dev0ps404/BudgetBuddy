@@ -816,10 +816,10 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5 auto-rows-max">
           {/* What-If Simulator - Professional */}
           <div
-            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 ${
+            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 h-full flex flex-col ${
               advancedData.topCategory
                 ? "bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50 border-blue-200/60 hover:shadow-md"
                 : "bg-gradient-to-br from-slate-50 to-slate-50/50 border-slate-200/60"
@@ -846,7 +846,7 @@ const Dashboard = () => {
                   spending by % below, you could recover:
                 </p>
 
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-3 gap-3 mb-4 flex-1">
                   {advancedData.scenarios.map((item) => (
                     <div
                       key={item.pct}
@@ -865,7 +865,7 @@ const Dashboard = () => {
                   ))}
                 </div>
 
-                <div className="p-3.5 bg-blue-100/60 rounded-lg border border-blue-200/70 backdrop-blur-sm">
+                <div className="p-3.5 bg-blue-100/60 rounded-lg border border-blue-200/70 backdrop-blur-sm mt-auto">
                   <p className="text-[12px] text-blue-800 font-medium leading-relaxed">
                     <span className="font-bold">💡 Insight:</span> Reducing{" "}
                     <span className="font-bold text-blue-700">
@@ -880,7 +880,7 @@ const Dashboard = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center py-6">
+              <div className="text-center py-6 flex-1 flex items-center justify-center">
                 <p className="text-sm text-slate-600 font-medium">
                   📊 Add categorized expenses to unlock insights
                 </p>
@@ -890,7 +890,7 @@ const Dashboard = () => {
 
           {/* Action Protocol - Professional */}
           <div
-            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 ${
+            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 h-full flex flex-col ${
               advancedData.riskTone === "high"
                 ? "bg-gradient-to-br from-red-50 via-red-50/50 to-pink-50 border-red-200/60 hover:shadow-md"
                 : advancedData.riskTone === "watch"
@@ -926,7 +926,7 @@ const Dashboard = () => {
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 flex-1 overflow-y-auto">
               {advancedData.actionPlan.map((step, idx) => (
                 <div
                   key={`${step}-${idx}`}
