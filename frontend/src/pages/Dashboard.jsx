@@ -851,7 +851,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5 auto-rows-max">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-screen">
           {/* What-If Simulator - Professional */}
           <div
             className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 h-full flex flex-col ${
