@@ -803,6 +803,59 @@ const Dashboard = () => {
           })
         )}
       </div>
+
+      {/* Dynamic Smart Insight — Enhanced Rotating Cards */}
+      {currentInsight && (
+        <div
+          onClick={() =>
+            insights.length > 1 &&
+            setInsightIdx((prev) => (prev + 1) % insights.length)
+          }
+          className={`mt-4 bg-gradient-to-r ${currentInsight.gradient} text-white rounded-2xl p-5 shadow-lg cursor-pointer transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] relative overflow-hidden group`}
+        >
+          <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-xl transition-all duration-500 group-hover:w-32 group-hover:h-32"></div>
+          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/10 rounded-full blur-xl transition-all duration-500 group-hover:w-40 group-hover:h-40"></div>
+
+          <div className="flex gap-4 relative z-10">
+            <div className="text-4xl flex-shrink-0 drop-shadow-lg group-hover:scale-110 transition-transform duration-300">
+              {currentInsight.emoji}
+            </div>
+            <div className="min-w-0 flex-1">
+              <h4 className="font-bold text-base tracking-tight group-hover:text-white/95 transition-colors">
+                {currentInsight.title}
+              </h4>
+              <p className="text-sm text-white/85 mt-2 leading-relaxed group-hover:text-white transition-colors">
+                {currentInsight.text}
+              </p>
+            </div>
+          </div>
+
+          {/* Action hint */}
+          {insights.length > 1 && (
+            <div className="mt-4 flex items-center justify-between relative z-10">
+              <div className="flex gap-1.5">
+                {insights.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInsightIdx(i);
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300 hover:opacity-100 ${
+                      i === insightIdx % insights.length
+                        ? "w-6 bg-white shadow-lg"
+                        : "w-2 bg-white/40 hover:bg-white/60"
+                    }`}
+                  ></button>
+                ))}
+              </div>
+              <span className="text-[10px] text-white/70 font-medium">
+                {(insightIdx % insights.length) + 1}/{insights.length}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 
