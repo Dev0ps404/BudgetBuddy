@@ -288,6 +288,105 @@ const Dashboard = () => {
           gradient: "from-indigo-600 to-indigo-700",
         });
 
+        // Compare with previous month
+        const prevMonth = curMonth === 0 ? 11 : curMonth - 1;
+        const prevYear = curMonth === 0 ? curYear - 1 : curYear;
+        const prevMonthExpenses = expenses.filter((e) => {
+          const d = new Date(e.date);
+          return d.getMonth() === prevMonth && d.getFullYear() === prevYear;
+        });
+        if (prevMonthExpenses.length > 0) {
+          const prevMonthTotal = prevMonthExpenses.reduce(
+            (s, e) => s + Number(e.amount),
+            0,
+          );
+          const monthDiff = monthTotal - prevMonthTotal;
+          const percentChange = ((monthDiff / prevMonthTotal) * 100).toFixed(1);
+          if (Math.abs(monthDiff) > 100) {
+            list.push({
+              emoji: monthDiff > 0 ? "📈" : "📉",
+              title:
+                monthDiff > 0
+                  ? "Spending Increased"
+                  : "Great! Spending Decreased",
+              text:
+                monthDiff > 0
+                  ? `You're spending ₹${monthDiff.toFixed(0)} (${percentChange}%) more than last month. Watch out!`
+                  : `You've reduced spending by ₹${Math.abs(monthDiff).toFixed(0)} (${Math.abs(percentChange)}%) vs last month. Awesome!`,
+              gradient:
+                monthDiff > 0
+                  ? "from-orange-600 to-red-600"
+                  : "from-green-600 to-emerald-600",
+            });
+          }
+        }
+
+        // Average expense amount
+        const avgExpense = (monthTotal / monthExpenses.length).toFixed(0);
+        const expensesByAmount = monthExpenses.map((e) => Number(e.amount)).sort((a, b) => a - b);
+        const medianExpense = expensesByAmount[Math.floor(expensesByAmount.length / 2)].toFixed(0);
+        list.push({
+          emoji: "💵",
+          title: "Expense Patterns",
+          text: `Average per transaction: ₹${avgExpense}. Your median expense is ₹${medianExpense}.`,
+          gradient: "from-rose-600 to-pink-600",
+        });
+
+        // Category comparison - which 2 categories are closest
+        if (sorted.length >= 2) {
+          const topTwo = sorted.slice(0, 2);
+          const diff = (topTwo[0][1] - topTwo[1][1]).toFixed(0);
+          list.push({
+            emoji: "⚖️",
+            title: "Top Categories Close Call",
+            text: `${topTwo[0][0]} (₹${topTwo[0][1].toFixed(0)}) and ${topTwo[1][0]} (₹${topTwo[1][1].toFixed(0)}) are close! Just ₹${diff} apart.`,
+            gradient: "from-fuchsia-600 to-purple-600",
+          });
+        }
+
+        // Largest jump in spending
+        if (monthExpenses.length > 1) {
+          const sorted_by_amount = [...monthExpenses].sort((a, b) => Number(b.amount) - Number(a.amount));
+          if (sorted_by_amount.length >= 2) {
+            const largest = Number(sorted_by_amount[0].amount);
+            const secondLargest = Number(sorted_by_amount[1].amount);
+            const jump = (largest - secondLargest).toFixed(0);
+            list.push({
+              emoji: "📊",
+              title: "Spending Spike",
+              text: `Your biggest transaction jumped ₹${jump} above the second-largest. That's ${((jump / secondLargest) * 100).toFixed(0)}% higher!`,
+              gradient: "from-red-600 to-orange-600",
+            });
+          }
+        }
+
+        // Most common category
+        const categoryFreq = {};
+        monthExpenses.forEach((e) => {
+          categoryFreq[e.category] = (categoryFreq[e.category] || 0) + 1;
+        });
+        const mostFreq = Object.entries(categoryFreq).sort((a, b) => b[1] - a[1])[0];
+        if (mostFreq && mostFreq[1] >= 3) {
+          list.push({
+            emoji: "🔁",
+            title: "Most Frequent Category",
+            text: `${mostFreq[0]} appears in ${mostFreq[1]} transactions! That's ${((mostFreq[1] / monthExpenses.length) * 100).toFixed(0)}% of your spending.`,
+            gradient: "from-cyan-600 to-sky-600",
+          });
+        }
+
+        // Spending forecast if continue current pace
+        const weekdaysLeft = daysLeft;
+        const projectedWeekEnd = dailyAvg * weekdaysLeft;
+        if (projectedWeekEnd > 500) {
+          list.push({
+            emoji: "🎲",
+            title: "7-Day Forecast",
+            text: `If you spend at current pace for the next 7 days, expect ₹${projectedWeekEnd.toFixed(0)} more spending.`,
+            gradient: "from-violet-600 to-indigo-600",
+          });
+        }
+
         // Add helpful tips at the end
         list.push({
           emoji: "💡",
@@ -304,7 +403,7 @@ const Dashboard = () => {
         });
       }
     }
-    
+
     // Ensure at least 1 insight
     if (list.length === 0) {
       list.push({
@@ -314,7 +413,7 @@ const Dashboard = () => {
         gradient: "from-purple-600 to-pink-600",
       });
     }
-    
+
     return list;
   }, [expenses, user]);
 
