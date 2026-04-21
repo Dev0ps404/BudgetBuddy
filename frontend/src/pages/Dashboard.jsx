@@ -851,123 +851,141 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* What-If Simulator - Enhanced */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* What-If Simulator - Professional */}
           <div
-            className={`rounded-xl border-2 p-4 transition-all duration-300 ${
+            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 ${
               advancedData.topCategory
-                ? "bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200"
-                : "bg-slate-50 border-slate-200"
+                ? "bg-gradient-to-br from-blue-50 via-blue-50/50 to-indigo-50 border-blue-200/60 hover:shadow-md"
+                : "bg-gradient-to-br from-slate-50 to-slate-50/50 border-slate-200/60"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 flex items-center gap-2">
-              🎯 What-If Simulator
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                <span className="text-lg">🎯</span> What-If Simulator
+              </p>
               {advancedData.topCategory && (
-                <span className="text-[10px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">
-                  Active
+                <span className="text-[11px] font-semibold bg-blue-500/20 text-blue-700 px-3 py-1 rounded-full border border-blue-200/50">
+                  ACTIVE
                 </span>
               )}
-            </p>
+            </div>
+
             {advancedData.topCategory ? (
               <>
-                <p className="text-sm text-slate-700 mt-3">
+                <p className="text-sm leading-relaxed text-slate-700 mb-5">
                   If you cut{" "}
-                  <span className="font-bold text-indigo-700">
+                  <span className="font-bold text-blue-700 bg-blue-100/50 px-1.5 py-0.5 rounded">
                     {advancedData.topCategory[0]}
                   </span>{" "}
                   spending by % below, you could recover:
                 </p>
-                <div className="mt-4 grid grid-cols-3 gap-2">
+
+                <div className="grid grid-cols-3 gap-3 mb-4">
                   {advancedData.scenarios.map((item) => (
                     <div
                       key={item.pct}
-                      className="rounded-lg border-2 border-blue-200 bg-white p-3 text-center hover:border-blue-400 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                      className="rounded-xl border-1.5 border-blue-200/70 bg-white p-4 text-center hover:border-blue-400 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer group"
                     >
-                      <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700">
+                      <p className="text-sm font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
                         -{item.pct}%
                       </p>
-                      <p className="text-lg font-black text-indigo-700 mt-2 group-hover:scale-110 transition-transform">
+                      <p className="text-lg font-black text-indigo-600 mt-3 group-hover:text-indigo-700">
                         ₹{item.savings.toFixed(0)}
                       </p>
-                      <p className="text-[9px] text-slate-500 mt-1">
+                      <p className="text-[10px] text-slate-500 font-medium mt-2 uppercase tracking-wide">
                         savings/month
                       </p>
                     </div>
                   ))}
                 </div>
-                <div className="mt-3 p-2 bg-blue-100 rounded-lg border border-blue-200">
-                  <p className="text-[11px] text-blue-800">
-                    💡 Reducing <strong>{advancedData.topCategory[0]}</strong>{" "}
+
+                <div className="p-3.5 bg-blue-100/60 rounded-lg border border-blue-200/70 backdrop-blur-sm">
+                  <p className="text-[12px] text-blue-800 font-medium leading-relaxed">
+                    <span className="font-bold">💡 Insight:</span> Reducing{" "}
+                    <span className="font-bold text-blue-700">
+                      {advancedData.topCategory[0]}
+                    </span>{" "}
                     by 20% would free up{" "}
-                    <strong>
+                    <span className="font-bold text-blue-700">
                       ₹{(advancedData.scenarios[1]?.savings || 0).toFixed(0)}
-                    </strong>
+                    </span>
+                    /month
                   </p>
                 </div>
               </>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-sm text-slate-600">
-                  📊 Add categorized expenses to see personalized
-                  recommendations
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-600 font-medium">
+                  📊 Add categorized expenses to unlock insights
                 </p>
               </div>
             )}
           </div>
 
-          {/* Action Protocol - Enhanced */}
+          {/* Action Protocol - Professional */}
           <div
-            className={`rounded-xl border-2 p-4 transition-all duration-300 ${
+            className={`rounded-2xl border shadow-sm p-6 transition-all duration-300 ${
               advancedData.riskTone === "high"
-                ? "bg-gradient-to-br from-red-50 to-pink-50 border-red-200"
+                ? "bg-gradient-to-br from-red-50 via-red-50/50 to-pink-50 border-red-200/60 hover:shadow-md"
                 : advancedData.riskTone === "watch"
-                  ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200"
-                  : "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200"
+                  ? "bg-gradient-to-br from-amber-50 via-amber-50/50 to-orange-50 border-amber-200/60 hover:shadow-md"
+                  : "bg-gradient-to-br from-emerald-50 via-emerald-50/50 to-teal-50 border-emerald-200/60 hover:shadow-md"
             }`}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 flex items-center gap-2">
-              {advancedData.riskTone === "high"
-                ? "🚨 Critical Actions"
-                : advancedData.riskTone === "watch"
-                  ? "⚠️ Recommended Actions"
-                  : "✅ Optimization Tips"}
-              <span
-                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                  advancedData.riskTone === "high"
-                    ? "bg-red-200 text-red-800"
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                <span className="text-lg">
+                  {advancedData.riskTone === "high"
+                    ? "🚨"
                     : advancedData.riskTone === "watch"
-                      ? "bg-amber-200 text-amber-800"
-                      : "bg-emerald-200 text-emerald-800"
+                      ? "⚠️"
+                      : "✅"}
+                </span>
+                {advancedData.riskTone === "high"
+                  ? "Critical Actions"
+                  : advancedData.riskTone === "watch"
+                    ? "Recommended Actions"
+                    : "Optimization Tips"}
+              </p>
+              <span
+                className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
+                  advancedData.riskTone === "high"
+                    ? "bg-red-500/20 text-red-700 border-red-200/50"
+                    : advancedData.riskTone === "watch"
+                      ? "bg-amber-500/20 text-amber-700 border-amber-200/50"
+                      : "bg-emerald-500/20 text-emerald-700 border-emerald-200/50"
                 }`}
               >
                 {advancedData.riskLabel}
               </span>
-            </p>
-            <div className="mt-4 space-y-2">
+            </div>
+
+            <div className="space-y-2.5">
               {advancedData.actionPlan.map((step, idx) => (
                 <div
                   key={`${step}-${idx}`}
-                  className={`flex items-start gap-3 p-3 rounded-lg transition-all duration-200 hover:shadow-md ${
+                  className={`flex items-start gap-4 p-3.5 rounded-lg transition-all duration-200 hover:shadow-md border-l-3 ${
                     advancedData.riskTone === "high"
-                      ? "bg-red-100/50 hover:bg-red-100"
+                      ? "bg-red-100/40 hover:bg-red-100/60 border-l-red-400"
                       : advancedData.riskTone === "watch"
-                        ? "bg-amber-100/50 hover:bg-amber-100"
-                        : "bg-emerald-100/50 hover:bg-emerald-100"
+                        ? "bg-amber-100/40 hover:bg-amber-100/60 border-l-amber-400"
+                        : "bg-emerald-100/40 hover:bg-emerald-100/60 border-l-emerald-400"
                   }`}
                 >
                   <div
-                    className={`mt-0.5 text-lg ${
+                    className={`min-w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm ${
                       advancedData.riskTone === "high"
-                        ? "text-red-600"
+                        ? "bg-red-500/20 text-red-700"
                         : advancedData.riskTone === "watch"
-                          ? "text-amber-600"
-                          : "text-emerald-600"
+                          ? "bg-amber-500/20 text-amber-700"
+                          : "bg-emerald-500/20 text-emerald-700"
                     }`}
                   >
                     {idx + 1}
                   </div>
                   <p
-                    className={`text-sm leading-relaxed font-medium ${
+                    className={`text-sm leading-relaxed font-medium pt-0.5 ${
                       advancedData.riskTone === "high"
                         ? "text-red-900"
                         : advancedData.riskTone === "watch"
