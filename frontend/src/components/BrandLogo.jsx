@@ -48,11 +48,11 @@ const BrandLogo = ({
       className={`flex items-center ${showText ? "gap-3" : "gap-0"} ${className}`.trim()}
     >
       <div
-        className={`relative flex items-center justify-center bg-gradient-to-br from-sky-500 via-indigo-500 to-blue-700 text-white font-black leading-none tracking-tight shadow-lg shadow-blue-700/30 ${MARK_SIZE_CLASSES[resolvedSize]} ${markClassName}`.trim()}
+        className={`relative flex items-center justify-center bg-gradient-to-br from-cyan-400 via-sky-500 to-blue-800 text-white font-black leading-none tracking-tight shadow-xl shadow-blue-600/50 rounded-2xl ${MARK_SIZE_CLASSES[resolvedSize]} ${markClassName}`.trim()}
       >
-        <span>B</span>
+        <span className="drop-shadow-lg">B</span>
         <span
-          className={`absolute -bottom-0.5 -right-0.5 rounded-full bg-emerald-300 ring-2 ring-white/85 ${DOT_SIZE_CLASSES[resolvedSize]}`}
+          className={`absolute -bottom-1 -right-1 rounded-full bg-emerald-400 ring-2 ring-white/90 shadow-lg shadow-emerald-400/50 ${DOT_SIZE_CLASSES[resolvedSize]}`}
         ></span>
       </div>
 
