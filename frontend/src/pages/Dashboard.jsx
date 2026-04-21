@@ -116,12 +116,26 @@ const Dashboard = () => {
   // Generate insights from real data - moved to top level to comply with Rules of Hooks
   const insights = useMemo(() => {
     const list = [];
+
+    // Always add get started tip at the beginning if no data
     if (expenses.length === 0) {
       list.push({
         emoji: "🚀",
         title: "Get Started",
         text: "Add your first expense and unlock personalized spending insights!",
         gradient: "from-indigo-600 to-violet-600",
+      });
+      list.push({
+        emoji: "💡",
+        title: "Smart Tip",
+        text: "Track all spending to get AI-powered recommendations on saving money.",
+        gradient: "from-blue-600 to-purple-600",
+      });
+      list.push({
+        emoji: "🎯",
+        title: "Budget Goals",
+        text: "Set your monthly budget to get real-time alerts and stay on track.",
+        gradient: "from-cyan-600 to-blue-600",
       });
     } else {
       const now = new Date();
@@ -135,9 +149,15 @@ const Dashboard = () => {
       if (monthExpenses.length === 0) {
         list.push({
           emoji: "📭",
-          title: "No Activity",
+          title: "No Activity This Month",
           text: "No expenses logged this month yet. Start tracking to see your insights!",
           gradient: "from-slate-600 to-slate-700",
+        });
+        list.push({
+          emoji: "📊",
+          title: "Total All-Time Spending",
+          text: `You've spent ₹${expenses.reduce((s, e) => s + Number(e.amount), 0).toFixed(0)} total across all time.`,
+          gradient: "from-indigo-600 to-blue-600",
         });
       } else {
         const monthTotal = monthExpenses.reduce(
@@ -272,8 +292,34 @@ const Dashboard = () => {
           text: `${monthExpenses.length} transactions so far. Average ${(monthExpenses.length / dayOfMonth).toFixed(1)} per day.`,
           gradient: "from-indigo-600 to-indigo-700",
         });
+
+        // Add helpful tips at the end
+        list.push({
+          emoji: "💡",
+          title: "Pro Tip",
+          text: "Set up categories for better spending insights. Track dining, transport, utilities separately!",
+          gradient: "from-yellow-600 to-amber-600",
+        });
+
+        list.push({
+          emoji: "🎯",
+          title: "Budget Goal",
+          text: "Did you set your monthly budget? Update it to get personalized alerts when you're close to limit.",
+          gradient: "from-teal-600 to-cyan-600",
+        });
       }
     }
+    
+    // Ensure at least 1 insight
+    if (list.length === 0) {
+      list.push({
+        emoji: "💬",
+        title: "Welcome",
+        text: "Start tracking your expenses to get smart financial recommendations!",
+        gradient: "from-purple-600 to-pink-600",
+      });
+    }
+    
     return list;
   }, [expenses, user]);
 
