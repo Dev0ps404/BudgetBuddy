@@ -282,7 +282,7 @@ const Dashboard = () => {
       try {
         // Check if alert was already dismissed this session
         const dismissed = sessionStorage.getItem("budgetAlertDismissed");
-        
+
         const token = localStorage.getItem("authToken");
         const response = await axios.get("/api/expenses/budget-stats", {
           headers: {
@@ -1159,6 +1159,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-
-dfkjvhgdfiaubyfcarsiurfgyuerfgyaergyudfgyuf yu goyqv 
