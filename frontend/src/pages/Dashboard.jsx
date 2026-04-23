@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { toast } from "react-toastify";
+import axios from "axios";
 import ExpenseForm from "../components/ExpenseForm";
 import AIInsights from "../components/AIInsights";
 import CompactExpenseCalendar from "../components/CompactExpenseCalendar";
 import CalendarSidebar from "../components/CalendarSidebar";
+import BudgetAlertModal from "../components/BudgetAlertModal";
+import BudgetProgressBar from "../components/BudgetProgressBar";
 import { AuthContext } from "../context/AuthContext";
 import { SearchContext } from "../context/SearchContext";
 import {
@@ -104,6 +107,8 @@ const Dashboard = () => {
   const [chartRange, setChartRange] = useState("7d");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showAllActivity, setShowAllActivity] = useState(false);
+  const [budgetStats, setBudgetStats] = useState(null);
+  const [showBudgetAlert, setShowBudgetAlert] = useState(false);
   const { user } = useContext(AuthContext);
   const { searchQuery, expenses, fetchExpenses } = useContext(SearchContext);
   const [insightIdx, setInsightIdx] = useState(0);
@@ -503,6 +508,36 @@ const Dashboard = () => {
     fetchExpenses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Fetch budget stats and show alert if needed
+  useEffect(() => {
+    const fetchBudgetStats = async () => {
+      try {
+        // Check if alert was already dismissed this session
+        const dismissed = sessionStorage.getItem("budgetAlertDismissed");
+
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get("/api/expenses/budget-stats", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setBudgetStats(response.data);
+
+        // Show alert only if percentage >= 50% and not dismissed this session
+        if (response.data.percentageUsed >= 50 && !dismissed) {
+          setShowBudgetAlert(true);
+        }
+      } catch (error) {
+        console.error("Error fetching budget stats:", error);
+      }
+    };
+
+    if (user) {
+      fetchBudgetStats();
+    }
+  }, [user]);
 
   // Filtered expenses for "Recent Activity" and other lists based on global search
   const filteredExpenses = useMemo(() => {
@@ -1064,6 +1099,17 @@ const Dashboard = () => {
 
   return (
     <div className="mx-auto max-w-7xl space-y-4 md:space-y-6">
+      {/* Budget Alert Modal */}
+      {budgetStats && (
+        <BudgetAlertModal
+          isOpen={showBudgetAlert}
+          percentageUsed={budgetStats.percentageUsed}
+          monthlyBudget={budgetStats.monthlyBudget}
+          totalExpenses={budgetStats.totalExpenses}
+          onClose={() => setShowBudgetAlert(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="flex flex-col gap-4 md:items-end md:justify-between md:flex-row">
         <div>
@@ -1430,6 +1476,16 @@ const Dashboard = () => {
 
         <div className="hidden min-w-0 space-y-4 xl:block">
           {renderRemainingBudgetCard()}
+          {/* Budget Progress Bar */}
+          {budgetStats && (
+            <div className="dashboard-card">
+              <BudgetProgressBar
+                percentageUsed={budgetStats.percentageUsed}
+                monthlyBudget={budgetStats.monthlyBudget}
+                totalExpenses={budgetStats.totalExpenses}
+              />
+            </div>
+          )}
           <CalendarSidebar expenses={expenses} />
           {renderRecentActivityCard()}
           <AIInsights
