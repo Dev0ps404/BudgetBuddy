@@ -329,3 +329,144 @@
     width: 100%;
   }
 }
+
+/* Landing Page Animations */
+@keyframes landing-card-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes landing-card-shine {
+  0% {
+    transform: translateX(-130%) rotate(18deg);
+  }
+  100% {
+    transform: translateX(145%) rotate(18deg);
+  }
+}
+
+@keyframes landing-soft-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Feature cards */
+#features .grid > div {
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: landing-card-reveal 0.75s ease-out forwards;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease,
+    border-color 260ms ease;
+}
+
+#features .grid > div:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+#features .grid > div:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+#features .grid > div:nth-child(3) {
+  animation-delay: 220ms;
+}
+
+#features .grid > div:nth-child(4) {
+  animation-delay: 320ms;
+}
+
+#features .grid > div:nth-child(5) {
+  animation-delay: 420ms;
+}
+
+#features .grid > div:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+#features .grid > div::after {
+  content: "";
+  position: absolute;
+  top: -45%;
+  left: 0;
+  width: 45%;
+  height: 190%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transform: translateX(-130%) rotate(18deg);
+  pointer-events: none;
+}
+
+#features .grid > div:hover::after {
+  animation: landing-card-shine 0.9s ease;
+}
+
+/* Hero floating cards */
+#home .absolute.bg-white {
+  animation: landing-soft-float 5s ease-in-out infinite;
+}
+
+#home .absolute.bg-white:nth-of-type(3) {
+  animation-delay: 1s;
+}
+
+/* Pricing/testimonial cards */
+#pricing .bg-\[\#f1f5f9\],
+#pricing .bg-\[\#4f46e5\] {
+  opacity: 0;
+  animation: landing-card-reveal 0.8s ease-out forwards;
+  transition:
+    transform 260ms ease,
+    box-shadow 260ms ease;
+}
+
+#pricing .bg-\[\#f1f5f9\] {
+  animation-delay: 120ms;
+}
+
+#pricing .bg-\[\#4f46e5\] {
+  animation-delay: 240ms;
+}
+
+#pricing .bg-\[\#f1f5f9\]:hover,
+#pricing .bg-\[\#4f46e5\]:hover {
+  transform: translateY(-8px) scale(1.01);
+}
+
+/* Animated chart bars */
+#features .bg-\[\#0ea5e9\] {
+  animation: chart-bar-rise 0.8s ease-out forwards;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  #features .grid > div,
+  #home .absolute.bg-white,
+  #pricing .bg-\[\#f1f5f9\],
+  #pricing .bg-\[\#4f46e5\],
+  #features .bg-\[\#0ea5e9\] {
+    opacity: 1;
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
