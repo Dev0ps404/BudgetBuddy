@@ -7,6 +7,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { useGoogleLogin } from "@react-oauth/google";
 import BrandLogo from "../components/BrandLogo";
+import ParticlesBackground from "../components/ParticlesBackground";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -64,14 +65,8 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
-      {/* Background Dots Pattern (Simulating standard dark backdrop in image) */}
-      <div
-        className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(#4b5563 1px, transparent 1px)",
-          backgroundSize: "16px 16px",
-        }}
-      ></div>
+      {/* Interactive Background Particles */}
+      <ParticlesBackground theme="dark" particleCount={150} colors={["#6366f1", "#8b5cf6", "#3b82f6", "#14b8a6"]} />
 
       {/* Main Split Card Container */}
       <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl md:h-[650px]">
