@@ -64,7 +64,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-[#1e293b] flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
-      <ParticlesBackground theme="dark" particleCount={300} colors={["#39ff14", "#ff007f", "#00ffff", "#ffaa00", "#ffffff"]} connectionDistance={130} />
+      <ParticlesBackground theme="dark" particleCount={1000} repulsionRadius={90} />
 
       {/* Main Split Card Container */}
       <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl md:h-[680px]">
