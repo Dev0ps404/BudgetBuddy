@@ -67,6 +67,13 @@ const Landing = () => {
         id="home"
         className="max-w-7xl mx-auto px-8 pt-16 pb-24 flex flex-col lg:flex-row items-center gap-16 relative"
       >
+        {/* Subtle background glow */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-0" 
+          style={{
+            background: "radial-gradient(circle at 50% 20%, rgba(99,102,241,0.06), transparent 70%)"
+          }}
+        />
         {/* Left Copy */}
         <div className="flex-1 space-y-6 z-10">
           <span className="inline-block px-4 py-1.5 bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full">
@@ -100,6 +107,13 @@ const Landing = () => {
 
         {/* Right Dashboard Mockup Graphic */}
         <div className="flex-1 relative w-full h-[550px] flex items-center justify-center">
+          {/* Second glow behind dashboard illustration */}
+          <div 
+            className="absolute w-[120%] h-[120%] rounded-full blur-[100px] pointer-events-none z-0"
+            style={{
+              background: "radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%)"
+            }}
+          />
           {/* Slanted device base */}
           <div className="absolute w-[90%] h-[90%] bg-[#1e293b] rounded-[2rem] shadow-2xl -rotate-6 transition-transform hover:-rotate-3 duration-500 overflow-hidden border-8 border-slate-800">
             {/* Inner Dashboard Mock */}
