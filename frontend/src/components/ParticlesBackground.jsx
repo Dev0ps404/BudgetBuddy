@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 
 const ParticlesBackground = ({
-  particleCount = 150,
-  colors = ["#6366f1", "#8b5cf6", "#3b82f6", "#14b8a6", "#ec4899"],
-  speedMultiplier = 0.8,
-  minRadius = 1,
-  maxRadius = 3.5,
-  connectionDistance = 110,
-  mouseRadius = 160,
+  particleCount = 280,
+  colors = ["#39ff14", "#ff007f", "#00ffff", "#ffaa00", "#ffffff"], // Default high-contrast neon
+  speedMultiplier = 1.0,
+  minRadius = 1.2,
+  maxRadius = 4.0,
+  connectionDistance = 120,
+  mouseRadius = 220,
   theme = "dark"
 }) => {
   const canvasRef = useRef(null);
@@ -20,25 +20,52 @@ const ParticlesBackground = ({
     if (!ctx) return;
 
     let animationFrameId;
-    let particles = [];
+    let baseParticles = [];
+    let trailParticles = [];
     
     // Mouse state
     const mouse = {
       x: null,
       y: null,
       radius: mouseRadius,
+      lastX: null,
+      lastY: null
     };
 
-    // Handle mouse move on window so we track it even through pointer-events-none elements
+    // Track mouse move on window to allow interactions even over other elements
     const handleMouseMove = (e) => {
       const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      const newX = e.clientX - rect.left;
+      const newY = e.clientY - rect.top;
+
+      mouse.x = newX;
+      mouse.y = newY;
+
+      // Spawn trail particles when mouse moves
+      if (mouse.lastX !== null && mouse.lastY !== null) {
+        const moveDist = Math.hypot(newX - mouse.lastX, newY - mouse.lastY);
+        // Only spawn if mouse actually moved significantly to avoid clutter
+        if (moveDist > 2) {
+          const spawnCount = Math.min(4, Math.floor(moveDist / 4) + 1);
+          for (let i = 0; i < spawnCount; i++) {
+            // Interpolate position along the movement line for smooth trails
+            const ratio = i / spawnCount;
+            const spawnX = mouse.lastX + (newX - mouse.lastX) * ratio;
+            const spawnY = mouse.lastY + (newY - mouse.lastY) * ratio;
+            trailParticles.push(new TrailParticle(spawnX, spawnY));
+          }
+        }
+      }
+
+      mouse.lastX = newX;
+      mouse.lastY = newY;
     };
 
     const handleMouseLeave = () => {
       mouse.x = null;
       mouse.y = null;
+      mouse.lastX = null;
+      mouse.lastY = null;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -49,8 +76,6 @@ const ParticlesBackground = ({
       const rect = canvas.parentElement.getBoundingClientRect();
       canvas.width = rect.width;
       canvas.height = rect.height;
-      
-      // Re-initialize particles to fit the new size properly
       initParticles();
     };
 
@@ -62,153 +87,226 @@ const ParticlesBackground = ({
       resizeObserver.observe(canvas.parentElement);
     }
 
-    // Particle Class
+    // Normal Particle Class
     class Particle {
       constructor(width, height) {
         this.width = width;
         this.height = height;
-        this.reset();
+        this.reset(true); // Random positions initially
       }
 
-      reset() {
-        this.x = Math.random() * this.width;
-        this.y = Math.random() * this.height;
+      reset(randomPos = false) {
+        this.x = randomPos ? Math.random() * this.width : (Math.random() * 20 - 10) + mouse.x;
+        this.y = randomPos ? Math.random() * this.height : (Math.random() * 20 - 10) + mouse.y;
         this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
         
-        // Random velocity direction
+        // Base velocity
         const angle = Math.random() * Math.PI * 2;
-        const speed = (Math.random() * 0.6 + 0.2) * speedMultiplier;
+        const speed = (Math.random() * 0.8 + 0.4) * speedMultiplier;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
         
-        // Random color from palette
         this.color = colors[Math.floor(Math.random() * colors.length)];
-        this.alpha = Math.random() * 0.5 + 0.3; // 0.3 to 0.8
-        
-        // Mouse reaction variables
-        this.density = Math.random() * 20 + 5;
+        this.alpha = Math.random() * 0.6 + 0.4; // 0.4 to 1.0 (high visibility)
+        this.density = Math.random() * 15 + 5; // Mass for gravity pull
       }
 
       update(width, height) {
         this.width = width;
         this.height = height;
 
-        // Regular movement
+        // Apply friction/dampening so particles don't keep accelerating forever
+        this.vx *= 0.98;
+        this.vy *= 0.98;
+
+        // Move particle
         this.x += this.vx;
         this.y += this.vy;
 
-        // Bounce off edges
-        if (this.x < 0 || this.x > width) {
-          this.vx = -this.vx;
-          this.x = Math.max(0, Math.min(this.x, width));
-        }
-        if (this.y < 0 || this.y > height) {
-          this.vy = -this.vy;
-          this.y = Math.max(0, Math.min(this.y, height));
-        }
-
-        // Mouse interaction: Repulsion
+        // Mouse attraction (magnetic gravitational pull)
         if (mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - this.x;
           const dy = mouse.y - this.y;
           const distance = Math.hypot(dx, dy);
 
           if (distance < mouse.radius) {
-            const forceDirectionX = dx / distance;
-            const forceDirectionY = dy / distance;
-            
-            // The closer the mouse, the stronger the force
+            // The closer the particle is to the mouse, the stronger the pull
             const force = (mouse.radius - distance) / mouse.radius;
-            const directionX = forceDirectionX * force * this.density * 0.15;
-            const directionY = forceDirectionY * force * this.density * 0.15;
+            const gravityStrength = 0.08; // Adjust for pull speed
             
-            // Push away
-            this.x -= directionX;
-            this.y -= directionY;
+            // Pull direction vector
+            const pullX = (dx / distance) * force * gravityStrength * this.density;
+            const pullY = (dy / distance) * force * gravityStrength * this.density;
+
+            this.vx += pullX;
+            this.vy += pullY;
           }
+        }
+
+        // Add back a tiny bit of random drift if they slow down too much
+        const speed = Math.hypot(this.vx, this.vy);
+        if (speed < 0.2) {
+          const driftAngle = Math.random() * Math.PI * 2;
+          this.vx += Math.cos(driftAngle) * 0.1;
+          this.vy += Math.sin(driftAngle) * 0.1;
+        }
+
+        // Limit maximum speed
+        const maxSpeed = 4.5;
+        if (speed > maxSpeed) {
+          this.vx = (this.vx / speed) * maxSpeed;
+          this.vy = (this.vy / speed) * maxSpeed;
+        }
+
+        // Bounce off canvas boundaries
+        if (this.x < 0 || this.x > width) {
+          this.vx = -this.vx * 0.8;
+          this.x = Math.max(0, Math.min(this.x, width));
+        }
+        if (this.y < 0 || this.y > height) {
+          this.vy = -this.vy * 0.8;
+          this.y = Math.max(0, Math.min(this.y, height));
         }
       }
 
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        
-        // Convert hex to rgb for opacity control
         ctx.fillStyle = this.color;
         ctx.globalAlpha = this.alpha;
+        ctx.shadowBlur = theme === "dark" ? 6 : 0; // Glowing effect on dark themes
+        ctx.shadowColor = this.color;
         ctx.fill();
+        ctx.shadowBlur = 0; // Reset shadow
       }
     }
 
+    // Spark Trail Particle Class
+    class TrailParticle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 3.5 + 2.0; // Thicker spark sizes
+        
+        // High velocity explosion/spread
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 2.5 + 1.0;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.alpha = 1.0;
+        this.decay = Math.random() * 0.04 + 0.025; // Fades out in ~30 frames
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        // High friction to make them float around the spawn point
+        this.vx *= 0.92;
+        this.vy *= 0.92;
+        
+        this.alpha -= this.decay;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = Math.max(0, this.alpha);
+        ctx.shadowBlur = theme === "dark" ? 10 : 0;
+        ctx.shadowColor = this.color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      get isDead() {
+        return this.alpha <= 0;
+      }
+    }
+
+    // Initialize base particle list
     const initParticles = () => {
-      particles = [];
-      const count = Math.min(particleCount, Math.floor((canvas.width * canvas.height) / 8000));
+      baseParticles = [];
+      // Calculate particle density based on screen space
+      const screenFactor = Math.floor((canvas.width * canvas.height) / 5000);
+      const count = Math.min(particleCount, Math.max(80, screenFactor));
+      
       for (let i = 0; i < count; i++) {
-        particles.push(new Particle(canvas.width, canvas.height));
+        baseParticles.push(new Particle(canvas.width, canvas.height));
       }
     };
 
-    // Draw lines between close particles
+    // Draw connection lines
     const drawConnections = () => {
-      const lineOpacity = theme === "dark" ? 0.08 : 0.05;
-      const mouseLineOpacity = theme === "dark" ? 0.25 : 0.18;
+      // Stronger visibility contrast
+      const lineOpacity = theme === "dark" ? 0.15 : 0.12;
+      const mouseLineOpacity = theme === "dark" ? 0.45 : 0.35;
       
-      for (let i = 0; i < particles.length; i++) {
-        const p1 = particles[i];
-        
-        // Connect to mouse
-        if (mouse.x !== null && mouse.y !== null) {
-          const mDx = mouse.x - p1.x;
-          const mDy = mouse.y - p1.y;
-          const mDist = Math.hypot(mDx, mDy);
-          
-          if (mDist < mouse.radius) {
-            const alpha = (1 - mDist / mouse.radius) * mouseLineOpacity;
+      // 1. Draw connections from particles to mouse
+      if (mouse.x !== null && mouse.y !== null) {
+        for (let i = 0; i < baseParticles.length; i++) {
+          const p = baseParticles[i];
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < mouse.radius) {
+            const alpha = (1 - dist / mouse.radius) * mouseLineOpacity;
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
+            ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
-            ctx.strokeStyle = p1.color;
+            ctx.strokeStyle = p.color;
             ctx.globalAlpha = alpha;
-            ctx.lineWidth = 0.8;
+            ctx.lineWidth = 1.2; // Slightly thicker lines to mouse
             ctx.stroke();
           }
         }
+      }
 
-        // Connect to other particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
+      // 2. Draw connections between nearby particles
+      for (let i = 0; i < baseParticles.length; i++) {
+        const p1 = baseParticles[i];
+
+        for (let j = i + 1; j < baseParticles.length; j++) {
+          const p2 = baseParticles[j];
           const dx = p1.x - p2.x;
           const dy = p1.y - p2.y;
-          const distance = Math.hypot(dx, dy);
+          const dist = Math.hypot(dx, dy);
 
-          if (distance < connectionDistance) {
-            // Fade lines as they get further
-            const alpha = (1 - distance / connectionDistance) * lineOpacity;
+          if (dist < connectionDistance) {
+            const alpha = (1 - dist / connectionDistance) * lineOpacity;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            
-            // Mix or pick color of one particle
             ctx.strokeStyle = p1.color;
             ctx.globalAlpha = alpha;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.7;
             ctx.stroke();
           }
         }
       }
     };
 
-    // Animation Loop
+    // Main Canvas Render Loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update and draw particles
-      particles.forEach((particle) => {
-        particle.update(canvas.width, canvas.height);
-        particle.draw();
+      // Update & draw base particles
+      baseParticles.forEach((p) => {
+        p.update(canvas.width, canvas.height);
+        p.draw();
       });
 
-      // Draw interactive connections
+      // Update, draw, and filter out dead trail particles
+      trailParticles = trailParticles.filter((p) => {
+        p.update();
+        p.draw();
+        return !p.isDead;
+      });
+
+      // Render networking mesh
       drawConnections();
 
       animationFrameId = requestAnimationFrame(animate);
@@ -218,7 +316,7 @@ const ParticlesBackground = ({
     resizeCanvas();
     animate();
 
-    // Clean up
+    // Event Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("mousemove", handleMouseMove);
