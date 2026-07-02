@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from "react";
 
 const ParticlesBackground = ({
-  particleCount = 200,
-  maxDistance = 140, // Connection line distance (120-160px)
-  mouseRadius = 220,  // Cursor influence radius (180-250px)
-  theme = "dark"      // Page theme
+  speedMultiplier = 0.15, // Calm, slow space drift speed
+  minRadius = 0.5,
+  maxRadius = 1.25,      // Size range 1px to 2.5px (radius 0.5px to 1.25px)
+  repulsionRadius = 100  // Circular repulsion zone radius (80-120px)
 }) => {
   const canvasRef = useRef(null);
 
@@ -18,11 +18,11 @@ const ParticlesBackground = ({
     let animationFrameId;
     let particles = [];
     
-    // Mouse tracking state
+    // Mouse interaction coordinates
     const mouse = {
       x: null,
       y: null,
-      radius: mouseRadius
+      radius: repulsionRadius
     };
 
     const handleMouseMove = (e) => {
@@ -36,7 +36,6 @@ const ParticlesBackground = ({
       mouse.y = null;
     };
 
-    // Track globally so moving over text/buttons still affects the canvas
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
 
@@ -56,7 +55,7 @@ const ParticlesBackground = ({
       resizeObserver.observe(canvas.parentElement);
     }
 
-    // Particle Class with natural physics
+    // Space Star Particle Class
     class Particle {
       constructor(width, height) {
         this.width = width;
@@ -67,61 +66,72 @@ const ParticlesBackground = ({
       reset(randomPos = false) {
         this.x = randomPos ? Math.random() * this.width : Math.random() * this.width;
         this.y = randomPos ? Math.random() * this.height : Math.random() * this.height;
-        this.radius = Math.random() * 3.0 + 1.0; // 1px - 4px size range
+        this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
         
-        // Random drift speed and angle (ambient cosmic drift)
+        // Consistent slow cosmic drift direction
         const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 0.4 + 0.2; // Smooth floating movement
+        const speed = (Math.random() * 0.3 + 0.1) * speedMultiplier;
         
-        // Storing original base drift velocity for smooth path recovery
+        // Base paths/drift vectors (original velocities)
         this.driftX = Math.cos(angle) * speed;
         this.driftY = Math.sin(angle) * speed;
 
-        // Current velocity
+        // Current velocities
         this.vx = this.driftX;
         this.vy = this.driftY;
 
-        // Random opacity levels between 0.2 and 0.8
-        this.alpha = Math.random() * 0.6 + 0.2;
+        // Pure white with opacities between 0.6 and 0.95
+        this.alpha = Math.random() * 0.35 + 0.6;
         
-        // Magnetic sensitivity factor
-        this.sensitivity = Math.random() * 0.8 + 0.4;
+        // Dynamic twinkle factor
+        this.twinkleSpeed = Math.random() * 0.005 + 0.002;
+        this.twinkleDirection = Math.random() > 0.5 ? 1 : -1;
       }
 
       update(width, height) {
         this.width = width;
         this.height = height;
 
-        // Apply smooth friction/damping
-        this.vx *= 0.95;
-        this.vy *= 0.95;
+        // Soft star twinkle effect
+        this.alpha += this.twinkleSpeed * this.twinkleDirection;
+        if (this.alpha >= 0.95) {
+          this.alpha = 0.95;
+          this.twinkleDirection = -1;
+        } else if (this.alpha <= 0.6) {
+          this.alpha = 0.6;
+          this.twinkleDirection = 1;
+        }
 
-        // Easing pull towards original drift path
-        this.vx += this.driftX * 0.05;
-        this.vy += this.driftY * 0.05;
-
-        // Real-time mouse magnetic attraction interaction
+        // Soft repulsion interaction around the cursor
         if (mouse.x !== null && mouse.y !== null) {
-          const dx = mouse.x - this.x;
-          const dy = mouse.y - this.y;
+          const dx = this.x - mouse.x;
+          const dy = this.y - mouse.y;
           const dist = Math.hypot(dx, dy);
 
           if (dist < mouse.radius) {
-            // Attraction force is stronger the closer the particle is
+            // Force drops to 0 at the boundary of repulsion zone
             const force = (mouse.radius - dist) / mouse.radius;
-            const attractionStrength = 0.15 * this.sensitivity;
+            const pushFactor = 0.25; // Gentle push behavior
 
-            // Pull vectors
-            this.vx += (dx / dist) * force * attractionStrength;
-            this.vy += (dy / dist) * force * attractionStrength;
+            // Shift particle away gently
+            this.x += (dx / dist) * force * pushFactor;
+            this.y += (dy / dist) * force * pushFactor;
+
+            // Direct velocity slightly away
+            this.vx += (dx / dist) * force * 0.05;
+            this.vy += (dy / dist) * force * 0.05;
           }
         }
 
-        // Apply movement
+        // Smooth velocity recovery back to original drift paths
+        this.vx += (this.driftX - this.vx) * 0.05;
+        this.vy += (this.driftY - this.vy) * 0.05;
+
+        // Apply continuous floating movement
         this.x += this.vx;
         this.y += this.vy;
 
-        // Screen wrap-around with infinite loop logic
+        // Screen wrap-around with infinite drift loop
         if (this.x < -10) this.x = width + 10;
         if (this.x > width + 10) this.x = -10;
         if (this.y < -10) this.y = height + 10;
@@ -131,19 +141,14 @@ const ParticlesBackground = ({
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-        // White particles with opacity. 
-        // For light themes, we use a light-indigo/grey so they stand out on light backgrounds
-        if (theme === "light") {
-          ctx.fillStyle = `rgba(148, 163, 184, ${this.alpha})`; // Soft slate-400
-          ctx.shadowColor = "rgba(100, 116, 139, 0.2)";
-        } else {
-          ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; // White
-          ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
-        }
-
-        // Subtle glowing effect
-        ctx.shadowBlur = 5;
+        
+        // Pure uniform white only
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+        
+        // Subtle white glow
+        ctx.shadowBlur = 3;
+        ctx.shadowColor = "rgba(255, 255, 255, 0.45)";
+        
         ctx.fill();
         ctx.shadowBlur = 0; // Reset
       }
@@ -151,52 +156,24 @@ const ParticlesBackground = ({
 
     const initParticles = () => {
       particles = [];
+      const width = canvas.width;
       
-      // Calculate optimized density based on screen size (150-250 range)
-      const screenFactor = Math.floor((canvas.width * canvas.height) / 7500);
-      const count = Math.min(particleCount, Math.max(70, screenFactor));
+      // Strict density counts matching screen size requirements
+      let count = 1000;
+      if (width < 640) {
+        count = 350; // Mobile: 250–450 particles
+      } else if (width < 1024) {
+        count = 550; // Tablet: 400–700 particles
+      } else {
+        count = 1000; // Desktop: 800–1200 particles
+      }
       
       for (let i = 0; i < count; i++) {
         particles.push(new Particle(canvas.width, canvas.height));
       }
     };
 
-    // Draw lines between close particles
-    const drawConnections = () => {
-      // Connect line opacity styles
-      const lineAlphaMultiplier = theme === "light" ? 0.08 : 0.12;
-
-      for (let i = 0; i < particles.length; i++) {
-        const p1 = particles[i];
-
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const dist = Math.hypot(dx, dy);
-
-          if (dist < maxDistance) {
-            // Fade connection line opacity smoothly with distance
-            const alpha = (1 - dist / maxDistance) * lineAlphaMultiplier * Math.min(p1.alpha, p2.alpha);
-            
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            
-            if (theme === "light") {
-              ctx.strokeStyle = `rgba(148, 163, 184, ${alpha})`;
-            } else {
-              ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-            }
-            
-            ctx.lineWidth = 0.55;
-            ctx.stroke();
-          }
-        }
-      }
-    };
-
-    // 60FPS animation loop
+    // Render loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -204,8 +181,6 @@ const ParticlesBackground = ({
         p.update(canvas.width, canvas.height);
         p.draw();
       });
-
-      drawConnections();
 
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -219,12 +194,12 @@ const ParticlesBackground = ({
       window.removeEventListener("mouseleave", handleMouseLeave);
       resizeObserver.disconnect();
     };
-  }, [particleCount, maxDistance, mouseRadius, theme]);
+  }, [speedMultiplier, minRadius, maxRadius, repulsionRadius]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none block z-0"
+      className="fixed inset-0 w-full h-full pointer-events-none block z-0"
     />
   );
 };
