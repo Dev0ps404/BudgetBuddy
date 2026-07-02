@@ -20,7 +20,7 @@ import ParticlesBackground from "../components/ParticlesBackground";
 const Landing = () => {
   return (
     <div className="min-h-screen bg-[#f8fafc] font-sans selection:bg-indigo-200 relative overflow-hidden">
-      <ParticlesBackground theme="light" particleCount={800} repulsionRadius={100} />
+      <ParticlesBackground theme="light" />
       <div className="relative z-10">
         {/* --- NAVBAR --- */}
         <nav className="flex justify-between items-center px-8 py-5 max-w-7xl mx-auto border-b border-transparent">

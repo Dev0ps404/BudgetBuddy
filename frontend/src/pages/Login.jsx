@@ -65,7 +65,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-[#111827] flex items-center justify-center p-4 sm:p-8 font-sans relative overflow-hidden">
-      <ParticlesBackground theme="dark" particleCount={1000} repulsionRadius={90} />
+      <ParticlesBackground theme="dark" />
 
       {/* Main Split Card Container */}
       <div className="bg-white w-full max-w-6xl rounded-[2rem] overflow-hidden flex flex-col md:flex-row relative z-10 shadow-2xl md:h-[650px]">

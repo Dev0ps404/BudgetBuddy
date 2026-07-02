@@ -1,12 +1,10 @@
 import React, { useEffect, useRef } from "react";
 
 const ParticlesBackground = ({
-  particleCount = 1000,
-  speedMultiplier = 0.4, // Increased for a more visible continuous drift
-  minRadius = 0.5,
-  maxRadius = 2.0,
-  repulsionRadius = 95, // Size of the mouse repulsion ring
-  theme = "dark"
+  particleCount = 200,
+  maxDistance = 140, // Connection line distance (120-160px)
+  mouseRadius = 220,  // Cursor influence radius (180-250px)
+  theme = "dark"      // Page theme
 }) => {
   const canvasRef = useRef(null);
 
@@ -20,11 +18,11 @@ const ParticlesBackground = ({
     let animationFrameId;
     let particles = [];
     
-    // Mouse state
+    // Mouse tracking state
     const mouse = {
       x: null,
       y: null,
-      radius: repulsionRadius
+      radius: mouseRadius
     };
 
     const handleMouseMove = (e) => {
@@ -38,6 +36,7 @@ const ParticlesBackground = ({
       mouse.y = null;
     };
 
+    // Track globally so moving over text/buttons still affects the canvas
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseleave", handleMouseLeave);
 
@@ -57,7 +56,7 @@ const ParticlesBackground = ({
       resizeObserver.observe(canvas.parentElement);
     }
 
-    // Starfield Particle Class
+    // Particle Class with natural physics
     class Particle {
       constructor(width, height) {
         this.width = width;
@@ -68,104 +67,136 @@ const ParticlesBackground = ({
       reset(randomPos = false) {
         this.x = randomPos ? Math.random() * this.width : Math.random() * this.width;
         this.y = randomPos ? Math.random() * this.height : Math.random() * this.height;
-        this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
+        this.radius = Math.random() * 3.0 + 1.0; // 1px - 4px size range
         
-        // Continuous drift velocity
+        // Random drift speed and angle (ambient cosmic drift)
         const angle = Math.random() * Math.PI * 2;
-        const speed = (Math.random() * 0.5 + 0.2) * speedMultiplier;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
+        const speed = Math.random() * 0.4 + 0.2; // Smooth floating movement
         
-        // Twinkling stars look
-        this.color = "#ffffff";
-        this.alpha = Math.random() * 0.8 + 0.2; // Opacity variation
-        this.twinkleSpeed = Math.random() * 0.01 + 0.005;
-        this.twinkleDirection = Math.random() > 0.5 ? 1 : -1;
+        // Storing original base drift velocity for smooth path recovery
+        this.driftX = Math.cos(angle) * speed;
+        this.driftY = Math.sin(angle) * speed;
+
+        // Current velocity
+        this.vx = this.driftX;
+        this.vy = this.driftY;
+
+        // Random opacity levels between 0.2 and 0.8
+        this.alpha = Math.random() * 0.6 + 0.2;
+        
+        // Magnetic sensitivity factor
+        this.sensitivity = Math.random() * 0.8 + 0.4;
       }
 
       update(width, height) {
         this.width = width;
         this.height = height;
 
-        // Twinkle effect (softly adjust opacity)
-        this.alpha += this.twinkleSpeed * this.twinkleDirection;
-        if (this.alpha >= 1.0) {
-          this.alpha = 1.0;
-          this.twinkleDirection = -1;
-        } else if (this.alpha <= 0.2) {
-          this.alpha = 0.2;
-          this.twinkleDirection = 1;
-        }
+        // Apply smooth friction/damping
+        this.vx *= 0.95;
+        this.vy *= 0.95;
 
-        // Mouse circle push-out interaction
+        // Easing pull towards original drift path
+        this.vx += this.driftX * 0.05;
+        this.vy += this.driftY * 0.05;
+
+        // Real-time mouse magnetic attraction interaction
         if (mouse.x !== null && mouse.y !== null) {
-          const dx = this.x - mouse.x;
-          const dy = this.y - mouse.y;
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
           const dist = Math.hypot(dx, dy);
 
           if (dist < mouse.radius) {
-            const angle = Math.atan2(dy, dx);
-            
-            // 1. Push particle to the edge of the repulsion circle
-            const pushForce = (mouse.radius - dist) * 0.25;
-            this.x += Math.cos(angle) * pushForce;
-            this.y += Math.sin(angle) * pushForce;
-            
-            // 2. Continuous orbit flow along the perimeter (prevents particles from freezing)
-            const orbitSpeed = (Math.random() * 0.4 + 0.6) * speedMultiplier * 2.5;
-            this.vx = -Math.sin(angle) * orbitSpeed;
-            this.vy = Math.cos(angle) * orbitSpeed;
+            // Attraction force is stronger the closer the particle is
+            const force = (mouse.radius - dist) / mouse.radius;
+            const attractionStrength = 0.15 * this.sensitivity;
+
+            // Pull vectors
+            this.vx += (dx / dist) * force * attractionStrength;
+            this.vy += (dy / dist) * force * attractionStrength;
           }
         }
 
-        // Apply continuous movement
+        // Apply movement
         this.x += this.vx;
         this.y += this.vy;
 
-        // Gradually recover original speed limit if exited mouse ring
-        const speed = Math.hypot(this.vx, this.vy);
-        const maxNormalSpeed = speedMultiplier * 0.7;
-        if (mouse.x === null || mouse.y === null || Math.hypot(this.x - mouse.x, this.y - mouse.y) >= mouse.radius) {
-          if (speed > maxNormalSpeed) {
-            this.vx *= 0.95;
-            this.vy *= 0.95;
-          }
-        }
-
-        // Screen wrap-around (classic continuous starfield)
-        if (this.x < 0) this.x = width;
-        if (this.x > width) this.x = 0;
-        if (this.y < 0) this.y = height;
-        if (this.y > height) this.y = 0;
+        // Screen wrap-around with infinite loop logic
+        if (this.x < -10) this.x = width + 10;
+        if (this.x > width + 10) this.x = -10;
+        if (this.y < -10) this.y = height + 10;
+        if (this.y > height + 10) this.y = -10;
       }
 
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        
-        // For light themes, invert starfield to dark grey/slate so they are visible
+
+        // White particles with opacity. 
+        // For light themes, we use a light-indigo/grey so they stand out on light backgrounds
         if (theme === "light") {
-          ctx.fillStyle = "#334155";
+          ctx.fillStyle = `rgba(148, 163, 184, ${this.alpha})`; // Soft slate-400
+          ctx.shadowColor = "rgba(100, 116, 139, 0.2)";
         } else {
-          ctx.fillStyle = this.color;
+          ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; // White
+          ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
         }
-        
-        ctx.globalAlpha = this.alpha;
+
+        // Subtle glowing effect
+        ctx.shadowBlur = 5;
         ctx.fill();
+        ctx.shadowBlur = 0; // Reset
       }
     }
 
     const initParticles = () => {
       particles = [];
-      const screenFactor = Math.floor((canvas.width * canvas.height) / 1200);
-      const count = Math.min(particleCount, Math.max(200, screenFactor));
+      
+      // Calculate optimized density based on screen size (150-250 range)
+      const screenFactor = Math.floor((canvas.width * canvas.height) / 7500);
+      const count = Math.min(particleCount, Math.max(70, screenFactor));
       
       for (let i = 0; i < count; i++) {
         particles.push(new Particle(canvas.width, canvas.height));
       }
     };
 
-    // Render loop
+    // Draw lines between close particles
+    const drawConnections = () => {
+      // Connect line opacity styles
+      const lineAlphaMultiplier = theme === "light" ? 0.08 : 0.12;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < maxDistance) {
+            // Fade connection line opacity smoothly with distance
+            const alpha = (1 - dist / maxDistance) * lineAlphaMultiplier * Math.min(p1.alpha, p2.alpha);
+            
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            
+            if (theme === "light") {
+              ctx.strokeStyle = `rgba(148, 163, 184, ${alpha})`;
+            } else {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            }
+            
+            ctx.lineWidth = 0.55;
+            ctx.stroke();
+          }
+        }
+      }
+    };
+
+    // 60FPS animation loop
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -173,6 +204,8 @@ const ParticlesBackground = ({
         p.update(canvas.width, canvas.height);
         p.draw();
       });
+
+      drawConnections();
 
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -186,7 +219,7 @@ const ParticlesBackground = ({
       window.removeEventListener("mouseleave", handleMouseLeave);
       resizeObserver.disconnect();
     };
-  }, [particleCount, speedMultiplier, minRadius, maxRadius, repulsionRadius, theme]);
+  }, [particleCount, maxDistance, mouseRadius, theme]);
 
   return (
     <canvas

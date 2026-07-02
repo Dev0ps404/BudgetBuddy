@@ -29,6 +29,7 @@ import Profile from "./pages/Profile";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import InfoPage from "./pages/InfoPage";
+import ParticlesBackground from "./components/ParticlesBackground";
 
 const PrivateLayout = ({ children }) => {
   const { searchQuery, setSearchQuery } = useContext(SearchContext);
@@ -188,8 +189,11 @@ const PrivateLayout = ({ children }) => {
               </div>
             </div>
           </div>
-          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-8">
-            {children}
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:p-8 relative overflow-hidden">
+            <ParticlesBackground theme="light" />
+            <div className="relative z-10">
+              {children}
+            </div>
           </main>
         </div>
       </div>
