@@ -223,14 +223,14 @@ const ParticlesBackground = ({
       particles = [];
       const width = canvas.width;
       
-      // Low density count based on screen sizes
-      let count = 900;
+      // Extremely low density count matching 60–120 particles
+      let count = 110;
       if (width < 640) {
-        count = 350; // Mobile: 250-450 particles
+        count = 55;  // Mobile: ~50 particles
       } else if (width < 1024) {
-        count = 600; // Tablet: 400-700 particles
+        count = 85;  // Tablet: ~80 particles
       } else {
-        count = 900; // Desktop: 600-1200 particles
+        count = 110; // Desktop: ~110 particles
       }
       
       for (let i = 0; i < count; i++) {
