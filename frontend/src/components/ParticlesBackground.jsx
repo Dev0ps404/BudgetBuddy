@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from "react";
 
 const ParticlesBackground = ({
   particleCount = 1000,
-  speedMultiplier = 0.2, // Very slow cosmic drift
+  speedMultiplier = 0.4, // Increased for a more visible continuous drift
   minRadius = 0.5,
   maxRadius = 2.0,
-  repulsionRadius = 90, // Size of the mouse circle ring
+  repulsionRadius = 95, // Size of the mouse repulsion ring
   theme = "dark"
 }) => {
   const canvasRef = useRef(null);
@@ -70,9 +70,9 @@ const ParticlesBackground = ({
         this.y = randomPos ? Math.random() * this.height : Math.random() * this.height;
         this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
         
-        // Very slow drifting velocity
+        // Continuous drift velocity
         const angle = Math.random() * Math.PI * 2;
-        const speed = (Math.random() * 0.4 + 0.1) * speedMultiplier;
+        const speed = (Math.random() * 0.5 + 0.2) * speedMultiplier;
         this.vx = Math.cos(angle) * speed;
         this.vy = Math.sin(angle) * speed;
         
@@ -106,22 +106,33 @@ const ParticlesBackground = ({
           if (dist < mouse.radius) {
             const angle = Math.atan2(dy, dx);
             
-            // Push particle exactly to the edge of the circle (repulsion zone)
+            // 1. Push particle to the edge of the repulsion circle
             const pushForce = (mouse.radius - dist) * 0.25;
             this.x += Math.cos(angle) * pushForce;
             this.y += Math.sin(angle) * pushForce;
             
-            // Dampen normal velocity inside the zone to prevent erratic fly-aways
-            this.vx *= 0.8;
-            this.vy *= 0.8;
+            // 2. Continuous orbit flow along the perimeter (prevents particles from freezing)
+            const orbitSpeed = (Math.random() * 0.4 + 0.6) * speedMultiplier * 2.5;
+            this.vx = -Math.sin(angle) * orbitSpeed;
+            this.vy = Math.cos(angle) * orbitSpeed;
           }
         }
 
-        // Apply normal drift
+        // Apply continuous movement
         this.x += this.vx;
         this.y += this.vy;
 
-        // Screen wrap-around (classic starfield effect)
+        // Gradually recover original speed limit if exited mouse ring
+        const speed = Math.hypot(this.vx, this.vy);
+        const maxNormalSpeed = speedMultiplier * 0.7;
+        if (mouse.x === null || mouse.y === null || Math.hypot(this.x - mouse.x, this.y - mouse.y) >= mouse.radius) {
+          if (speed > maxNormalSpeed) {
+            this.vx *= 0.95;
+            this.vy *= 0.95;
+          }
+        }
+
+        // Screen wrap-around (classic continuous starfield)
         if (this.x < 0) this.x = width;
         if (this.x > width) this.x = 0;
         if (this.y < 0) this.y = height;
@@ -132,7 +143,7 @@ const ParticlesBackground = ({
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         
-        // For light themes, invert starfield to dark grey/indigo so they are visible
+        // For light themes, invert starfield to dark grey/slate so they are visible
         if (theme === "light") {
           ctx.fillStyle = "#334155";
         } else {
@@ -146,7 +157,6 @@ const ParticlesBackground = ({
 
     const initParticles = () => {
       particles = [];
-      // Dynamic count based on viewport size for performance safety
       const screenFactor = Math.floor((canvas.width * canvas.height) / 1200);
       const count = Math.min(particleCount, Math.max(200, screenFactor));
       
