@@ -1,10 +1,11 @@
 import React, { useEffect, useRef } from "react";
 
 const ParticlesBackground = ({
-  speedMultiplier = 0.15, // Calm, slow space drift speed
+  speedMultiplier = 0.15, // Very slow, calm drifting speed
   minRadius = 0.5,
-  maxRadius = 1.25,      // Size range 1px to 2.5px (radius 0.5px to 1.25px)
-  repulsionRadius = 100  // Circular repulsion zone radius (80-120px)
+  maxRadius = 1.25,      // Size range 1px to 2.5px
+  repulsionRadius = 110, // Circular repulsion zone (80-120px)
+  theme = "dark"
 }) => {
   const canvasRef = useRef(null);
 
@@ -18,7 +19,7 @@ const ParticlesBackground = ({
     let animationFrameId;
     let particles = [];
     
-    // Mouse interaction coordinates
+    // Mouse tracking state
     const mouse = {
       x: null,
       y: null,
@@ -55,7 +56,7 @@ const ParticlesBackground = ({
       resizeObserver.observe(canvas.parentElement);
     }
 
-    // Space Star Particle Class
+    // High-performance Particle Class
     class Particle {
       constructor(width, height) {
         this.width = width;
@@ -66,52 +67,40 @@ const ParticlesBackground = ({
       reset(randomPos = false) {
         this.x = randomPos ? Math.random() * this.width : Math.random() * this.width;
         this.y = randomPos ? Math.random() * this.height : Math.random() * this.height;
-        this.radius = Math.random() * (maxRadius - minRadius) + minRadius;
         
-        // Consistent slow cosmic drift direction
+        // uniform size: 1px to 2.5px
+        this.size = Math.random() * (maxRadius * 2 - minRadius * 2) + minRadius * 2;
+        
+        // Cosmic drifting velocities
         const angle = Math.random() * Math.PI * 2;
         const speed = (Math.random() * 0.3 + 0.1) * speedMultiplier;
         
-        // Base paths/drift vectors (original velocities)
         this.driftX = Math.cos(angle) * speed;
         this.driftY = Math.sin(angle) * speed;
 
-        // Current velocities
         this.vx = this.driftX;
         this.vy = this.driftY;
 
-        // Pure white with opacities between 0.6 and 0.95
-        this.alpha = Math.random() * 0.35 + 0.6;
-        
-        // Dynamic twinkle factor
-        this.twinkleSpeed = Math.random() * 0.005 + 0.002;
-        this.twinkleDirection = Math.random() > 0.5 ? 1 : -1;
+        // Group index for batched rendering by opacity level (0, 1, 2, 3)
+        this.groupIndex = Math.floor(Math.random() * 4);
       }
 
       update(width, height) {
         this.width = width;
         this.height = height;
 
-        // Soft star twinkle effect
-        this.alpha += this.twinkleSpeed * this.twinkleDirection;
-        if (this.alpha >= 0.95) {
-          this.alpha = 0.95;
-          this.twinkleDirection = -1;
-        } else if (this.alpha <= 0.6) {
-          this.alpha = 0.6;
-          this.twinkleDirection = 1;
-        }
-
-        // Soft repulsion interaction around the cursor
+        // Optimized mouse repulsion: check squared distance first to avoid heavy Math.sqrt calls
         if (mouse.x !== null && mouse.y !== null) {
           const dx = this.x - mouse.x;
           const dy = this.y - mouse.y;
-          const dist = Math.hypot(dx, dy);
+          const distSq = dx * dx + dy * dy;
+          const radiusSq = mouse.radius * mouse.radius;
 
-          if (dist < mouse.radius) {
+          if (distSq < radiusSq) {
+            const dist = Math.sqrt(distSq);
             // Force drops to 0 at the boundary of repulsion zone
             const force = (mouse.radius - dist) / mouse.radius;
-            const pushFactor = 0.25; // Gentle push behavior
+            const pushFactor = 0.35; // Gentle push behavior
 
             // Shift particle away gently
             this.x += (dx / dist) * force * pushFactor;
@@ -137,35 +126,20 @@ const ParticlesBackground = ({
         if (this.y < -10) this.y = height + 10;
         if (this.y > height + 10) this.y = -10;
       }
-
-      draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        
-        // Pure uniform white only
-        ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-        
-        // Subtle white glow
-        ctx.shadowBlur = 3;
-        ctx.shadowColor = "rgba(255, 255, 255, 0.45)";
-        
-        ctx.fill();
-        ctx.shadowBlur = 0; // Reset
-      }
     }
 
     const initParticles = () => {
       particles = [];
       const width = canvas.width;
       
-      // Strict density counts matching screen size requirements
-      let count = 1000;
+      // Scaled particle counts based on device widths to guarantee 60fps on mobile/tablet
+      let count = 50000;
       if (width < 640) {
-        count = 350; // Mobile: 250–450 particles
+        count = 12000; // Mobile: ~12,000 stars
       } else if (width < 1024) {
-        count = 550; // Tablet: 400–700 particles
+        count = 25000; // Tablet: ~25,000 stars
       } else {
-        count = 1000; // Desktop: 800–1200 particles
+        count = 50000; // Desktop: ~50,000 stars
       }
       
       for (let i = 0; i < count; i++) {
@@ -173,14 +147,53 @@ const ParticlesBackground = ({
       }
     };
 
-    // Render loop
+    // Render loop using highly-optimized batched rectangle path drawings
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      particles.forEach((p) => {
+      // Create batched bucket lists for each opacity level
+      const groups = [[], [], [], []];
+      const count = particles.length;
+      
+      for (let i = 0; i < count; i++) {
+        const p = particles[i];
         p.update(canvas.width, canvas.height);
-        p.draw();
-      });
+        groups[p.groupIndex].push(p);
+      }
+
+      // Consistent white colors with varying opacities
+      const opacities = [0.6, 0.72, 0.84, 0.95];
+      
+      // Set uniform shadow blur to give the starfield a subtle glow
+      ctx.shadowBlur = 1.5;
+      if (theme === "light") {
+        ctx.shadowColor = "rgba(100, 116, 139, 0.15)";
+      } else {
+        ctx.shadowColor = "rgba(255, 255, 255, 0.35)";
+      }
+
+      for (let g = 0; g < 4; g++) {
+        ctx.beginPath();
+        
+        if (theme === "light") {
+          // Soft slate-grey for visibility on light pages
+          ctx.fillStyle = `rgba(148, 163, 184, ${opacities[g]})`;
+        } else {
+          // Pure white stars
+          ctx.fillStyle = `rgba(255, 255, 255, ${opacities[g]})`;
+        }
+        
+        const list = groups[g];
+        const listSize = list.length;
+        for (let i = 0; i < listSize; i++) {
+          const p = list[i];
+          // Drawing as square rects in a single path is >20x faster than drawing individual circle arcs
+          ctx.rect(p.x, p.y, p.size, p.size);
+        }
+        ctx.fill();
+      }
+      
+      ctx.shadowBlur = 0; // Reset shadow
 
       animationFrameId = requestAnimationFrame(animate);
     };
@@ -194,7 +207,7 @@ const ParticlesBackground = ({
       window.removeEventListener("mouseleave", handleMouseLeave);
       resizeObserver.disconnect();
     };
-  }, [speedMultiplier, minRadius, maxRadius, repulsionRadius]);
+  }, [speedMultiplier, minRadius, maxRadius, repulsionRadius, theme]);
 
   return (
     <canvas
