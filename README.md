@@ -213,14 +213,6 @@ We aim to continuously enhance the platform by introducing advanced features and
 
 ---
 
-## 👨‍💻 Team & Responsibilities
-
-- 🚀 **Devansh Agarwal** — Project Leader, Backend Developer & System Architect  
-- 🎨 **Govind Rana** — Frontend Developer  
-- 📊 **Gagan** — JavaScript & Charts Developer  
-- 🧪 **Sanskar** — Tester & Debugger  
----
-
 ## ⭐ Support
 
 If you found this project helpful, please consider giving it a ⭐ on GitHub.  
